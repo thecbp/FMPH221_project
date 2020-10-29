@@ -1,0 +1,55 @@
+---
+title: "Meeting Minutes"
+output: html_document
+---
+
+# Meeting 10-28
+
+- Explaining the data
+  - cancer death is outcome
+  - predictors are diverse: other death rates, economic variables, age, education
+  - county level data of all 50 states, it's not all of the counties
+  
+- Delegating Parts of The Report
+  - Parts 1 - 3 (introduction, table of data): Alex
+  - Part 4 (exploratory data analysis): Christian 
+  - Part 5 (initial analysis): Jasen
+  - Deadline: Nov 3 okay?
+
+- Presentation: 
+  - People should just present their particular parts described above
+  - Can use Google Drive for this: https://docs.google.com/presentation/d/1EBkkb6x0Uzv8apnwczo8TgY3-1_3djSD_QP-uJGMy9A/edit?usp=sharing
+
+- Using Github for the project
+  - Distinguish between local copy on your computer and the collective one on Github
+  - Teach how to associate an R project with the Github repo
+  - pull-add-commit-push cycle
+  - work in separate files, we'll compile everything together 
+
+- Christian's ideas for project
+  - use a more complex hypothesis test (maybe checking if all interaction values are 0?)
+  - use everything that is taught to us throughout class (diagnostics, bootstrap)
+  - ideally, everytime something new is learned, someone will do the codin and writing up for it and the other two will inspect
+  - aka develop the report throughout the whole semester, rather than dedicate a weekend to all of it
+
+- Next Meeting? 
+  - Probably day before class to go over report & presentation details
+  - Nov 2-4?
+
+-Alex's ideas for project
+  -Agree with all points Christian mentioned
+  -Discuss in details regarding complex hypothesis
+  -seek ideas on Christian's previous experience on the dataset and similar project if had any  
+  -try to discuss explicitly the methods(diagonistics, bootstraps) each one would probably use
+  -recommend next meeting to be on Monday evening before the internal deadline such that I can have more time to revise my part? 
+  -get the documentation on the dataset
+
+## TODO:
+  - Christian:
+    - get a data dictionary and add to the repo (done)
+  - Everyone:
+    - do your part for the report and presentation and have it mostly ready by Monday
+  
+- Meet on monday 4pm
+
+# Meeting 11-03 Minutes
