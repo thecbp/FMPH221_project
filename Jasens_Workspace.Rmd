@@ -1,0 +1,79 @@
+---
+title: "Jasens_Workspace"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+get_plots <- function(name){
+  lay1 <- rbind(c(1,2,3,4),
+                c(5,6,7,8),
+                c(9,10,11,12),
+                c(13,14,15,16))
+  
+  lay2 <- rbind(c(1,2,3,4),
+                c(5,6,7,8),
+                c(9,10,11,12),
+                c(NA,NA,NA,NA))
+  lay3 <- rbind(c(1,2),
+                c(3,4))
+  
+  pdf(name) 
+  
+  grid.arrange(graphs[[1]], 
+               graphs[[2]], 
+               graphs[[3]], 
+               graphs[[4]], layout_matrix = lay3)
+  
+  grid.arrange(graphs[[5]], 
+               graphs[[6]], 
+               graphs[[7]], 
+               graphs[[8]], layout_matrix = lay3)
+  
+  dev.off()
+}
+```
+
+## 1. Preliminary Regression
+
+Here, I examine variables one at a time
+
+```{r cars}
+library(tidyverse)
+library(gridExtra)
+df <- read.csv('cancer_registry.csv')
+
+graphs <- list()
+graph_count <- 1
+
+vars <- c('avgAnnCount',
+          'avgDeathsPerYear',
+          'incidenceRate',
+          'medIncome',
+          'popEst2015',
+          'povertyPercent',
+          'studyPerCap',
+          'MedianAge')
+
+for(i in vars){
+  eq <- paste('TARGET_deathRate', i, sep = ' ~ ')
+  m1 <- lm(formula = eq, data = df)
+  coeffs <- as.numeric(m1$coefficients)
+  x_temp <- dplyr::pull(df, i)
+  y_hat <- x_temp  * coeffs[2] + coeffs[1]
+  
+  df_hat <- data.frame(y_hat, x_temp)
+  g <- ggplot() + geom_point(data = df, aes(x = !!as.name(i), y = TARGET_deathRate)) + 
+  geom_line(data = df_hat, aes(x = x_temp, y = y_hat))
+  
+  g
+  graphs[[graph_count]] <- g
+  graph_count <- graph_count + 1
+}
+
+get_plots('Jasen_1_Individual_Plots.pdf')
+
+```
