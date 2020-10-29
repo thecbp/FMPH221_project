@@ -1,0 +1,166 @@
+---
+title: "Report EDA"
+author: "Christian Pascual"
+output: pdf_document
+---
+
+```{r, message = F, warning = F }
+library(tidyverse)
+
+# Load the data and do some processing
+cancer = read_csv("cancer_registry.csv") %>% 
+  # Split the geography variable
+  separate(Geography, into = c("county", "state"), sep = ", ") %>% 
+  # Split up binnedInc into a lower and upper decile
+  mutate(
+    binnedInc = str_remove_all(binnedInc, "[(\\]]"),
+    # also try to group states by region
+    region = case_when(
+      state %in% c("California", "Oregon", "Washington", "Nevada", "Idaho", 
+                   "Montana", "Wyoming", "Colorado", "Utah", "Alaska", "Hawaii") ~ "West",
+      state %in% c("Arizona", "New Mexico", "Texas", "Oklahoma") ~ "Southwest",
+      state %in% c("North Dakota", "South Dakota", "Nebraska", "Kansas", 
+                   "Minnesota", "Iowa", "Missouri", "Wisconsin", "Illinois", 
+                   "Indiana", "Ohio", "Michigan") ~ "Midwest",
+      state %in% c("Arkansas", "Louisiana", "Mississippi", "Alabama", "Georgia",
+                   "Florida", "South Carolina", "North Carolina", "Tennessee",
+                   "Kentucky", "Virginia", "West Virginia", "District of Columbia",
+                   "Delaware") ~ "Southeast",
+      state %in% c("Maryland", "Pennsylvania", "New Jersey", "New York", "Rhode Island",
+                   "Connecticut", "Massachusetts", "New Hampshire", "Vermont", "Maine") ~ "Northeast",
+      TRUE ~ "Southwest" # Weird formatting means a single NM is NA in state
+    )
+  ) %>% 
+  separate(binnedInc, into = c("inc_dec_low", "inc_dec_high"), sep = ",") %>% 
+  janitor::clean_names() # Convert all column names to lowercase
+```
+
+# Missing Data
+
+```{r}
+# Get the number of rows with missing data for each column
+cancer %>% 
+  select(everything()) %>%
+  summarise_all(funs(sum(is.na(.)))) %>% 
+  select(which(colMeans(.) != 0))
+```
+
+Three columns have missing data:
+
+- `pct_some_col18_24`
+- `pct_employed16_over`
+- `pct_private_coverage_alone`
+
+# Distribution of outcome
+
+```{r}
+cancer %>% 
+  ggplot(aes(x = target_death_rate)) +
+  geom_histogram(color = "red") +
+  ggtitle("Empirical distribution of cancer death rate in the data")
+```
+
+Outcome is reasonably normally distributed, which is nice. 
+
+# Variable Trends
+
+## Incidence and cancer death rate
+
+```{r}
+cancer %>% 
+  ggplot(aes(x = incidence_rate, y = target_death_rate)) +
+  geom_point() +
+  ggtitle("Incidence of cancer vs death rate")
+```
+
+Suggests a positive relationship between higher incidence and higher death rate. This is expected, so this should be controlled for in the model.
+
+## Age and death rate
+
+```{r}
+cancer %>% 
+  filter(median_age < 100) %>% # some weird values in the data
+  ggplot(aes(x = median_age, y = target_death_rate)) +
+  geom_point() +
+  ggtitle("Age vs death rate")
+```
+
+I thought there might be a relationship between age and death rate. Doesn't seem to show here. I know that the older you get, the more likely you are to get cancer, so this should still be controlled for in the analysis.
+
+## Education & Death Rate
+
+```{r}
+cancer %>% 
+  pivot_longer(
+    cols = c("pct_no_hs18_24", "pct_hs18_24", "pct_bach_deg18_24"),
+    values_to = "pct",
+    names_to = "educ_level"
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = educ_level)) + 
+  facet_grid(educ_level ~ .) +
+  theme(legend.position = "bottom") +
+  geom_point() +
+  ggtitle("Death rate by percent of county with particular education level")
+```
+
+Hard to parse much here. It kind of looks like more education leads to slightly lower death rates (based on blue plot)? But this effect is not very pronounced.
+
+## Insurance Coverage & Death Rate
+
+```{r}
+cancer %>% 
+  pivot_longer(
+    cols = c("pct_private_coverage", 
+             "pct_private_coverage_alone", 
+             "pct_public_coverage",
+             "pct_public_coverage_alone"),
+    values_to = "pct",
+    names_to = "ins_level"
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = ins_level)) + 
+  facet_grid(ins_level ~ .) +
+  theme(legend.position = "bottom") +
+  geom_point() +
+  ggtitle("Death rate by percent of county by percentage of people with insurance types")
+```
+
+Interesting shift. The higher private coverage is, the lower the death rate. It's converse for public coverage. Perhaps this is a proxy for other economic factors? Maybe private insurance is better than public coverage? My thought was that more coverage in general would help improve death rate.
+
+## Race & Death Rate
+
+```{r}
+cancer %>% 
+  pivot_longer(
+    cols = c("pct_white", 
+             "pct_black", 
+             "pct_asian",
+             "pct_other_race"),
+    values_to = "pct",
+    names_to = "race"
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = race)) + 
+  facet_grid(race ~ .) +
+  theme(legend.position = "bottom") +
+  geom_point() +
+  ggtitle("Death rate by percent of county by percentage of race in a county")
+```
+
+Main takeaway here is that a higher percentage of African-Americans corresponds to higher death rates. This lines up with evidence of racial disparities in the healthcare system with regard to access and cost. 
+
+## Region by Death Rate
+
+```{r}
+cancer %>% 
+  ggplot(aes(x = region, y = target_death_rate)) + 
+  geom_boxplot() +
+  ggtitle("Death rate by region")
+```
+
+Interesting... Southeast seems to have a higher death rate than the other regions. 
+
+## Notes To Self:
+
+- we will probably need to control for the incidence rate of cancer, age, sex and race (typical things to control for in an analysis)
+- It would be interesting to test if some of these demographics interact with each other. 
+  - I'm leaning towards the interaction between race and education. Does getting more educated help people avoid cancer, which will extend to lower rates of cancer death in a county?-
+- Race and insurance are probably highly correlated. They represent very different things, so there are costs and benefits to including both or one over the other in the model
