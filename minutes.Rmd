@@ -41,7 +41,7 @@ output: html_document
   -Discuss in details regarding complex hypothesis
   -seek ideas on Christian's previous experience on the dataset and similar project if had any  
   -try to discuss explicitly the methods(diagonistics, bootstraps) each one would probably use
-  -plan to ask Armin tomorrow on what to be covered in proposal presentation.How long it would be for each group? Guess maybe not too much analysis required rn
   -recommend next meeting to be on Monday evening before the internal deadline such that I can have more time to revise my part? 
+  -get the documentation on the dataset
 
 
