@@ -1,5 +1,86 @@
 ---
-title: "Project Proposal"
+title: "PROJECT TITLE HERE"
+author: "Jasen Zhang, Alex Zhu, Christian Pascual"
 output: pdf_document
 ---
+
+# Introduction
+
+# Exploratory Data Analysis
+
+```{r, message = F, warning = F, echo = F }
+library(tidyverse)
+cancer = read_csv("cancer_registry.csv") %>% 
+  # Split the geography variable
+  separate(Geography, into = c("county", "state"), sep = ", ") %>% 
+  # Split up binnedInc into a lower and upper decile
+  mutate(
+    binnedInc = str_remove_all(binnedInc, "[(\\]]"),
+    # also try to group states by region
+    region = case_when(
+      state %in% c("California", "Oregon", "Washington", "Nevada", "Idaho", 
+                   "Montana", "Wyoming", "Colorado", "Utah", "Alaska", "Hawaii") ~ "West",
+      state %in% c("Arizona", "New Mexico", "Texas", "Oklahoma") ~ "Southwest",
+      state %in% c("North Dakota", "South Dakota", "Nebraska", "Kansas", 
+                   "Minnesota", "Iowa", "Missouri", "Wisconsin", "Illinois", 
+                   "Indiana", "Ohio", "Michigan") ~ "Midwest",
+      state %in% c("Arkansas", "Louisiana", "Mississippi", "Alabama", "Georgia",
+                   "Florida", "South Carolina", "North Carolina", "Tennessee",
+                   "Kentucky", "Virginia", "West Virginia", "District of Columbia",
+                   "Delaware") ~ "Southeast",
+      state %in% c("Maryland", "Pennsylvania", "New Jersey", "New York", "Rhode Island",
+                   "Connecticut", "Massachusetts", "New Hampshire", "Vermont", "Maine") ~ "Northeast",
+      TRUE ~ "Southwest" # Weird formatting means a single NM is NA in state
+    )
+  ) %>% 
+  separate(binnedInc, into = c("inc_dec_low", "inc_dec_high"), sep = ",") %>% 
+  janitor::clean_names() # Convert all column names to lowercase
+```
+
+Our data is an aggregation of multiple sources including the American Community Survey, the Census, clinical trials and from cancer databases. The observational unit is a state county, and each observation contains various demographic, economic and educational factors. Our outcome is **cancer mortality rate**, measured as number of deaths per capita (100K people).
+
+The data contains information on `r nrow(cancer)` counties in the United States. The data is not fully descriptive of all counties in the US because `r 3141 - nrow(cancer)` are missing. We surmise these counties are missing due to lack of data for them. 
+
+The average mortality per capita is `r cancer %>% pull(target_death_rate) %>% mean %>% round(., 2)` across the dataset. Cancer mortality has a nice bell shape, but there are a few outliers present.
+
+```{r, echo = F, out.width = "70%", fig.align = 'center' }
+cancer %>% 
+  ggplot(aes(x = target_death_rate)) +
+  geom_histogram(color = "black", fill = "white", bins = 30) +
+  geom_vline(xintercept =  cancer %>% pull(target_death_rate) %>% mean, color = "red") + 
+  labs(
+    title = "Empirical distribution of cancer mortality in the data",
+    x = "Cancer Morality (deaths / 100K)",
+    y = "Frequency") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+We explored how other variables in the dataset correlated with the cancer mortality in the counties. The data also includes information on the incidence of cancer in each county, so we checked how it related to mortality. As expected, higher incidence correlates highly with higher mortality, so this should be accounted for in a model. There was no apparent trend between cancer mortality per capita and either age or education level. 
+
+We found a relationship between insurance type and cancer mortality. Counties where a higher proportion of the population has a private insurance had lower cancer mortality. This trend was reversed for counties with a high proportion of public insurance. Race also seemed to have a relationship with cancer mortality. Counties with a higher proportion of African-Americans experienced higher rates of mortality, and the reverse trend was observed in white Americans. No obvious trend was seen in Asian-Americans or races defined as "other".
+
+```{r,  echo = F, out.width = "70%", fig.align = 'center' }
+cancer %>% 
+  pivot_longer(
+    cols = c("pct_white", 
+             "pct_black", 
+             "pct_asian",
+             "pct_other_race"),
+    values_to = "pct",
+    names_to = "race"
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = race)) + 
+  facet_grid(race ~ .) +
+  geom_point(size = 0.5) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5),
+        strip.text.y = element_blank()) +
+  labs(
+    title = "Cancer mortality by percentage of race in each county",
+    x = "Percentage of race (%)",
+    y = "Cancer Morality (deaths / 100K)") +
+  scale_color_discrete(labels = c("Asian", "Black", "Other", "White"))
+```
 
