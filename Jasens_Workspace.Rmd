@@ -44,21 +44,19 @@ Here, I examine variables one at a time
 ```{r cars}
 library(tidyverse)
 library(gridExtra)
-df <- read.csv('cancer_registry.csv')
+df <- read.csv('cancer_registry.csv') %>%
+  filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200)
 
 graphs <- list()
 graph_count <- 1
 
-vars <- c('avgAnnCount',
-          'avgDeathsPerYear',
-          'incidenceRate',
-          'medIncome',
-          'popEst2015',
-          'povertyPercent',
-          'studyPerCap',
-          'MedianAge')
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
 
-for(i in vars){
+for(i in vars_1){
   eq <- paste('TARGET_deathRate', i, sep = ' ~ ')
   m1 <- lm(formula = eq, data = df)
   coeffs <- as.numeric(m1$coefficients)
@@ -76,4 +74,12 @@ for(i in vars){
 
 get_plots('Jasen_1_Individual_Plots.pdf')
 
+```
+
+# 2 Preliminary Log Regression
+
+A few variables may look better with a log x axis
+
+```{r}
+log_vars <- c('avgAnnCount', 'avgDeathsPerYear', 'popEst2015', 'studyPerCap')
 ```
