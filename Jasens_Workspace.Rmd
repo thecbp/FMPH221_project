@@ -186,7 +186,40 @@ for(i in all_vars){
 
 df4 <- data.frame(col1, col2, corr_col)
 
-g4 <- ggplot() + geom_tile(aes(x = col1, y = col2, fill = corr_col))
-g4
+g4 <- ggplot() + geom_tile(aes(x = col1, y = col2, fill = corr_col)) + 
+  theme(axis.text.x = element_text(angle = 90))
 
+
+pdf('Jasen_heatmap1.pdf')
+g4
+dev.off()
+
+#another heatmap option
+
+df_temp <- df %>% select(all_vars)
+df_temp <- na.omit(df_temp)
+
+heatmap2 <- cor(df_temp)
+
+pdf('Jasen_heatmap2.pdf')
+heatmap(heatmap2)
+dev.off()
+
+```
+
+# 5 Carefully choosing variables for our model
+
+```{r}
+choose_pvalue <- var_summary %>% filter(p_values < 10^(-4)) %>%
+  select(all_vars)
+
+choose_pvalue <- unname(unlist(choose_pvalue))
+
+
+eq5 <- paste(choose_pvalue, collapse = ' + ')
+eq5 <- paste(dep_var, eq5, sep= ' ~ ')
+
+m5 <- lm(eq5, data = df)
+s5 <- summary(m5)
+s5
 ```
