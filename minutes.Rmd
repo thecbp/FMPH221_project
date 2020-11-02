@@ -3,7 +3,21 @@ title: "Meeting Minutes"
 output: html_document
 ---
 
-# Meeting 10-28
+# Important Links
+
+- Project Proposal Google Doc: https://docs.google.com/document/d/1o2uwT-Cma9o6UsyaRo6lUYbd91xiHiS3SwMz09GbAb0/edit
+- Project Proposal Presentation: https://docs.google.com/presentation/d/1EBkkb6x0Uzv8apnwczo8TgY3-1_3djSD_QP-uJGMy9A/edit?usp=sharing
+
+# Meeting 11-03 Minutes
+
+- TODO:
+  - Christian:
+  - Jasen:
+  - Alex:
+  - Everyone:
+
+
+# Meeting 10-28 Minutes
 
 - Explaining the data
   - cancer death is outcome
@@ -49,7 +63,3 @@ output: html_document
     - get a data dictionary and add to the repo (done)
   - Everyone:
     - do your part for the report and presentation and have it mostly ready by Monday
-  
-- Meet on monday 4pm
-
-# Meeting 11-03 Minutes

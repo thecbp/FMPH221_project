@@ -151,12 +151,58 @@ Main takeaway here is that a higher percentage of African-Americans corresponds 
 
 ```{r}
 cancer %>% 
-  ggplot(aes(x = region, y = target_death_rate)) + 
+  ggplot(aes(x = region, y = target_death_rate, color = region)) + 
   geom_boxplot() +
-  ggtitle("Death rate by region")
+  theme_minimal() +
+  labs(
+    title = "Death rate by US region",
+    x = "Region",
+    y = "Cancer Mortality (deaths / 100K)") +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)
+  )
 ```
 
 Interesting... Southeast seems to have a higher death rate than the other regions. 
+
+# Interaction Between Education and Race?
+
+```{r}
+cancer %>% 
+  mutate(
+    high_college = pct_bach_deg18_24 > 0.5
+  ) %>% 
+  pivot_longer(
+    cols = c("pct_white", 
+             "pct_black", 
+             "pct_asian",
+             "pct_other_race"),
+    values_to = "pct",
+    names_to = "race"
+  ) %>% 
+  mutate(
+    race = case_when(
+      race == "pct_white" ~ "White",
+      race == "pct_black" ~ "Black",
+      race == "pct_asian" ~ "Asian",
+      race == "pct_other_race" ~ "Other"
+    )
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = high_college)) + 
+  geom_smooth(method = "lm", size = 0.5) +
+  facet_grid(race ~ .) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)
+  ) + 
+  labs(
+    title = "Death rate by percent of by race in a county and high education",
+    x = "Percentage of race in county population",
+    y = "Cancer Mortality (deaths / 100K)") +
+  scale_color_discrete(labels = c("< 50%", ">= 50%"))
+```
 
 ## Notes To Self:
 
