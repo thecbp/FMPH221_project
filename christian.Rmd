@@ -151,9 +151,17 @@ Main takeaway here is that a higher percentage of African-Americans corresponds 
 
 ```{r}
 cancer %>% 
-  ggplot(aes(x = region, y = target_death_rate)) + 
+  ggplot(aes(x = region, y = target_death_rate, color = region)) + 
   geom_boxplot() +
-  ggtitle("Death rate by region")
+  theme_minimal() +
+  labs(
+    title = "Death rate by US region",
+    x = "Region",
+    y = "Cancer Mortality (deaths / 100K)") +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)
+  )
 ```
 
 Interesting... Southeast seems to have a higher death rate than the other regions. 
