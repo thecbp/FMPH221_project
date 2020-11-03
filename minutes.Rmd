@@ -12,10 +12,11 @@ output: html_document
 
 - TODO:
   - Christian:
+    - add two questions to the slide
   - Jasen:
   - Alex:
   - Everyone:
-
+    - have your part finalized by Wednesday meeting
 
 # Meeting 10-28 Minutes
 
