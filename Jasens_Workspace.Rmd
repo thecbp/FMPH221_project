@@ -44,6 +44,16 @@ get_plots <- function(name,count, graphs){
 }
 ```
 
+# 0 count how many variables are missing
+
+```{r}
+df <- read.csv('cancer_registry.csv')
+
+colSums(is.na(df))
+```
+
+We realize we can easily impute for # college 18-24 since it needs to add to 100% with the other 18-24 groups.
+
 ## 1. Preliminary Regression
 
 Here, I examine variables one at a time
@@ -88,6 +98,7 @@ var_explained_df_1 <- data.frame(vars_1, var_explained_1)
 get_plots('Jasen_1_Individual_Plots.pdf', graph_count - 1, graphs)
 
 ```
+
 
 # 2 Preliminary Log Regression
 
@@ -222,4 +233,19 @@ eq5 <- paste(dep_var, eq5, sep= ' ~ ')
 m5 <- lm(eq5, data = df)
 s5 <- summary(m5)
 s5
+```
+
+# 6 Using PCA 
+
+```{r}
+all_vars_and_dep <- append(all_vars, dep_var)
+df6 <- df %>% select(all_vars) 
+df6 <- na.omit(df6)
+m6 <- prcomp(df6)
+s6 <- summary(m6)
+
+component_matrix <- data.frame(as.matrix(df6) %*% m6$rotation)
+
+pca_df <- component_matrix %>% mutate(dep_var = )
+
 ```
