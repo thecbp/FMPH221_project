@@ -254,3 +254,5 @@ component_matrix <- data.frame(as.matrix(df6) %*% m6$rotation)
 pca_df <- component_matrix %>% mutate(dep_var = )
 
 ```
+
+# 7 ok
