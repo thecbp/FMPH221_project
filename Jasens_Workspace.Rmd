@@ -62,10 +62,13 @@ Here, I examine variables one at a time
 library(tidyverse)
 library(gridExtra)
 df <- read.csv('cancer_registry.csv') %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
   filter(incidenceRate < 1000) %>%
   filter(avgAnnCount < 20000) %>%
   filter(MedianAge < 200) %>%
   filter(AvgHouseholdSize > 1)
+
+df <- na.omit(df)
 
 graphs <- list()
 graph_count <- 1
@@ -168,6 +171,8 @@ var_explained_df_3 <- rbind(var_explained_df_1, var_explained_df_2)
 colnames(var_explained_df_3) <- c('all_vars', 'var_explained')
 
 var_summary <- var_summary %>% left_join(var_explained_df_3, by = 'all_vars')
+
+var_summary2 <- var_summary %>% select(c(all_vars, var_explained)) %>% arrange(desc(var_explained))
 ```
 
 # 4 Heatmap
