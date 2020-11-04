@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Helper function
+
 ```{r}
 get_plots <- function(name,count, graphs){
   graph_count <- count
@@ -52,6 +54,24 @@ df <- read.csv('cancer_registry.csv')
 colSums(is.na(df))
 ```
 
+# 0.5 Exploring insurance
+
+```{r}
+priv_vec <- df$PctPrivateCoverage - df$PctPrivateCoverageAlone
+pub_vec <- df$PctPublicCoverage - df$PctPublicCoverageAlone
+diff <- priv_vec - pub_vec
+hm <- data.frame(priv_vec, pub_vec)
+
+summary(diff)
+
+all_races <- df$PctAsian + df$PctBlack + df$PctWhite + df$PctOtherRace
+
+summary(all_races)
+
+sort(all_races)
+
+```
+
 We realize we can easily impute for # college 18-24 since it needs to add to 100% with the other 18-24 groups.
 
 ## 1. Preliminary Regression
@@ -70,6 +90,7 @@ df <- read.csv('cancer_registry.csv') %>%
 
 df <- na.omit(df)
 
+p_values_1 <- c()
 graphs <- list()
 graph_count <- 1
 
@@ -82,6 +103,12 @@ for(i in vars_1){
   eq <- paste('TARGET_deathRate', i, sep = ' ~ ')
   m1 <- lm(formula = eq, data = df)
   s1 <- summary(m1)
+  
+  # get p-value
+  temp <- s1$coefficients[,4]
+  temp1 <- unname(temp[2])
+  p_values_1 <- append(p_values_1, temp1)
+  
   var_explained_1 <- append(var_explained_1, s1$r.squared)
   coeffs <- as.numeric(m1$coefficients)
   x_temp <- dplyr::pull(df, i)
@@ -96,7 +123,7 @@ for(i in vars_1){
   graph_count <- graph_count + 1
 }
 
-var_explained_df_1 <- data.frame(vars_1, var_explained_1)
+var_explained_df_1 <- data.frame(vars_1, var_explained_1, p_values_1)
 
 get_plots('Jasen_1_Individual_Plots.pdf', graph_count - 1, graphs)
 
@@ -113,6 +140,8 @@ log_names <- c()
 graph_count <- 1
 graphs <- list()
 var_explained_2 <- c()
+p_values_2 <- c()
+
 for(i in log_vars){
   temp <- paste(i, '_log', sep = '')
   
@@ -129,6 +158,12 @@ for(i in log_vars){
   eq <- paste('TARGET_deathRate', temp, sep = ' ~ ')
   m2 <- lm(formula = eq, data = df)
   s2 <- summary(m2)
+  
+  # get p-value
+  temp_p_value <- s2$coefficients[,4]
+  temp_p_value_1 <- unname(temp_p_value[2])
+  p_values_2 <- append(p_values_2, temp_p_value_1)
+  
   var_explained_2 <- append(var_explained_2, s2$r.squared)
   coeffs <- as.numeric(m2$coefficients)
   x_temp <- dplyr::pull(df, temp)
@@ -145,7 +180,7 @@ for(i in log_vars){
 get_plots('Jasen_2_Log_Individual_Plots.pdf', graph_count - 1, graphs)
 
 
-var_explained_df_2 <- data.frame(log_names, var_explained_2)
+var_explained_df_2 <- data.frame(log_names, var_explained_2, p_values_2)
 ```
 
 # 3 Look at all variables together
@@ -163,16 +198,16 @@ s3 <- summary(m3)
 s3
 
 p_values <- unname(s3$coefficients[,4])
-p_values <- p_values[2:length(p_values)]
-var_summary <- data.frame(all_vars, p_values)
+combined_p_values <- p_values[2:length(p_values)]
+var_summary <- data.frame(all_vars, combined_p_values)
 
 colnames(var_explained_df_2) <- colnames(var_explained_df_1)
 var_explained_df_3 <- rbind(var_explained_df_1, var_explained_df_2)
-colnames(var_explained_df_3) <- c('all_vars', 'var_explained')
+colnames(var_explained_df_3) <- c('all_vars', 'individual_var_explained', 'individual_p_values')
 
 var_summary <- var_summary %>% left_join(var_explained_df_3, by = 'all_vars')
 
-var_summary2 <- var_summary %>% select(c(all_vars, var_explained)) %>% arrange(desc(var_explained))
+var_summary2 <- var_summary %>% arrange(desc(individual_var_explained))
 ```
 
 # 4 Heatmap
@@ -218,12 +253,13 @@ df_temp <- na.omit(df_temp)
 heatmap2 <- cor(df_temp)
 
 pdf('Jasen_heatmap2.pdf')
-heatmap(heatmap2)
+heatmap(heatmap2, margins = c(10,10))
 dev.off()
+
 
 ```
 
-# 5 Carefully choosing variables for our model
+# 5 Choosing variables solely on p-value
 
 ```{r}
 choose_pvalue <- var_summary %>% filter(p_values < 10^(-4)) %>%
@@ -243,16 +279,73 @@ s5
 # 6 Using PCA 
 
 ```{r}
+num_comp <- 3
+
 all_vars_and_dep <- append(all_vars, dep_var)
-df6 <- df %>% select(all_vars) 
+df6 <- df %>% select(all_vars_and_dep) 
 df6 <- na.omit(df6)
-m6 <- prcomp(df6)
+
+df6_temp <- df6 %>% select(- !!as.name(dep_var))
+
+m6 <- prcomp(df6_temp)
 s6 <- summary(m6)
 
-component_matrix <- data.frame(as.matrix(df6) %*% m6$rotation)
+component_matrix <- data.frame(as.matrix(df6_temp) %*% m6$rotation)
+pca_df6 <- data.frame(component_matrix[,1:num_comp])
 
-pca_df <- component_matrix %>% mutate(dep_var = )
+names <- c()
+for(i in 1:num_comp){
+  temp <- paste('PC', i, sep = '')
+  names <- append(names, temp)
+}
 
+colnames(pca_df6) <- names
+
+pca_df6 <- pca_df6 %>% mutate(TARGET_deathRate := df6$TARGET_deathRate)
+
+eq6 <- paste(dep_var, ' ~ ', sep = '')
+for(i in 1:num_comp){
+  temp <- paste('PC', i, sep = '')
+  eq6 <- paste(eq6, temp, sep = ' + ')
+}
+m61 <- lm(eq6, data = pca_df6)
+s61 <- summary(m61)
+s61
+
+eq61 <- paste(names, collapse = ' + ')
+eq61 <- paste(' ~ ', eq61, sep = '')
+
+pairs(pca_df6, eq61)
 ```
 
-# 7 ok
+# 7 Manually choosing variables based on heatmap + p-value + percent variance explained
+
+```{r}
+vars_7 <- c('PctBachDeg25_Over',
+            'PctPublicCoverageAlone',
+            'incidenceRate',
+            'medIncome',
+            'PctEmployed16_Over',
+            'PctMarriedHouseholds',
+            'PctBlack',
+            'PctOtherRace_log',
+            'avgAnnCount_log')
+
+eq7 <- paste(vars_7, collapse = ' + ')
+eq7 <- paste(dep_var, eq7, sep = ' ~ ')
+
+m7 <- lm(eq7, data = df)
+s7 <- summary(m7)
+s7
+```
+
+# 8 PCA of these manually selected variables
+
+```{r}
+df8 <- df %>% select(vars_7) 
+df8 <- na.omit(df8)
+m8 <- prcomp(df8)
+s8 <- summary(m8)
+
+component_matrix <- data.frame(as.matrix(df8) %*% m8$rotation)
+```
