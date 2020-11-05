@@ -90,7 +90,7 @@ df <- read.csv('cancer_registry.csv') %>%
 df <- na.omit(df)
 
 p_values_1 <- c()
-graphs <- list()
+graphs1 <- list()
 graph_count <- 1
 
 vars <- colnames(df)
@@ -118,13 +118,13 @@ for(i in vars_1){
   geom_line(data = df_hat, aes(x = x_temp, y = y_hat))
   
   g
-  graphs[[graph_count]] <- g
+  graphs1[[graph_count]] <- g
   graph_count <- graph_count + 1
 }
 
 var_explained_df_1 <- data.frame(vars_1, var_explained_1, p_values_1)
 
-get_plots('Jasen_1_Individual_Plots.pdf', graph_count - 1, graphs)
+get_plots('Jasen_1_Individual_Plots.pdf', graph_count - 1, graphs1)
 
 ```
 
@@ -137,7 +137,7 @@ A few variables may look better with a log x axis
 log_vars <- c('avgAnnCount', 'avgDeathsPerYear', 'popEst2015', 'studyPerCap', 'PctBachDeg18_24', 'PctAsian', 'PctOtherRace')
 log_names <- c()
 graph_count <- 1
-graphs <- list()
+graphs2 <- list()
 var_explained_2 <- c()
 p_values_2 <- c()
 
@@ -172,14 +172,23 @@ for(i in log_vars){
   g <- ggplot() + geom_point(data = df, aes(x = !!as.name(temp), y = TARGET_deathRate)) + 
   geom_line(data = df_hat, aes(x = x_temp, y = y_hat))
   
-  graphs[[graph_count]] <- g
+  graphs2[[graph_count]] <- g
   graph_count <- graph_count + 1
 }
 
-get_plots('Jasen_2_Log_Individual_Plots.pdf', graph_count - 1, graphs)
+get_plots('Jasen_2_Log_Individual_Plots.pdf', graph_count - 1, graphs2)
 
 
 var_explained_df_2 <- data.frame(log_names, var_explained_2, p_values_2)
+```
+# 2.5 Displaying non-log and log of average death data
+
+```{r}
+g1_temp <- graphs1[[2]]
+g2_temp <- graphs2[[2]]
+lay <- rbind(c(1,2))
+
+grid.arrange(g1_temp, g2_temp, layout_matrix = lay)
 ```
 
 # 3 Look at all variables together
@@ -207,7 +216,10 @@ colnames(var_explained_df_3) <- c('all_vars', 'individual_var_explained', 'indiv
 var_summary <- var_summary %>% left_join(var_explained_df_3, by = 'all_vars')
 
 var_summary2 <- var_summary %>% arrange(desc(individual_var_explained))
+
+var_summary2
 ```
+
 
 # 4 Heatmap
 
@@ -252,10 +264,10 @@ df_temp <- na.omit(df_temp)
 heatmap2 <- cor(df_temp)
 
 pdf('Jasen_heatmap2.pdf')
-par(cex.lab = 1.0)
 heatmap.2(heatmap2, trace = 'none', margins = c(10,10), col = 'cm.colors', cexRow=0.7, cexCol = 0.7)
 dev.off()
 
+heatmap.2(heatmap2, trace = 'none', margins = c(10,10), col = 'cm.colors', cexRow=0.7, cexCol = 0.7)
 
 ```
 
@@ -273,7 +285,6 @@ eq5 <- paste(dep_var, eq5, sep= ' ~ ')
 
 m5 <- lm(eq5, data = df)
 s5 <- summary(m5)
-s5
 ```
 
 # 6 PCA of all 31 covariates
@@ -289,6 +300,8 @@ df6_temp <- df6 %>% select(- !!as.name(dep_var))
 
 m6 <- prcomp(df6_temp)
 s6 <- summary(m6)
+
+s6
 
 component_matrix <- data.frame(as.matrix(df6_temp) %*% m6$rotation)
 pca_df6 <- data.frame(component_matrix[,1:num_comp])
@@ -310,7 +323,6 @@ for(i in 1:num_comp){
 }
 m61 <- lm(eq6, data = pca_df6)
 s61 <- summary(m61)
-s61
 
 # eq61 <- paste(names, collapse = ' + ')
 # eq61 <- paste(' ~ ', eq61, sep = '')
@@ -336,7 +348,6 @@ eq7 <- paste(dep_var, eq7, sep = ' ~ ')
 
 m7 <- lm(eq7, data = df)
 s7 <- summary(m7)
-s7
 ```
 
 # 8 PCA of these manually selected variables
