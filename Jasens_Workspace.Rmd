@@ -68,8 +68,6 @@ all_races <- df$PctAsian + df$PctBlack + df$PctWhite + df$PctOtherRace
 
 summary(all_races)
 
-sort(all_races)
-
 ```
 
 We realize we can easily impute for # college 18-24 since it needs to add to 100% with the other 18-24 groups.
@@ -81,6 +79,7 @@ Here, I examine variables one at a time
 ```{r cars}
 library(tidyverse)
 library(gridExtra)
+library(gplots)
 df <- read.csv('cancer_registry.csv') %>%
   mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
   filter(incidenceRate < 1000) %>%
@@ -253,7 +252,8 @@ df_temp <- na.omit(df_temp)
 heatmap2 <- cor(df_temp)
 
 pdf('Jasen_heatmap2.pdf')
-heatmap(heatmap2, margins = c(10,10))
+par(cex.lab = 1.0)
+heatmap.2(heatmap2, trace = 'none', margins = c(10,10), col = 'cm.colors', cexRow=0.7, cexCol = 0.7)
 dev.off()
 
 
@@ -262,7 +262,7 @@ dev.off()
 # 5 Choosing variables solely on p-value
 
 ```{r}
-choose_pvalue <- var_summary %>% filter(p_values < 10^(-4)) %>%
+choose_pvalue <- var_summary %>% filter(individual_p_values < 10^(-4)) %>%
   select(all_vars)
 
 choose_pvalue <- unname(unlist(choose_pvalue))
@@ -276,10 +276,10 @@ s5 <- summary(m5)
 s5
 ```
 
-# 6 Using PCA 
+# 6 PCA of all 31 covariates
 
 ```{r}
-num_comp <- 3
+num_comp <- 31
 
 all_vars_and_dep <- append(all_vars, dep_var)
 df6 <- df %>% select(all_vars_and_dep) 
@@ -312,10 +312,10 @@ m61 <- lm(eq6, data = pca_df6)
 s61 <- summary(m61)
 s61
 
-eq61 <- paste(names, collapse = ' + ')
-eq61 <- paste(' ~ ', eq61, sep = '')
-
-pairs(pca_df6, eq61)
+# eq61 <- paste(names, collapse = ' + ')
+# eq61 <- paste(' ~ ', eq61, sep = '')
+# 
+# pairs(pca_df6, eq61)
 ```
 
 # 7 Manually choosing variables based on heatmap + p-value + percent variance explained
