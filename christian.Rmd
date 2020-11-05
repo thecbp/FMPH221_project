@@ -96,11 +96,25 @@ cancer %>%
     values_to = "pct",
     names_to = "educ_level"
   ) %>% 
+  mutate(
+    educ_level = case_when(
+      educ_level == "pct_no_hs18_24" ~ "No HS", 
+      educ_level == "pct_hs18_24" ~ "HS", 
+      educ_level == "pct_bach_deg18_24" ~ "College"
+    )
+  ) %>% 
   ggplot(aes(x = pct, y = target_death_rate, color = educ_level)) + 
   facet_grid(educ_level ~ .) +
-  theme(legend.position = "bottom") +
-  geom_point() +
-  ggtitle("Death rate by percent of county with particular education level")
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Cancer mortality by percent of county with particular education level",
+    x = "Percent of population with particular education level",
+    y = "Cancer Mortality (deaths / 100K)")
 ```
 
 Hard to parse much here. It kind of looks like more education leads to slightly lower death rates (based on blue plot)? But this effect is not very pronounced.
@@ -138,11 +152,23 @@ cancer %>%
     values_to = "pct",
     names_to = "race"
   ) %>% 
+  mutate(
+    race = case_when(
+      race == "pct_white" ~ "White",
+      race == "pct_black" ~ "Black",
+      race == "pct_asian" ~ "Asian",
+      race == "pct_other_race" ~ "Other"
+    )
+  ) %>% 
   ggplot(aes(x = pct, y = target_death_rate, color = race)) + 
+  geom_point(size = 0.5, alpha = 0.3) +
+  geom_smooth(method = "lm") +
   facet_grid(race ~ .) +
   theme(legend.position = "bottom") +
-  geom_point() +
-  ggtitle("Death rate by percent of county by percentage of race in a county")
+  labs(
+    title = "Death rate by percent of county by percentage of race in a county",
+    x = "Percentage of race in county population",
+    y = "Cancer Mortality (deaths / 100K)")
 ```
 
 Main takeaway here is that a higher percentage of African-Americans corresponds to higher death rates. This lines up with evidence of racial disparities in the healthcare system with regard to access and cost. 
