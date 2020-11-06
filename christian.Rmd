@@ -401,7 +401,46 @@ bs %>%
   scale_color_manual(values = c("#DC143C", "#2E8B57"))
 ```
 
+# Wald Test
 
+$$
+W_{n}=n g\left(\widehat{\theta}_{n}\right)^{\top}\left[J_{g}\left(\widehat{\theta}_{n}\right) \hat{V}_{n} J_{g}\left(\widehat{\theta}_{n}\right)^{\top}\right]^{-1} g\left(\widehat{\theta}_{n}\right)
+$$
 
+```{r}
+n = nrow(cancer)
+# Create the contrast matrix for coefficients
+C = matrix(integer(8 * 20), nrow = 8, ncol = 20)
+C[1, 13] = C[2, 14] = C[3, 15] = C[4, 16] = C[5, 17] = C[6, 18] = C[7, 19] = C[8, 20] = 1
+C[1, 14] = C[2, 15] = C[3, 16] = C[4, 17] = C[5, 18] = C[6, 19] = C[7, 20] = -1
 
+# Contrast on the model coefficients and get var-cov matrix of coefficients
+g_beta = C %*% model2$coefficients
 
+# Variance covariance of coefficients 
+
+est = 1
+
+# Construct the contrast matrix
+C = as.matrix(
+  rbind(
+    c(1, -1, 0, 0, 0, 0),
+    c(0, 1, -1, 0, 0, 0),
+    c(0, 0, 1, -1, 0, 0),
+    c(0, 0, 0, 1, -1, 0),
+    c(0, 0, 0, 0, 1, -1)
+  )
+)
+c = nrow(C)
+
+# Perform the test
+T.2.test.B = n * t(C %*% mu.diffs) %*% 
+  solve(C %*% var.pooled %*% t(C)) %*%
+  (C %*% mu.diffs)
+
+# Calculate the statistic
+F.stat.test.B = (n - c)/((n - 1)*c) * T.2.test.B
+
+# Now p-value
+pvalue.test.B = 1 - pf(F.stat.test.B, c, n - c)
+```
