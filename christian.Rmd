@@ -6,6 +6,7 @@ output: pdf_document
 
 ```{r, message = F, warning = F }
 library(tidyverse)
+set.seed(1)
 
 # Load the data and do some processing
 cancer = read_csv("cancer_registry.csv") %>% 
@@ -32,7 +33,11 @@ cancer = read_csv("cancer_registry.csv") %>%
     )
   ) %>% 
   separate(binnedInc, into = c("inc_dec_low", "inc_dec_high"), sep = ",") %>% 
-  janitor::clean_names() # Convert all column names to lowercase
+  janitor::clean_names() %>%  # Convert all column names to lowercase'
+  mutate(
+    high_college = pct_bach_deg25_over > median(pct_bach_deg25_over), # median(pct_bach_deg18_24),
+    high_hs = pct_hs18_24 > median(pct_hs18_24)
+  )
 ```
 
 # Missing Data
@@ -197,7 +202,8 @@ Interesting... Southeast seems to have a higher death rate than the other region
 ```{r}
 cancer %>% 
   mutate(
-    high_college = pct_bach_deg18_24 > 0.5
+    high_college = pct_bach_deg25_over > 34, # median(pct_bach_deg18_24),
+    high_hs = pct_hs18_24 > median(pct_hs18_24)
   ) %>% 
   pivot_longer(
     cols = c("pct_white", 
@@ -230,9 +236,172 @@ cancer %>%
   scale_color_discrete(labels = c("< 50%", ">= 50%"))
 ```
 
-## Notes To Self:
+```{r}
+cancer %>% 
+  ggplot(aes(x = pct_bach_deg25_over)) +
+  geom_density()
+```
 
-- we will probably need to control for the incidence rate of cancer, age, sex and race (typical things to control for in an analysis)
-- It would be interesting to test if some of these demographics interact with each other. 
-  - I'm leaning towards the interaction between race and education. Does getting more educated help people avoid cancer, which will extend to lower rates of cancer death in a county?-
-- Race and insurance are probably highly correlated. They represent very different things, so there are costs and benefits to including both or one over the other in the model
+```{r}
+cancer %>% 
+  ggplot(aes(x = pct_hs25_over)) +
+  geom_density()
+```
+
+# Inference Model
+
+```{r}
+colnames(cancer)
+```
+
+```{r}
+# Trying out fuill interaction
+model = lm(target_death_rate ~ pct_no_hs18_24 + pct_no_hs18_24 + pct_some_col18_24 +
+                               pct_bach_deg18_24 + pct_white + pct_black + pct_asian + pct_other_race +
+                               pct_no_hs18_24*pct_white + pct_no_hs18_24*pct_black + pct_no_hs18_24*pct_asian + 
+                               pct_no_hs18_24*pct_other_race + pct_hs18_24*pct_white + pct_hs18_24*pct_black + pct_hs18_24*pct_asian + 
+                               pct_hs18_24*pct_other_race + pct_some_col18_24*pct_white + pct_some_col18_24*pct_black + pct_some_col18_24*pct_asian + 
+                               pct_some_col18_24*pct_other_race + pct_bach_deg18_24*pct_white + pct_bach_deg18_24*pct_black + 
+                               pct_bach_deg18_24*pct_asian + pct_bach_deg18_24*pct_other_race +
+                               incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+                             data = cancer)
+
+# Doesn't seem very good, will try indicators for high education and low education
+summary(model)             
+```
+
+```{r}
+# Trying out different set of education vars
+model2 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+
+# Looks good! Some interesting results here.
+summary(model2)      
+```
+
+
+```{r}
+# Function for recreating the interaction model for bootstrapping
+create_int_model = function(data) {
+  
+  # lm(target_death_rate ~ pct_no_hs18_24 + pct_no_hs18_24 + pct_some_col18_24 +
+  #            pct_bach_deg18_24 + pct_white + pct_black + pct_asian + pct_other_race +
+  #            pct_no_hs18_24*pct_white + pct_no_hs18_24*pct_black + pct_no_hs18_24*pct_asian + 
+  #            pct_no_hs18_24*pct_other_race + pct_hs18_24*pct_white + pct_hs18_24*pct_black + pct_hs18_24*pct_asian + 
+  #            pct_hs18_24*pct_other_race + pct_some_col18_24*pct_white + pct_some_col18_24*pct_black + pct_some_col18_24*pct_asian + 
+  #            pct_some_col18_24*pct_other_race + pct_bach_deg18_24*pct_white + pct_bach_deg18_24*pct_black + 
+  #            pct_bach_deg18_24*pct_asian + pct_bach_deg18_24*pct_other_race +
+  #            incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+  #          data = data)
+  
+  
+  lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = data)
+  
+}
+```
+
+```{r}
+# How many bootstrap datasets do I want
+bs_n = 5000
+
+# Terms to keep
+# terms = model$coefficients %>% names %>% .[15:30]
+terms = model2$coefficients %>% names %>% .[13:20]
+
+# Create the bootstrap datasets and models
+bs = tibble( idx = 1:bs_n ) %>% 
+  mutate(
+    bs_data = map(idx, function(i) {
+      sample_n(cancer, size = nrow(cancer), replace = TRUE)
+    }),
+    bs_model = map(bs_data, function(bsd) {
+      create_int_model(bsd)
+    }),
+    bs_results = map(bs_model, broom::tidy)
+  ) %>% 
+  select(idx, bs_results) %>% 
+  unnest(bs_results) %>% 
+  group_by(term) %>% 
+  summarize(
+    n = n(),
+    bs_mean = mean(estimate),
+    bs_var = var(estimate),
+    left_bound = quantile(estimate, 0.025),
+    right_bound = quantile(estimate, 0.975),
+  ) %>% 
+  filter(term %in% terms) %>% 
+  # Convert terms to factors for easier reordering
+  mutate(
+    # Model 1 formatting
+    # term = factor(term, 
+    #               levels = c(
+    #                 "pct_no_hs18_24:pct_asian", "pct_asian:pct_hs18_24",
+    #                 "pct_some_col18_24:pct_asian", "pct_bach_deg18_24:pct_asian",
+    #                 "pct_no_hs18_24:pct_black", "pct_black:pct_hs18_24",
+    #                 "pct_some_col18_24:pct_black","pct_bach_deg18_24:pct_black",
+    #                 "pct_no_hs18_24:pct_other_race", "pct_other_race:pct_hs18_24",
+    #                 "pct_some_col18_24:pct_other_race", "pct_bach_deg18_24:pct_other_race",
+    #                 "pct_no_hs18_24:pct_white", "pct_white:pct_hs18_24",   
+    #                 "pct_some_col18_24:pct_white", "pct_bach_deg18_24:pct_white"),
+    #               labels = c(
+    #                 "No HS x Asian", "Some HS x Asian",
+    #                 "Some College x Asian", "College x Asian",
+    #                 "No HS x Black", "Some HS x Black",
+    #                 "Some College x Black", "College x Black",
+    #                 "No HS x Other", "Some HS x Other",
+    #                 "Some College x Other", "College x Other",
+    #                 "No HS x White", "Some HS x White",
+    #                 "Some College x White", "College x White"
+    #               ))
+    term = factor(term, 
+                  levels = c(
+                    "pct_hs25_over:pct_asian", "pct_bach_deg25_over:pct_asian",
+                    "pct_hs25_over:pct_black", "pct_bach_deg25_over:pct_black",
+                    "pct_hs25_over:pct_other_race", "pct_bach_deg25_over:pct_other_race",
+                    "pct_hs25_over:pct_white", "pct_bach_deg25_over:pct_white"),
+                  labels = c(
+                    "HS x Asian", "College x Asian",
+                    "HS x Black", "College x Black",
+                    "HS x Other", "College x Other",
+                    "HS x White", "College x White"
+                  ))
+  )
+
+# Visualize the bootstrap confidence intervals
+bs %>% 
+  ggplot(aes(x = term, y = bs_mean)) +
+  geom_pointrange(aes(ymin = left_bound, ymax = right_bound,
+                      color = if_else(left_bound > 0 | right_bound < 0, "y", "n"))
+                  ) +
+  geom_hline(yintercept = 0, color = "red", alpha = 0.5) +
+  coord_flip() +
+  labs(
+    title = "Bootstrap confidence intervals for 5000 resamples",
+    x = "Interaction Term",
+    y = "Bootstrap Interaction Coefficient Estimate"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "none"
+  ) +
+  scale_color_manual(values = c("#DC143C", "#2E8B57"))
+```
+
+
+
+
+
