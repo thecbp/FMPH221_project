@@ -1,5 +1,5 @@
 ---
-title: "Analyzing Socioeconomic Factors on USA Cancer Mortality"
+title: "Project Proposal: Analyzing Socioeconomic Factors on USA Cancer Mortality"
 author: "Jasen Zhang, Alex Zhu, Christian Pascual"
 output: pdf_document
 ---
@@ -35,7 +35,11 @@ cancer = read_csv("cancer_registry.csv") %>%
 
 # Introduction
 
+Approximately one in every four deaths in the U.S. is due to cancer, making it the second leading cause of death after heart disease. Billions of dollars are spent annually on the research, treatment and prevention of cancer so that we understand the key factors determining the cancer mortality and from there, to have accurate estimates of cancer cases and deaths. 
 
+Each year, the American Cancer Society (ACS) estimates the number of new cancer cases and deaths with a focus on the death rates in various cancer sites. The ACS also briefly reported death rates by several socioeconomic factors like ethnicity and educational attainment respectively. In this project, we plan to analyze how socioeconomic factors relate to cancer mortality and create a model to predict cancer mortality based on projections from observed data between 2010-2016. These data were collected from multiple sources, spanning over 3,000 counties nationwide. 
+
+Mortality data is compiled based on the cause of death reported on death certificate and census report from ACS. The factors are categorized into five overarching themes: cancer-related figures, economic data, demographic data, education and county-specific information. Most variables in the dataset are continuous in nature, representing a some proportion of the county. 
 
 # Exploratory Data Analysis
 
@@ -43,7 +47,7 @@ Our data is an aggregation of multiple sources including the American Community 
 
 The data contains information on `r nrow(cancer)` counties in the United States. The data is not fully descriptive of all counties in the US because `r 3141 - nrow(cancer)` are missing. We surmise these counties are missing due to lack of data for them. 
 
-The average mortality per capita is `r cancer %>% pull(target_death_rate) %>% mean %>% round(., 2)` across the dataset. Cancer mortality has a nice bell shape, but there are a few outliers present (Figure 1)
+The average mortality per capita is `r cancer %>% pull(target_death_rate) %>% mean %>% round(., 2)` across the dataset. Cancer mortality has a nice bell shape, but there are a few outliers present (Figure 1).
 
 We explored how other variables in the dataset correlated with the cancer mortality in the counties. The data also includes information on the incidence of cancer in each county, so we checked how it related to mortality. As expected, higher incidence correlates highly with higher mortality, so this should be accounted for in a model. There was no apparent trend between cancer mortality per capita and either age or education level. 
 
@@ -68,13 +72,15 @@ We needed to perform some transformations on the data since some covariates such
 
 As an initial prediction model, we fit all 31 covariates individually with cancer death rate as the response. The resulting adjusted $R^2$ was 0.7664. We took note of the p-value for each covariate in this joint model, some of which significantly differedd from the p-value obtained when modeled alone (Figure 4). This likely happens because a few covariates are correlated with each other and explain similar underlying trends in the cancer rate. To gain a better understanding of collinearity of the covariates, we also plotted a heatmap of the pairwise correlations (Figure 5). This confirmed our initial belief about the redundancy in the data, so we can trim out redundant covariates from our model.
 
-One approach we explored was principal component analysis (PCA) on all 31 covariates. We found that the first principal component explains nearly all the variance in the dataset.
+One approach we explored was principal component analysis (PCA) on all 31 covariates. We found that the first principal component explains nearly all the variance in the dataset. In response to this, we plan to see how removing some major confounding variables might help the principal components.
 
 # Future Directions
 
 For our inference model, we plan to use the Wald Test to test the joint hypothesis that all the interaction coefficients are zero. We may also use bootstrap to understand these coefficients better.
 
 For our prediction model, we plan to explore model selection from multiple angles, such as PCA, regularization, or hand-picking non-correlated covariates that individually explain the response variable well. For the first two approaches, we will use cross-validation to pick an optimal hyperparameter (shrinkage factor or number of principal components respectively) to tune the linear model in preparation for cross-validation so we do not overfit the data. Different error metrics such as absolute error or squared error may also be explored. We intend to use an 80-10-10 split of the data between training, cross-validation and testing.
+
+Moving forward, we plan to distribute all analytic and writing work evenly. Christian will be responsible for the inference model, Jasen and Alex will work on prediction. 
 
 \pagebreak
 
