@@ -1,6 +1,5 @@
 ---
-title: "Report EDA"
-author: "Christian Pascual"
+title: "Appendix"
 output: pdf_document
 ---
 
@@ -40,236 +39,6 @@ cancer = read_csv("cancer_registry.csv") %>%
   )
 ```
 
-# Missing Data
-
-```{r}
-# Get the number of rows with missing data for each column
-cancer %>% 
-  select(everything()) %>%
-  summarise_all(funs(sum(is.na(.)))) %>% 
-  select(which(colMeans(.) != 0))
-```
-
-Three columns have missing data:
-
-- `pct_some_col18_24`
-- `pct_employed16_over`
-- `pct_private_coverage_alone`
-
-# Distribution of outcome
-
-```{r}
-cancer %>% 
-  ggplot(aes(x = target_death_rate)) +
-  geom_histogram(color = "red") +
-  ggtitle("Empirical distribution of cancer death rate in the data")
-```
-
-Outcome is reasonably normally distributed, which is nice. 
-
-# Variable Trends
-
-## Incidence and cancer death rate
-
-```{r}
-cancer %>% 
-  ggplot(aes(x = incidence_rate, y = target_death_rate)) +
-  geom_point() +
-  ggtitle("Incidence of cancer vs death rate")
-```
-
-Suggests a positive relationship between higher incidence and higher death rate. This is expected, so this should be controlled for in the model.
-
-## Age and death rate
-
-```{r}
-cancer %>% 
-  filter(median_age < 100) %>% # some weird values in the data
-  ggplot(aes(x = median_age, y = target_death_rate)) +
-  geom_point() +
-  ggtitle("Age vs death rate")
-```
-
-I thought there might be a relationship between age and death rate. Doesn't seem to show here. I know that the older you get, the more likely you are to get cancer, so this should still be controlled for in the analysis.
-
-## Education & Death Rate
-
-```{r}
-cancer %>% 
-  pivot_longer(
-    cols = c("pct_no_hs18_24", "pct_hs18_24", "pct_bach_deg18_24"),
-    values_to = "pct",
-    names_to = "educ_level"
-  ) %>% 
-  mutate(
-    educ_level = case_when(
-      educ_level == "pct_no_hs18_24" ~ "No HS", 
-      educ_level == "pct_hs18_24" ~ "HS", 
-      educ_level == "pct_bach_deg18_24" ~ "College"
-    )
-  ) %>% 
-  ggplot(aes(x = pct, y = target_death_rate, color = educ_level)) + 
-  facet_grid(educ_level ~ .) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(hjust = 0.5)) +
-  geom_point(alpha = 0.2) +
-  geom_smooth(method = "lm") +
-  labs(
-    title = "Cancer mortality by percent of county with particular education level",
-    x = "Percent of population with particular education level",
-    y = "Cancer Mortality (deaths / 100K)")
-```
-
-Hard to parse much here. It kind of looks like more education leads to slightly lower death rates (based on blue plot)? But this effect is not very pronounced.
-
-## Insurance Coverage & Death Rate
-
-```{r}
-cancer %>% 
-  pivot_longer(
-    cols = c("pct_private_coverage", 
-             "pct_private_coverage_alone", 
-             "pct_public_coverage",
-             "pct_public_coverage_alone"),
-    values_to = "pct",
-    names_to = "ins_level"
-  ) %>% 
-  ggplot(aes(x = pct, y = target_death_rate, color = ins_level)) + 
-  facet_grid(ins_level ~ .) +
-  theme(legend.position = "bottom") +
-  geom_point() +
-  ggtitle("Death rate by percent of county by percentage of people with insurance types")
-```
-
-Interesting shift. The higher private coverage is, the lower the death rate. It's converse for public coverage. Perhaps this is a proxy for other economic factors? Maybe private insurance is better than public coverage? My thought was that more coverage in general would help improve death rate.
-
-## Race & Death Rate
-
-```{r}
-cancer %>% 
-  pivot_longer(
-    cols = c("pct_white", 
-             "pct_black", 
-             "pct_asian",
-             "pct_other_race"),
-    values_to = "pct",
-    names_to = "race"
-  ) %>% 
-  mutate(
-    race = case_when(
-      race == "pct_white" ~ "White",
-      race == "pct_black" ~ "Black",
-      race == "pct_asian" ~ "Asian",
-      race == "pct_other_race" ~ "Other"
-    )
-  ) %>% 
-  ggplot(aes(x = pct, y = target_death_rate, color = race)) + 
-  geom_point(size = 0.5, alpha = 0.3) +
-  geom_smooth(method = "lm") +
-  facet_grid(race ~ .) +
-  theme(legend.position = "bottom") +
-  labs(
-    title = "Death rate by percent of county by percentage of race in a county",
-    x = "Percentage of race in county population",
-    y = "Cancer Mortality (deaths / 100K)")
-```
-
-Main takeaway here is that a higher percentage of African-Americans corresponds to higher death rates. This lines up with evidence of racial disparities in the healthcare system with regard to access and cost. 
-
-## Region by Death Rate
-
-```{r}
-cancer %>% 
-  ggplot(aes(x = region, y = target_death_rate, color = region)) + 
-  geom_boxplot() +
-  theme_minimal() +
-  labs(
-    title = "Death rate by US region",
-    x = "Region",
-    y = "Cancer Mortality (deaths / 100K)") +
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(hjust = 0.5)
-  )
-```
-
-Interesting... Southeast seems to have a higher death rate than the other regions. 
-
-# Interaction Between Education and Race?
-
-```{r}
-cancer %>% 
-  mutate(
-    high_college = pct_bach_deg25_over > 34, # median(pct_bach_deg18_24),
-    high_hs = pct_hs18_24 > median(pct_hs18_24)
-  ) %>% 
-  pivot_longer(
-    cols = c("pct_white", 
-             "pct_black", 
-             "pct_asian",
-             "pct_other_race"),
-    values_to = "pct",
-    names_to = "race"
-  ) %>% 
-  mutate(
-    race = case_when(
-      race == "pct_white" ~ "White",
-      race == "pct_black" ~ "Black",
-      race == "pct_asian" ~ "Asian",
-      race == "pct_other_race" ~ "Other"
-    )
-  ) %>% 
-  ggplot(aes(x = pct, y = target_death_rate, color = high_college)) + 
-  geom_smooth(method = "lm", size = 0.5) +
-  facet_grid(race ~ .) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(hjust = 0.5)
-  ) + 
-  labs(
-    title = "Death rate by percent of by race in a county and high education",
-    x = "Percentage of race in county population",
-    y = "Cancer Mortality (deaths / 100K)") +
-  scale_color_discrete(labels = c("< 50%", ">= 50%"))
-```
-
-```{r}
-cancer %>% 
-  ggplot(aes(x = pct_bach_deg25_over)) +
-  geom_density()
-```
-
-```{r}
-cancer %>% 
-  ggplot(aes(x = pct_hs25_over)) +
-  geom_density()
-```
-
-# Inference Model
-
-```{r}
-colnames(cancer)
-```
-
-```{r}
-# Trying out fuill interaction
-model = lm(target_death_rate ~ pct_no_hs18_24 + pct_no_hs18_24 + pct_some_col18_24 +
-                               pct_bach_deg18_24 + pct_white + pct_black + pct_asian + pct_other_race +
-                               pct_no_hs18_24*pct_white + pct_no_hs18_24*pct_black + pct_no_hs18_24*pct_asian + 
-                               pct_no_hs18_24*pct_other_race + pct_hs18_24*pct_white + pct_hs18_24*pct_black + pct_hs18_24*pct_asian + 
-                               pct_hs18_24*pct_other_race + pct_some_col18_24*pct_white + pct_some_col18_24*pct_black + pct_some_col18_24*pct_asian + 
-                               pct_some_col18_24*pct_other_race + pct_bach_deg18_24*pct_white + pct_bach_deg18_24*pct_black + 
-                               pct_bach_deg18_24*pct_asian + pct_bach_deg18_24*pct_other_race +
-                               incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
-                             data = cancer)
-
-# Doesn't seem very good, will try indicators for high education and low education
-summary(model)             
-```
-
 ```{r}
 # Trying out different set of education vars
 model2 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
@@ -282,12 +51,8 @@ model2 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over +
            data = cancer)
 
 # Looks good! Some interesting results here.
-summary(model2)      
-```
+summary(model2)    
 
-
-```{r}
-# Function for recreating the interaction model for bootstrapping
 create_int_model = function(data) {
   
   # lm(target_death_rate ~ pct_no_hs18_24 + pct_no_hs18_24 + pct_some_col18_24 +
@@ -300,7 +65,6 @@ create_int_model = function(data) {
   #            incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
   #          data = data)
   
-  
   lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
              pct_white + pct_black + pct_asian + pct_other_race +
              # Interactions
@@ -311,9 +75,7 @@ create_int_model = function(data) {
            data = data)
   
 }
-```
 
-```{r}
 # How many bootstrap datasets do I want
 bs_n = 5000
 
@@ -400,8 +162,6 @@ bs %>%
   ) +
   scale_color_manual(values = c("#DC143C", "#2E8B57"))
 ```
-
-# Wald Test
 
 ```{r}
 # Create the contrast matrix for coefficients
