@@ -8,6 +8,28 @@ output: html_document
 - Project Proposal Google Doc: https://docs.google.com/document/d/1o2uwT-Cma9o6UsyaRo6lUYbd91xiHiS3SwMz09GbAb0/edit
 - Project Proposal Presentation: https://docs.google.com/presentation/d/1EBkkb6x0Uzv8apnwczo8TgY3-1_3djSD_QP-uJGMy9A/edit?usp=sharing
 
+# Monday, Nov-9, 1:30pm Meeting Miniutes
+Delegating tasks:
+ - Agreeing to a common list of data points to throw out
+   - When median age > 100, etc...
+   
+
+ - Model Selection
+   - PCA
+   - Regularization
+   
+ - Prediction Model
+   - Cross Validation
+   - Exploring different error metrics (AIC, MSE)
+ 
+ - Missing Data
+ 
+ - Statistical Tests
+   - Interaction effects
+   - ANOVA
+   
+
+
 # Meeting 11-03 Minutes
 
 - TODO:
