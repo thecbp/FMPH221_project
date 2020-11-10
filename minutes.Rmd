@@ -15,18 +15,18 @@ Delegating tasks:
    
 
  - Model Selection
-   - PCA
-   - Regularization
+   - PCA: Alex
+   - Regularization: Jasen
    
- - Prediction Model
+ - Prediction Model (Both Jasen and Alex)
    - Cross Validation
    - Exploring different error metrics (AIC, MSE)
  
- - Missing Data
+ - Missing Data: Jasen
  
  - Statistical Tests
-   - Interaction effects
-   - ANOVA
+   - Interaction effects: Christian
+   - ANOVA: Alex
    
 
 
