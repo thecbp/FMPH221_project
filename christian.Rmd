@@ -409,13 +409,104 @@ C = matrix(integer(8 * 20), nrow = 8, ncol = 20)
 C[1, 13] = C[2, 14] = C[3, 15] = C[4, 16] = C[5, 17] = C[6, 18] = C[7, 19] = C[8, 20] = 1
 C[1, 14] = C[2, 15] = C[3, 16] = C[4, 17] = C[5, 18] = C[6, 19] = C[7, 20] = -1
 
+# Constants for null distribution
+q = nrow(C)
+p = model2$coefficients %>% length
+
 # Contrast on the model coefficients and get var-cov matrix of coefficients
 g_beta = C %*% model2$coefficients
 V = vcov(model2)
 
 # Get Wald test statistic
-W = t(g_beta) %*% solve(C %*% V %*% t(C)) %*% g_beta
+W = (t(g_beta) %*% solve(C %*% V %*% t(C)) %*% g_beta) / q
 
 # Calculate the p-value
 pval = 1 - pchisq(W, df = nrow(C))
 ```
+
+# Bootstrap Wald
+
+```{r}
+# Use bootstrap to calculate the Wald Test
+bs = tibble( idx = 1:bs_n ) %>% 
+  mutate(
+    bs_data = map(idx, function(i) {
+      sample_n(cancer, size = nrow(cancer), replace = TRUE)
+    }),
+    bs_model = map(bs_data, function(bsd) {
+      create_int_model(bsd)
+    }),
+    bs_wald = map(bs_model, function(model) { 
+      q = nrow(C)
+      g_beta = C %*% model$coefficients
+      V = vcov(model)
+      
+      (t(g_beta) %*% solve(C %*% V %*% t(C)) %*% g_beta) / q
+    })
+  )
+
+# How many of the resulting boostrap Wald tests are greater than the critical
+# value under the null hypothesis
+((bs %>% pull(bs_wald))  > qchisq(0.95, df = nrow(C))) %>% mean
+```
+
+
+# Model Diagnostics
+
+```{r}
+cancer = cancer %>% 
+  mutate(
+    fitted = model2$fitted.values,
+    resid = model2$residuals
+  )
+
+
+# Residuals plot
+cancer %>% 
+  ggplot(aes(x = fitted, y = resid)) + 
+  geom_point(size = 0.5, alpha = 0.5) +
+  geom_hline(yintercept = 0, color = "red", alpha = 0.5) +
+  theme_minimal() +
+  labs(
+    title = "Residual plot for inference model",
+    x = "Fitted Values",
+    y = "Predicted Values"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "none"
+  )
+```
+
+```{r}
+cancer %>% pull(resid) %>% mean
+cancer %>% pull(resid) %>% var
+```
+
+
+```{r}
+# QQ-plot
+theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "none"
+  )
+
+# QQ plot demonstrates that errors have some heavy tails
+# Suggests the errors are not normally distributed
+cancer %>% 
+  ggplot(aes(sample = resid)) + 
+  stat_qq(size = 0.5, alpha = 0.5) + 
+  stat_qq_line(color = "red", alpha = 0.5) +
+  theme_minimal() +
+  labs(
+    title = "QQ plot for inference model residuals",
+    x = "Theoretical Quantile",
+    y = "Sample Quantile"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = "none"
+  )
+```
+
+QQ-plot suggests that the errors are not normally distributed, which means that the LSE estimates may not be normally distributed. This justifies the use of bootstrap to attempt to check the significance of the model estimates.
