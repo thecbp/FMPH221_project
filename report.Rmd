@@ -1,6 +1,6 @@
 ---
 title: "Analyzing Socioeconomic Factors on USA Cancer Mortality"
-author: "Jasen Zhang, Alex Zhu, Christian Pascual"
+author: "Jasen Zhang, Alexander Zhu, Christian Pascual"
 output: pdf_document
 ---
 
@@ -8,6 +8,11 @@ output: pdf_document
 library(tidyverse)
 library(knitr)
 set.seed(1)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  out.width = "80%"
+)
 
 # Load the data and do some processing
 cancer = read_csv("cancer_registry.csv") %>% 
@@ -43,9 +48,19 @@ cancer = read_csv("cancer_registry.csv") %>%
 
 # Introduction
 
-- introduce cancer, its significance
-- what research has been done on this topic 
-  - concerning race, education, insurance, age, etc
+Cancer ranks among the leading causes of death worldwide. According to a report published by the American Cancer Society, an estimated 1.8 million new cancer cases are estimated to be diagnosed in 2020 in the United States, and more than 600,000 are expected to die directly as a result of cancer$.^1$Cancer also carries a significant economic burden, costing the United States an estimated \$80.2 billion according to a 2015 report$.^2$ From both a humane and economic perspective, investigation into effective, affordable cancer cures and treatments represents a important front of research. 
+
+Cancer is inherently a disease of the genes, but a wide berth of research has demonstrated that a diverse set of environmental and socioeconomic factors contribute to increased risk of cancer incidence and mortality. For example, Adler et. al showed that higher socioeconomic status was associated with decreased cancer mortality$.^3$ Rawl et. al demonstrates a similar result in a statewide survey in Indiana that income and education were inversely related to cancer mortality. Rawl also discusses how race affected cancer mortality in their sample, finding that African-American participants worried less about cancer and were less likely to seek treatment$.^4$. Rohfling et. al found that uninsured patients or those under Medicaid were more likely to have more advanced tumors and poorer survival compared to peerse with private insurance$.^5$ Higher socioeconomic status gives people better access to healthcare resources that are potentially life-saving or will help increase survival, and the opposite effect has been seen the lower scale.
+
+Similar research has documented race-based health disparities in cancer mortality. In an observational study in Philadelphia, Zeigler-Johnson found that black men were at the highest risk of prostate cancer relative to similar white counterparts$.^6$ Looking at data spanning from 1950 to 2014, a study by Singh showed that individuals from lower educational backgrounds experienced higher mortality of various types of cancer. Furthermore, African-Americans saw higher cancer mortality compared to their Asian and White counterparts in this group$.^7$ These are just a few examples of studies that have documented how race influences cancer mortality, highlighting that it is critical to consider in any cancer-related intervention. 
+
+One difficulty in researching cancer is that it is an incredibly diverse collection of diseases, as opposed to a monolithic set of symptoms. Further complicating this is that different cancers can occur at different rates across different regions of the United States. Mokdad et. al found that there were distinct clusters of counties in different regions with especially high cancer mortality. For example, breast cancers are highly prevalent in the southern belt, whereas liver cancer is the prevailing diagnosis along the Texas-Mexico border$.^8$ The heterogeneity of different cancers in the United States offers an interesting research avenue. Just as the aforementioned studies examined how socioeconomic factors and race affect cancer mortality on an individual, it could be useful to understand how these factors relate to cancer mortality on a higher, geographic level. Understanding how these factors contribute to cancer mortality on a geographic level offers an opportunity for researchers to understand the factors that contribute to higher mortality in different states and possibly a better way to allocate health resources to areas that are harder hit.
+
+## Project Motivation
+
+
+
+
 - motivation for the project
 
 ## Objectives
@@ -231,3 +246,12 @@ These findings are limited by the fact that the observational unit of the data w
 - results
 - significance
 - weaknessses
+
+# References 
+
+3. ADLER, N.E. and OSTROVE, J.M. (1999), Socioeconomic Status and Health: What We Know and What We Don't. Annals of the New York Academy of Sciences, 896: 3-15. https://doi.org/10.1111/j.1749-6632.1999.tb08101.x
+4. Rawl SM, Dickinson S, Lee JL, Roberts JL, Teal E, Baker LB, Kianersi S, Haggstrom DA. Racial and Socioeconomic Disparities in Cancer-Related Knowledge, Beliefs, and Behaviors in Indiana. Cancer Epidemiol Biomarkers Prev. 2019 Mar;28(3):462-470. doi: 10.1158/1055-9965.EPI-18-0795. Epub 2018 Nov 28. PMID: 30487135.
+5. Rohlfing ML, Mays AC, Isom S, Waltonen JD. Insurance status as a predictor of mortality in patients undergoing head and neck cancer surgery. Laryngoscope. 2017 Dec;127(12):2784-2789. doi: 10.1002/lary.26713. Epub 2017 Jun 22. PMID: 28639701; PMCID: PMC5688011.
+6. Zeigler-Johnson C, Keith S, McIntire R, Robinson T, Leader A, Glanz K. Racial and Ethnic Trends in Prostate Cancer Incidence and Mortality in Philadelphia, PA: an Observational Study. J Racial Ethn Health Disparities. 2019 Apr;6(2):371-379. doi: 10.1007/s40615-018-00534-z. Epub 2018 Dec 5. PMID: 30520002.
+7. Singh, Gopal & Jemal, Ahmedin. (2017). Socioeconomic and Racial/Ethnic Disparities in Cancer Mortality, Incidence, and Survival in the United States, 1950–2014: Over Six Decades of Changing Patterns and Widening Inequalities. Journal of Environmental and Public Health. 2017. 1-19. 10.1155/2017/2819372. 
+8. Mokdad AH, Dwyer-Lindgren L, Fitzmaurice C, et al. Trends and Patterns of Disparities in Cancer Mortality Among US Counties, 1980-2014. JAMA. 2017;317(4):388–406. doi:10.1001/jama.2016.20324
