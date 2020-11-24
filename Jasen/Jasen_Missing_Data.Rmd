@@ -1,0 +1,80 @@
+---
+title: "Jasen_Missing_Data"
+author: "Jasen Zhang"
+date: "11/23/2020"
+output: pdf_document
+---
+
+
+# 1 Load The Data
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(gplots)
+library(glmnet)
+library(mice)
+
+dir = getwd()
+data_dir <- paste(substr(dir,1, nchar(dir)-5), "cancer_registry.csv", sep = '')
+
+df <- read.csv(data_dir) %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
+  filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200) %>%
+  filter(AvgHouseholdSize > 1)
+```
+
+# Modifying the Design Matrix
+
+```{r}
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
+
+response_vars <- c('TARGET_deathRate')
+predict_vars <- paste(vars_1, collapse = ' + ')
+
+df <- df %>% select(- c('binnedInc', 'Geography'))
+df <- df %>% mutate('ID' = rownames(df))
+
+df <- data.frame(sapply(df, as.numeric))
+```
+
+
+```{r}
+colSums(is.na(df))
+```
+
+```{r}
+imputed_df <- mice(df)
+imputed_df2 <- imputed_df$imp
+
+imputed_PctEmployed16_Over <- imputed_df2$PctEmployed16_Over
+imputed_PctPrivateCoverageAlone <- imputed_df2$PctPrivateCoverageAlone
+
+avg_imputed_PctEmployed16_Over <- data.frame(apply(imputed_PctEmployed16_Over, 1, mean))
+avg_imputed_PctPrivateCoverageAlone <- data.frame(apply(imputed_PctPrivateCoverageAlone, 1, mean))
+
+colnames(avg_imputed_PctEmployed16_Over) <- c('Imputed_PctEmployed16_Over')
+colnames(avg_imputed_PctPrivateCoverageAlone) <- c('Imputed_PctPrivateCoverageAlone')
+
+avg_imputed_PctEmployed16_Over <- avg_imputed_PctEmployed16_Over %>% mutate('ID' = as.numeric(rownames(avg_imputed_PctEmployed16_Over)))
+avg_imputed_PctPrivateCoverageAlone <- avg_imputed_PctPrivateCoverageAlone %>% mutate('ID' = as.numeric(rownames(avg_imputed_PctPrivateCoverageAlone)))
+
+df_imp <- df %>% left_join(avg_imputed_PctEmployed16_Over, by = 'ID') %>% 
+  left_join(avg_imputed_PctPrivateCoverageAlone, by = 'ID')
+
+df_imp[is.na(df_imp)] <- 0
+
+data_dir <- paste(dir, '/df_imp.RData', sep = '')
+
+save(df_imp, file = data_dir)
+
+```
+
+
+```{r}
+df2 <- df_imp %>% select(c('Imputed_PctEmployed16_Over', 'PctEmployed16_Over'))
+```

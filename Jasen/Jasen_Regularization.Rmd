@@ -7,36 +7,26 @@ output: pdf_document
 
 # 1 Loading the Data
 
-
-```{r message=FALSE, warning=FALSE}
+```{r}
 library(tidyverse)
 library(gridExtra)
 library(gplots)
 library(glmnet)
-df <- read.csv('cancer_registry.csv') %>%
-  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
-  filter(incidenceRate < 1000) %>%
-  filter(avgAnnCount < 20000) %>%
-  filter(MedianAge < 200) %>%
-  filter(AvgHouseholdSize > 1)
 
-df <- na.omit(df)
-
-df <- df %>% mutate(sample_ID = 1:nrow(df))
-```
-
-
-# 2 Modifying the Design Matrix
-
-```{r}
-vars <- colnames(df)
-misc_vars <- c('binnedInc', 'Geography', 'sample_ID', 'TARGET_deathRate')
-vars_1 <- setdiff(vars, misc_vars)
+dir = getwd()
+data_dir <- paste('df_imp.RData', sep = '')
+load(data_dir)
 
 response_vars <- c('TARGET_deathRate')
+
+df <- df_imp %>% select(- c('ID', 'incidenceRate'))
+
+
+response_vars <- c('TARGET_deathRate')
+vars <- colnames(df)
+vars_1 <- setdiff(vars, response_vars)
 predict_vars <- paste(vars_1, collapse = ' + ')
 
-df <- df %>% select(- c('binnedInc', 'Geography'))
 df <- data.frame(sapply(df, as.numeric))
 ```
 
@@ -73,8 +63,13 @@ cv_output <- cv.glmnet(as.matrix(train_x), as.matrix(train_y),
 best_lambda <- cv_output$lambda.min
 
 lasso_best <- glmnet(as.matrix(train_x), as.matrix(train_y), alpha = 1, lambda = best_lambda)
+
 pred <- predict(lasso_best, s = best_lambda, newx = as.matrix(test_x))
 pred_train_y <- predict(lasso_best, s = best_lambda, newx = as.matrix(train_x))
+
+```
+
+```{r}
 
 ```
 
@@ -98,6 +93,10 @@ g <- ggplot(train_results) +
 g
 ```
 
+```{r}
+sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
+```
+
 # 6 Plotting Y_hat vs Y for test set
 
 ```{r}
@@ -118,4 +117,8 @@ g <- ggplot(test_results) +
 g
 ```
 
+
+```{r}
+sqrt(sum((test_results$y_true - test_results$y_hat)^2)/nrow(test_results))
+```
 
