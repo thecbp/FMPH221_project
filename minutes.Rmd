@@ -8,6 +8,22 @@ output: html_document
 - Project Proposal Google Doc: https://docs.google.com/document/d/1o2uwT-Cma9o6UsyaRo6lUYbd91xiHiS3SwMz09GbAb0/edit
 - Project Proposal Presentation: https://docs.google.com/presentation/d/1EBkkb6x0Uzv8apnwczo8TgY3-1_3djSD_QP-uJGMy9A/edit?usp=sharing
 
+# Tuesday Dec-1, 1:00pm Meeting Minutes
+
+Brainstorming additional tasks
+
+1. Literature review on socioeconomic status on cancer, not sure how much we've done
+2. Additional EDA and diagnostics
+  a. Homoskedastic?
+  b. Errors seem normally sitributed?
+3. Tranforming the data?
+  a. Summary score of variables that are related
+  b. Scale? Center?
+  c. Splines? Polynomials?
+4. Adjusting for OLS violations
+  a. Weighted least squares?
+  b. Sandwich method for standard errors of beta_hat's 
+
 # Monday, Nov-9, 1:30pm Meeting Miniutes
 Delegating tasks:
  - Agreeing to a common list of data points to throw out
