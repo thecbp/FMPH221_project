@@ -1,0 +1,178 @@
+---
+title: "PCA Prediction"
+output: pdf_document
+---
+
+# 1. Load dataset with imputed missing values
+
+```{r warning=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(gplots)
+library(glmnet)
+library(caret)
+
+dir = getwd()
+data_dir <- paste('df_imp.RData', sep = '')
+load(data_dir)
+
+response_vars <- c('TARGET_deathRate')
+y <- df_imp3 %>% select(response_vars)
+y <- unname(unlist(y))
+
+do_not_include <- c('ID', 'incidenceRate', 'popEst2015', 'medIncome', 'avgAnnCount')
+do_not_include <- c('ID')
+df <- df_imp3 %>% select(- do_not_include)
+
+
+
+vars <- colnames(df)
+vars_1 <- setdiff(vars, response_vars)
+predict_vars <- paste(vars_1, collapse = ' + ')
+
+df <- data.frame(sapply(df, as.numeric))
+
+df_vars <- df %>% select(-c('TARGET_deathRate'))
+```
+
+# 2. Looking at PCA
+
+```{r}
+S <- cov(df_vars)
+eig <- eigen(S)
+eig_vals <- eig$values
+eig_vecs <- eig$vectors
+
+
+cum_var_explained <- cumsum(eig_vals/(sum(eig_vals)))
+
+cum_var_explained
+```
+
+```{r}
+PCA_model <- prcomp(df_vars)
+PCA_loadings <- PCA_model$rotation
+```
+
+```{r}
+PCA_summary <- summary(PCA_model)
+
+PCA_summary
+```
+
+
+# 3 Splitting Test and Training Set
+
+## Arbitrarily chose 10% to be test set
+
+```{r message=FALSE}
+set.seed(221)
+test_set_index <- sample(1:nrow(df), floor(nrow(df))/10)
+train_set_index <- setdiff(1:nrow(df), test_set_index)
+
+test <- df[test_set_index,]
+train <- df[train_set_index,]
+
+test_y <- test %>% select(response_vars)
+test_x <- test %>% select(vars_1)
+train_y <- train %>% select(response_vars)
+train_x <- train %>% select(vars_1)
+```
+
+4. 10 fold cross validation
+
+```{r}
+train.control <- trainControl(method = "cv", number = 10)
+# Train the model
+model <- train(deathRate ~., data = pca_df, method = "lm",
+               trControl = train.control)
+# Summarize the results
+print(model)
+```
+
+# New PCA dataset
+
+```{r}
+num_comp <- 1:ncol(df_vars)
+mses <- integer(ncol(df_vars))
+results <- data.frame()
+
+for(i in num_comp){
+  
+  component_matrix <- data.frame(as.matrix(df_vars) %*% PCA_model$rotation)
+  pca_df <- data.frame(component_matrix[,1:i])
+  
+  
+  eq <- paste(colnames(pca_df), collapse = ' + ')
+  eq <- paste('deathRate', eq, sep = ' ~ ')
+  
+  pca_df <- pca_df %>% mutate(deathRate = y)
+  
+  train.control <- trainControl(method = "cv", number = 10)
+  
+  # Train the model
+  
+  model <- train(deathRate ~., data = pca_df, method = "lm",
+               trControl = train.control)
+  if(i == 1){
+    results <- model$results
+  } else{
+    results <- rbind(results, model$results)
+  }
+  # pca_lm_model <- lm(eq, data = pca_df)
+  # mse <- sum(residuals(pca_lm_model)^2)/nrow(pca_df)
+  # mses[i] <- mse
+}
+
+results <- results %>% mutate(ID = as.numeric(rownames(results)))
+
+g <- ggplot(data = results, aes(x = ID, y = RMSE)) + geom_point()
+
+g
+
+```
+
+# Test Set Seems like 10 PC's is pretty good
+
+```{r}
+n <- 10
+
+PCA_model <- prcomp(test_x)
+PCA_loadings <- PCA_model$rotation
+
+component_matrix <- data.frame(as.matrix(test_x) %*% PCA_model$rotation)
+pca_df <- data.frame(component_matrix[,1:n])
+
+eq <- paste(colnames(pca_df), collapse = ' + ')
+eq <- paste('deathRate', eq, sep = ' ~ ')
+
+y <- unname(unlist(test_y))
+pca_df <- pca_df %>% mutate(deathRate = y)
+
+pca_test_model <- lm(eq, data = pca_df)
+rmse_test <- sqrt(sum(residuals(pca_test_model)^2)/nrow(pca_df))
+
+y_pred <- unname(predict(pca_test_model))
+
+pca_df <- pca_df %>% mutate(y_pred = y_pred)
+
+R_squared <- as.numeric(unname(cor(y_pred, test_y)))
+R_squared <- sprintf("%.3f", round(R_squared,3))
+R_squared_label <- paste('R^2 = ', R_squared)
+
+g_pca_test <- ggplot(data = pca_df) + 
+  geom_point(aes(x = deathRate, y = y_pred)) + 
+  geom_line(aes(x = deathRate, y = deathRate), color = 'red') + 
+  geom_label(label = R_squared_label, x = 140, y = 250, label.padding = unit(0.55, "lines"), 
+             label.size = 0.35,
+             color = "black",
+             fill="#69b3a2")
+
+g_pca_test
+
+```
+
+
+
+
+

@@ -31,7 +31,7 @@ df <- data.frame(sapply(df, as.numeric))
 ```
 
 
-# 3 Splitting Test and Training Set
+# 2 Splitting Test and Training Set
 
 ## Arbitrarily chose 10% to be test set
 
@@ -49,7 +49,7 @@ train_y <- train %>% select(response_vars)
 train_x <- train %>% select(vars_1)
 ```
 
-# 4 Lasso + Leave one out Cross Validation
+# 3 Lasso + Leave one out Cross Validation
 
 ## 10 folds since that's default
 
@@ -69,11 +69,7 @@ pred_train_y <- predict(lasso_best, s = best_lambda, newx = as.matrix(train_x))
 
 ```
 
-```{r}
-
-```
-
-# 5 Plotting Y_hat vs Y for training set
+# 4 Plotting Y_hat vs Y for training set
 
 ```{r}
 train_results <- data.frame(train_y, pred_train_y)
@@ -97,7 +93,7 @@ g
 sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
 ```
 
-# 6 Plotting Y_hat vs Y for test set
+# 5 Plotting Y_hat vs Y for test set
 
 ```{r}
 test_results <- data.frame(test_y, pred)

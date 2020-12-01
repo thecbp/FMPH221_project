@@ -26,7 +26,7 @@ df <- read.csv(data_dir) %>%
   filter(AvgHouseholdSize > 1)
 ```
 
-# Modifying the Design Matrix
+# 2 Modifying the Design Matrix
 
 ```{r}
 vars <- colnames(df)
@@ -42,10 +42,13 @@ df <- df %>% mutate('ID' = rownames(df))
 df <- data.frame(sapply(df, as.numeric))
 ```
 
+# 3. Checking what columns have NA values
 
 ```{r}
 colSums(is.na(df))
 ```
+
+# 4. Imputing the two variables with NA
 
 ```{r}
 imputed_df <- mice(df)
@@ -67,14 +70,37 @@ df_imp <- df %>% left_join(avg_imputed_PctEmployed16_Over, by = 'ID') %>%
   left_join(avg_imputed_PctPrivateCoverageAlone, by = 'ID')
 
 df_imp[is.na(df_imp)] <- 0
-
-data_dir <- paste(dir, '/df_imp.RData', sep = '')
-
-save(df_imp, file = data_dir)
-
 ```
 
+# 5. Log transforming skewed variables
 
 ```{r}
-df2 <- df_imp %>% select(c('Imputed_PctEmployed16_Over', 'PctEmployed16_Over'))
+df_imp2 <- df_imp
+log_vars <- c('avgAnnCount', 'avgDeathsPerYear', 'popEst2015', 'studyPerCap', 'PctBachDeg18_24', 'PctAsian', 'PctOtherRace')
+log_names <- c()
+
+
+for(i in log_vars){
+  temp <- paste(i, '_log', sep = '')
+  
+  log_names <- append(log_names, temp)
+  if(i %in% c('studyPerCap')){
+    df_imp2 <- df_imp2 %>% mutate(!!as.name(temp) := log(!!as.name(i) + 1))
+  } else if(i %in% c('PctAsian', 'PctBachDeg18_24', 'PctOtherRace')){
+    df_imp2 <- df_imp2 %>% mutate(!!as.name(temp) := log(!!as.name(i) + exp(-5)))
+  } else{
+    df_imp2 <- df_imp2 %>% mutate(!!as.name(temp) := log(!!as.name(i)))
+  }
+}
+
+df_imp3 <- df_imp2 %>% select(- log_vars)
 ```
+
+# 6. Save the dataset
+
+```{r}
+data_dir <- paste(dir, '/df_imp.RData', sep = '')
+
+save(df_imp3, file = data_dir)
+```
+
