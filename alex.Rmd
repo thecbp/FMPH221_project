@@ -1,2 +1,59 @@
-#This is alex's workspace
-#I want to test sth
+---
+title: "anova,table"
+author: "Alexander ZHU"
+output: pdf_document
+---
+
+```{r}
+cancer=read.csv("cancer_registry.csv")
+View(cancer)
+library(tidyverse)
+```
+
+```{r}
+# Trying out different set of education vars
+model2 = lm(TARGET_deathRate ~ PctHS25_Over + PctBachDeg25_Over + 
+             PctWhite + PctBlack + PctAsian + PctOtherRace +
+             # Interactions
+             PctWhite*PctHS25_Over + PctBlack*PctHS25_Over + PctAsian*PctHS25_Over + PctOtherRace*PctHS25_Over +
+             PctWhite*PctBachDeg25_Over + PctBlack *PctBachDeg25_Over + PctAsian *PctBachDeg25_Over + PctOtherRace *PctBachDeg25_Over +
+             # Confounders
+             incidenceRate + medIncome + popEst2015 + povertyPercent + MedianAge,
+           data = cancer)
+summary(model2)      
+```
+
+```{r}
+# Trying out full interaction
+model = lm(TARGET_deathRate ~ PctNoHS18_24 + PctNoHS18_24 + PctSomeCol18_24 +
+                               PctBachDeg18_24 + PctWhite + PctBlack + PctAsian + PctOtherRace +
+                               PctNoHS18_24*PctWhite + PctNoHS18_24*PctBlack + PctNoHS18_24*PctAsian + 
+                              PctNoHS18_24*PctOtherRace + PctHS18_24*PctWhite + PctHS18_24*PctBlack + PctHS18_24*PctAsian + 
+                              PctHS18_24*PctOtherRace + PctSomeCol18_24*PctWhite + PctSomeCol18_24*PctBlack + PctSomeCol18_24*PctAsian + 
+                               PctSomeCol18_24*PctOtherRace + PctBachDeg18_24*PctWhite + PctBachDeg18_24*PctBlack+ 
+                               PctBachDeg18_24*PctAsian + PctBachDeg18_24*PctOtherRace +
+                              incidenceRate + medIncome + popEst2015 + povertyPercent + MedianAge,
+                             data = cancer)
+
+# Doesn't seem very good, will try indicators for high education and low education
+summary(model)             
+```
+
+# anova
+
+# table
+
+```{r}
+attach(cancer)
+m1<-mean(cancer[["avgAnnCount"]])
+m2<-mean(cancer[["avgDeathsPerYear"]])
+m3<-mean(cancer[["TARGET_deathRate"]])
+m4<-mean(cancer[["incidenceRate"]])
+m5<-mean(cancer[["medIncome"]])
+m6<-mean(cancer[["popEst2015"]])
+cancerStats<-matrix(c(m1,m2,m3,m4,m5,m6),ncol=6,byrow=TRUE)
+colnames(cancerStats) <- c("avgAnnCount","avgDeathsPerYear","TARGET_deathRate","incidenceRate","medIncome","popEst2015")
+rownames(cancerStats)<-c("mean")
+cancerStats<-as.table(cancerStats)
+cancerStats
+```
