@@ -11,11 +11,12 @@ geometry: margin=1in
 ```{r, message = F, warning = F, echo = F }
 library(tidyverse)
 library(knitr)
+library(gplots)
 set.seed(1)
 
 knitr::opts_chunk$set(
   fig.align = "center",
-  out.width = "80%"
+  out.width = "70%"
 )
 
 # Load the data and do some processing
@@ -62,9 +63,11 @@ One difficulty in researching cancer is that it is an incredibly diverse collect
 
 ## Data
 
-For our analysis, we will use a dataset aggregated from multiple sources including the American Community Survey, the National Census, clinicaltrials.gov, and cancer.gov. The data spans from 2010 to 2016 and includes information on `r nrow(cancer)` counties and county-equivalents in the United States. Some counties are missing from the dataset since there are a total of 3,143 counties and county-equivalents in the United States.
+For our analysis, we will use a dataset aggregated from multiple sources, which we note later. The data spans from 2010 to 2016 and includes information on `r nrow(cancer)` counties in the United States. There are a total of 3,143 counties and county-equivalents in the United States, so `r (((3143 - nrow(cancer)) / 3143) * 100) %>% round(1)`% of them are represented in the data. Our group did not aggregate the data ourselves, it is publically available and can be found [here](https://data.world/nrippner/ols-regression-challenge).
 
-Our data contains information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented typically as percentages. Each row contains the percentage of each race (Asian, Black, White and Other) that live in the county. The data also contains information on educational acheivement as well, measured as the proportion of the county population who have achieved high school and college degrees. The proportion of people who have public and private health insurance is another notable variable in the data. In terms of important cancer-related factors, we have the incidence rate of *all* cancer diagnoses in the county, measured in terms of *mean per capita (100,000 people)* and the average number of cancer cases reported annually from 2010 to 2016. 
+Our data contains information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented typically as percentages. These data are gathered from the 2013 Census. Each row contains the percentage of each race (Asian, Black, White and Other) that live in the county. The data also contains information on educational acheivement as well, measured as the proportion of the county population who have achieved high school and college degrees. The proportion of people who have public and private health insurance is another notable variable in the data. 
+
+The cancer data has been aggregated from the American Community Survey, cancer.gov and clinicaltrials.gov, spanning from 2010 to 2016. In terms of important cancer-related factors, we have the incidence rate of *all* cancer diagnoses in the county, measured in terms of *mean per capita (100,000 people)* and the average number of cancer cases reported annually from 2010 to 2016. 
 
 Our target response is cancer mortality, also measured as mean per capita. In this dataset, cancer mortality ranges from `r cancer$target_death_rate %>% min` to `r cancer$target_death_rate %>% max`, with a median value of `cancer$target_death_rate %>% median`. The outcome is also reasonably bell-shaped, so we don't think any transformation will be necessary for the analyses. 
 
@@ -72,7 +75,145 @@ Our target response is cancer mortality, also measured as mean per capita. In th
 
 Given our literature and what is present in our dataset, we aim to explore how different socioeconomic and demographic factors are associated with cancer mortality on a county level. 
 
-After some initial exploratory analyses. we found that 
+### Correlation Between Predictors
+
+Many of the predictors are highly correlated, so we created a heat map to keep track of these intercorrelations. Figure 1 below shows this heat map.
+
+```{r, echo = F }
+df <- read.csv('cancer_registry.csv') %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
+  filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200) %>%
+  filter(AvgHouseholdSize > 1)
+
+df <- na.omit(df)
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
+log_vars <- c('avgAnnCount', 'avgDeathsPerYear', 'popEst2015', 'studyPerCap', 'PctBachDeg18_24', 'PctAsian', 'PctOtherRace')
+log_names <- c()
+
+all_vars <- setdiff(vars_1, log_vars)
+all_vars <- append(all_vars, log_names)
+all_vars <- sort(all_vars)
+
+df_temp <- df %>% select(all_vars)
+df_temp <- na.omit(df_temp)
+
+heatmap2 <- cor(df_temp)
+heatmap.2(heatmap2, trace = 'none', margins = c(10,10), col = 'cm.colors', cexRow=0.7, cexCol = 0.7)
+```
+
+The `povertyPercent` variable correlates highly with other predictors that deal with being under public insurance of being unemployed. Conversely, poverty is highly negatively correlated with having private insurance. The median ages of men and women are highly correlated as well, so we will probably opt for just one of these. Since the educational variable represent highest achievement, many of them are correlated as well. 
+
+In making our future models, we now know that we'll have to deal with this correlation and perform some model selection on our variables. We performed an initial PCA to figure out what variables explained most of the variance in average cancer mortality, and this will help guide our final model selection.
+
+### Race & Average Cancer Mortality
+
+```{r, echo = F, message = F }
+cancer %>% 
+  pivot_longer(
+    cols = c("pct_white", 
+             "pct_black", 
+             "pct_asian",
+             "pct_other_race"),
+    values_to = "pct",
+    names_to = "race"
+  ) %>% 
+  mutate(
+    race = case_when(
+      race == "pct_white" ~ "White",
+      race == "pct_black" ~ "Black",
+      race == "pct_asian" ~ "Asian",
+      race == "pct_other_race" ~ "Other"
+    )
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = race)) + 
+  geom_point(size = 0.5, alpha = 0.3) +
+  geom_smooth(method = "lm") +
+  facet_grid(race ~ .) +
+  theme(legend.position = "bottom") +
+  labs(
+    title = "Death rate by percent of county by percentage of race in a county",
+    x = "Percentage of race in county population",
+    y = "Cancer Mortality (deaths / 100K)")
+```
+
+
+## Education & Average Cancer Mortality
+
+```{r, echo = F, message = F}
+cancer %>% 
+  pivot_longer(
+    cols = c("pct_no_hs18_24", "pct_hs18_24", "pct_bach_deg18_24"),
+    values_to = "pct",
+    names_to = "educ_level"
+  ) %>% 
+  mutate(
+    educ_level = case_when(
+      educ_level == "pct_no_hs18_24" ~ "No HS", 
+      educ_level == "pct_hs18_24" ~ "HS", 
+      educ_level == "pct_bach_deg18_24" ~ "College"
+    )
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = educ_level)) + 
+  facet_grid(educ_level ~ .) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Cancer mortality by percent of county with particular education level",
+    x = "Percent of population with particular education level",
+    y = "Cancer Mortality (deaths / 100K)")
+```
+
+
+### Interaction Between Race & Education
+
+One interesting trend that we found in the data was that there seemed to be an interaction between race and education in relation to cancer mortality. According to an article by the US Department of Education, the median percentage of adults 25 and over completing a bachelor's degree was 34%. We divided the counties by if they fell below or were equal to higher to the median value and investigated how cancer mortality changed with percentage of race (Figure 2).
+
+```{r, echo = F, message = F }
+cancer %>% 
+  mutate(
+    high_college = pct_bach_deg25_over > 34, # median(pct_bach_deg18_24),
+  ) %>% 
+  pivot_longer(
+    cols = c("pct_white", 
+             "pct_black", 
+             "pct_asian",
+             "pct_other_race"),
+    values_to = "pct",
+    names_to = "race"
+  ) %>% 
+  mutate(
+    race = case_when(
+      race == "pct_white" ~ "White",
+      race == "pct_black" ~ "Black",
+      race == "pct_asian" ~ "Asian",
+      race == "pct_other_race" ~ "Other"
+    )
+  ) %>% 
+  ggplot(aes(x = pct, y = target_death_rate, color = high_college)) + 
+  geom_smooth(method = "lm", size = 0.5) +
+  facet_grid(race ~ .) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)
+  ) + 
+  labs(
+    title = "Death rate by percent of by race in a county and high education",
+    subtitle = "Figure 2: Effects plot of percentage of race in county, stratified by education achievement",
+    x = "Percentage of race in county population",
+    y = "Cancer Mortality (deaths / 100K)") +
+  scale_color_discrete(labels = c("Above Median", "Below Median")) 
+```
+
+The change is most drastic in Asians, but the trend holds over all races present in the data. For African-Americans, we also see an attenuation of the average cancer mortality desite it not converting to a negative correlation.
 
 - exploratory analyses:
   - relationship between outcome and:
@@ -86,17 +227,15 @@ After some initial exploratory analyses. we found that
 Based on the results of our exploratory analyses, we propose two analytic questions:
 
 1. Can we identify county-level factors that contribute to a significant difference in cancer mortality? If so, can we identify any significant interaction between these factors that also contribute to increased cancer mortality?
-2. Can we use any significant findings from (1) to improve the predictive ability of a potential predictive model?
+2. Can we create an effective predictive model from the data? If we can find any significant interactions from our explanatory model, might they be helpful in increasing predictive ability?
 
-
-
-
-
-
+Our two questions is motivated by the nature of the data. The data is contains most of the counties in the United States, so any estimates we find apply directly to these counties during this time period. Since the data is a "snapshot" of the population from 2011 - 2016, we must acknowledge that the estimates we get in any explanatory model will reflect population characteristics. We also acknowledge that some variation is introduced because the data is come different points in time, we assume that these measurements do not change drastically on the scale of a few years. With the nature of the data in mind, we want to try to use the explanatory model to see if any features or combination of features might be useful in a prediction model, based on the estimated coefficients.
 
 # Methodology
 
 ## Explanatory Model
+
+### 
 
 To select the best possible candidate model, 
 
@@ -118,28 +257,13 @@ To select the best possible candidate model,
 - how to split the data
 
 
-# Results 
+# Results & Discussion
 
 ## Explanatory Model
 
-- Results based on the wald Test 
-- regression diagnostics results
-  - qqplot, residual plot
-- inferences using the bootstrap
-
-## Prediction Model
-
-- test MSE (final model, and final model including interactions)
-
-# PREXISTING MATERIAL BELOW
-
-# Results
-
-## Inference Model
-
 One of our goals was to assess whether there was any significant interaction between race and education that contributed to cancer mortality in a county. The dataset contains different percentages of educational attainment in each county and the percentage of four race categories (Asian, African American, Other and White). We elected for a model that looked at high school achievement and bachelor degrees among adults 25 years and older because we felt that this population would be more reflective of the education levels of the working population in each county. We experimented with a few different interaction models to see what combination of education and race predictors would make for both a sensible and useful model. Our final inference model includes 2 educational variables (high school achievement rate and bachelor degree achievement rate), the aforementioned 4 race percentages, 8 interaction variables based on each race and education pair, and also controls for cancer incidence, median income, county population size, and median age. We use the Wald test to check if any of the interaction coefficients are non-zero. Our dataset is reasonably large, so we feel the test is appropriate for our needed hypothesis with $\alpha = 0.05$. As another way to assess the significance of the interaction coefficients, we used 5000 bootstrap samples and examined the 95% bootstrap percentile interval to see if its results agree with the test. 
 
-## Interaction Between Education & Race
+### Interaction Between Education & Race
 
 Our interaction model found that 3 of the interaction coefficients were significant. We found that the interaction between both educational variables and African-Americans was significant, as well as the interaction between high school achievement rate and white Americans. The coefficients associated with these interactions are all negative (albeit small), indicating that they help *reduce* cancer mortality. Figure XXX shows the estimated interaction coefficients, along with their 95% confidence intervals. 
 
@@ -190,7 +314,7 @@ broom::tidy(model2) %>%
     align = "c")
 ```
 
-These results were encouraging and were subsequently supported by the results of the Wald test, which yielded a p-value less than 0.05. This test only indicates that at least one of the interaction variables is non-zero, but we look to the bootstrap 95% percentile intervals to get an idea of which were. Figure YYY shows the results of 5000 bootstrap interaction models.
+These results were encouraging and were subsequently supported by the results of the Wald test, which yielded a p-value less than 0.05. This test only indicates that at least one of the interaction variables is non-zero, but we look to the bootstrap 95% percentile intervals to get an idea of which were. Figure YYY shows the results of 1000 bootstrap interaction models.
 
 ```{r bootstrap_table, eval = F, echo = F, message = F, warning = F, out.width = "70%", fig.align = 'center' }
 create_int_model = function(data) {
@@ -205,7 +329,7 @@ create_int_model = function(data) {
            data = data)
 }
 
-bs_n = 5000
+bs_n = 1000
 
 # Terms to keep
 # terms = model$coefficients %>% names %>% .[15:30]
@@ -274,11 +398,14 @@ bs %>%
 The bootstrap 95% confidence intervals indicate that only the high school interactions with African- and white Americans were significant. The direction of these bootstrap estimates matches that of the overall model, which further supports our findings. We feel confident that our model supports our research hypothesis.
 
 
+- Results based on the wald Test 
+- regression diagnostics results
+  - qqplot, residual plot
+- inferences using the bootstrap
+
 ## Prediction Model
 
-- results of cross-validation
-  - optimal hyper parameters
-- final test prediction score
+- test MSE (final model, and final model including interactions)
 
 # Conclusion
 
@@ -286,15 +413,23 @@ Our analysis found at least one significant interaction between race and educati
 
 These findings are limited by the fact that the observational unit of the data was a county. The model suggests a beneficial benefit, but does not elucidate any reason as to why or how education interacts with race to reduce cancer mortality among African- and white Americans. The educational and race data come from 2013, so the model may be limited in its generalizability to future years, especially in the context of changing demographics and new educational environments created by COVID-19. In light of these weaknesses, we feel that our model offers an interesting perspective on how different demographic factors interact to affect a health-related outcome. Being so prevalent, it's important to understand these factors and interactions so that we can design proper interventions.
 
-- results
-- significance
-- weaknessses
+\pagebreak
 
 # References 
 
+1.
+2.
 3. ADLER, N.E. and OSTROVE, J.M. (1999), Socioeconomic Status and Health: What We Know and What We Don't. Annals of the New York Academy of Sciences, 896: 3-15. https://doi.org/10.1111/j.1749-6632.1999.tb08101.x
 4. Rawl SM, Dickinson S, Lee JL, Roberts JL, Teal E, Baker LB, Kianersi S, Haggstrom DA. Racial and Socioeconomic Disparities in Cancer-Related Knowledge, Beliefs, and Behaviors in Indiana. Cancer Epidemiol Biomarkers Prev. 2019 Mar;28(3):462-470. doi: 10.1158/1055-9965.EPI-18-0795. Epub 2018 Nov 28. PMID: 30487135.
 5. Rohlfing ML, Mays AC, Isom S, Waltonen JD. Insurance status as a predictor of mortality in patients undergoing head and neck cancer surgery. Laryngoscope. 2017 Dec;127(12):2784-2789. doi: 10.1002/lary.26713. Epub 2017 Jun 22. PMID: 28639701; PMCID: PMC5688011.
 6. Zeigler-Johnson C, Keith S, McIntire R, Robinson T, Leader A, Glanz K. Racial and Ethnic Trends in Prostate Cancer Incidence and Mortality in Philadelphia, PA: an Observational Study. J Racial Ethn Health Disparities. 2019 Apr;6(2):371-379. doi: 10.1007/s40615-018-00534-z. Epub 2018 Dec 5. PMID: 30520002.
 7. Singh, Gopal & Jemal, Ahmedin. (2017). Socioeconomic and Racial/Ethnic Disparities in Cancer Mortality, Incidence, and Survival in the United States, 1950–2014: Over Six Decades of Changing Patterns and Widening Inequalities. Journal of Environmental and Public Health. 2017. 1-19. 10.1155/2017/2819372. 
 8. Mokdad AH, Dwyer-Lindgren L, Fitzmaurice C, et al. Trends and Patterns of Disparities in Cancer Mortality Among US Counties, 1980-2014. JAMA. 2017;317(4):388–406. doi:10.1001/jama.2016.20324
+9. https://nces.ed.gov/pubs93/93442.pdf
+
+\pagebreak
+
+# Appendix
+
+```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+```
