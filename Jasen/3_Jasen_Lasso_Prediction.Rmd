@@ -101,7 +101,7 @@ R_squared_label <- paste('R^2 = ', R_squared)
 
 g <- ggplot(train_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
-  geom_line(aes(x = y_true, y = y_true))  +
+  geom_line(aes(x = y_true, y = y_true), color = 'red')  +
   geom_label(label = R_squared_label, x = 100, y = 275, label.padding = unit(0.55, "lines"),
     label.size = 0.35,
     color = "black",
@@ -129,7 +129,7 @@ R_squared_label <- paste('R^2 = ', R_squared)
 
 g <- ggplot(test_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
-  geom_line(aes(x = y_true, y = y_true))  +
+  geom_line(aes(x = y_true, y = y_true), color = 'red')  +
   geom_label(label = R_squared_label, x = 125, y = 250, label.padding = unit(0.55, "lines"),
     label.size = 0.35,
     color = "black",
