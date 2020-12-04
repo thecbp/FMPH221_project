@@ -1,5 +1,6 @@
 ```{r}
 cancer=read.csv("cancer_registry.csv")
+View(cancer)
 library(tidyverse)
 ```
 
@@ -17,7 +18,7 @@ summary(model2)
 ```
 
 ```{r}
-# Trying out fuill interaction
+# Trying out full interaction
 model = lm(TARGET_deathRate ~ PctNoHS18_24 + PctNoHS18_24 + PctSomeCol18_24 +
                                PctBachDeg18_24 + PctWhite + PctBlack + PctAsian + PctOtherRace +
                                PctNoHS18_24*PctWhite + PctNoHS18_24*PctBlack + PctNoHS18_24*PctAsian + 
@@ -33,7 +34,5 @@ summary(model)
 ```
 
 ```{r}
-anova(m1)
-anova(m2)
 ```
 
