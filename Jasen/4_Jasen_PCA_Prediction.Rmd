@@ -173,6 +173,8 @@ g_pca_test
 ```
 
 
-
+```{r}
+rmse_test
+```
 
 

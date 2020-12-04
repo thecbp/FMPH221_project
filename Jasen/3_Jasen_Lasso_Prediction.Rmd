@@ -19,7 +19,7 @@ load(data_dir)
 
 response_vars <- c('TARGET_deathRate')
 
-df <- df_imp %>% select(- c('ID', 'incidenceRate'))
+df <- df_imp3 %>% select(- c('ID', 'incidenceRate'))
 
 
 response_vars <- c('TARGET_deathRate')
@@ -55,7 +55,7 @@ train_x <- train %>% select(vars_1)
 
 ```{r}
 
-lambda_seq <- 10^seq(2, -2, by = -.05)
+lambda_seq <- 10^seq(-2, -1, by = .05)
 
 cv_output <- cv.glmnet(as.matrix(train_x), as.matrix(train_y),
                        alpha = 1, lambda = lambda_seq)
@@ -67,6 +67,20 @@ lasso_best <- glmnet(as.matrix(train_x), as.matrix(train_y), alpha = 1, lambda =
 pred <- predict(lasso_best, s = best_lambda, newx = as.matrix(test_x))
 pred_train_y <- predict(lasso_best, s = best_lambda, newx = as.matrix(train_x))
 
+```
+
+# 3.5 Plotting Graph of Hyperparameter
+
+```{r}
+hyper <- cv_output$cvm
+original_hyper <- hyper
+rescaled_hyper <- (hyper-min(hyper))/(max(hyper)-min(hyper))
+hyper <- data.frame(lambda_seq, rescaled_hyper )
+
+g_hyper <- ggplot(data = hyper, aes(x = lambda_seq, y = original_hyper)) + geom_point() + 
+  scale_x_continuous(trans = 'log10')
+
+g_hyper
 ```
 
 # 4 Plotting Y_hat vs Y for training set
