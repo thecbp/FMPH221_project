@@ -40,6 +40,8 @@ increased cancer mortality in a county?
       -- Cross Validation
  
  4. Anova
+ 
+ 5. Table
     
      
                                       
