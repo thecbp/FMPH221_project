@@ -7,7 +7,7 @@ output: pdf_document
 
 # 1 Loading the Data
 
-```{r}
+```{r echo=FALSE}
 library(tidyverse)
 library(gridExtra)
 library(gplots)
@@ -64,7 +64,7 @@ best_lambda <- cv_output$lambda.min
 
 lasso_best <- glmnet(as.matrix(train_x), as.matrix(train_y), alpha = 1, lambda = best_lambda)
 
-pred <- predict(lasso_best, s = best_lambda, newx = as.matrix(test_x))
+pred_test_y <- predict(lasso_best, s = best_lambda, newx = as.matrix(test_x))
 pred_train_y <- predict(lasso_best, s = best_lambda, newx = as.matrix(train_x))
 
 ```
@@ -72,13 +72,20 @@ pred_train_y <- predict(lasso_best, s = best_lambda, newx = as.matrix(train_x))
 # 3.5 Plotting Graph of Hyperparameter
 
 ```{r}
-hyper <- cv_output$cvm
-original_hyper <- hyper
-rescaled_hyper <- (hyper-min(hyper))/(max(hyper)-min(hyper))
-hyper <- data.frame(lambda_seq, rescaled_hyper )
+cv_error <- cv_output$cvm
+lambdas <- cv_output$lambda
+hyper <- data.frame(lambdas, cv_error)
 
-g_hyper <- ggplot(data = hyper, aes(x = lambda_seq, y = original_hyper)) + geom_point() + 
-  scale_x_continuous(trans = 'log10')
+# taking the minimum
+min_cv_error <- min(hyper$cv_error)
+min_df <- hyper %>% filter(cv_error == min_cv_error)
+
+g_hyper <- ggplot() + geom_point(data = hyper, aes(x = lambdas, y = cv_error)) + 
+  geom_point(data = min_df, aes(x = lambdas, y = cv_error), color = 'red') + 
+  scale_x_continuous(trans = 'log10') + 
+  ylab('Mean Cross-Validation Error') + 
+  xlab('Lambda') + 
+  ggtitle('Selection of Lambda Hyperparameter')
 
 g_hyper
 ```
@@ -98,21 +105,25 @@ g <- ggplot(train_results) +
   geom_label(label = R_squared_label, x = 100, y = 275, label.padding = unit(0.55, "lines"),
     label.size = 0.35,
     color = "black",
-    fill="#69b3a2")
+    fill="#69b3a2") + 
+  ylab('Predicted Cancer Death Rate') + 
+  xlab('True Cancer Death Rate') + 
+  ggtitle('Training Prediction')
 
 g
 ```
 
 ```{r}
-sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
+rmse_lasso_train <- sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
+r_squared_lasso_train <- R_squared
 ```
 
 # 5 Plotting Y_hat vs Y for test set
 
 ```{r}
-test_results <- data.frame(test_y, pred)
+test_results <- data.frame(test_y, pred_test_y)
 colnames(test_results) <- c('y_true', 'y_hat')
-R_squared <- as.numeric(unname(cor(test_y, pred)))
+R_squared <- as.numeric(unname(cor(test_y, pred_test_y)))
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 
@@ -122,13 +133,17 @@ g <- ggplot(test_results) +
   geom_label(label = R_squared_label, x = 125, y = 250, label.padding = unit(0.55, "lines"),
     label.size = 0.35,
     color = "black",
-    fill="#69b3a2")
+    fill="#69b3a2") + 
+  ylab('Predicted Cancer Death Rate') + 
+  xlab('True Cancer Death Rate') + 
+  ggtitle('Test Prediction')
 
 g
 ```
 
 
 ```{r}
-sqrt(sum((test_results$y_true - test_results$y_hat)^2)/nrow(test_results))
+rmse_lasso_test <- sqrt(sum((test_results$y_true - test_results$y_hat)^2)/nrow(test_results))
+r_squared_lasso_test <- R_squared
 ```
 
