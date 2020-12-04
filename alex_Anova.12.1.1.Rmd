@@ -1,0 +1,39 @@
+```{r}
+cancer=read.csv("cancer_registry.csv")
+library(tidyverse)
+```
+
+```{r}
+# Trying out different set of education vars
+model2 = lm(TARGET_deathRate ~ PctHS25_Over + PctBachDeg25_Over + 
+             PctWhite + PctBlack + PctAsian + PctOtherRace +
+             # Interactions
+             PctWhite*PctHS25_Over + PctBlack*PctHS25_Over + PctAsian*PctHS25_Over + PctOtherRace*PctHS25_Over +
+             PctWhite*PctBachDeg25_Over + PctBlack *PctBachDeg25_Over + PctAsian *PctBachDeg25_Over + PctOtherRace *PctBachDeg25_Over +
+             # Confounders
+             incidenceRate + medIncome + popEst2015 + povertyPercent + MedianAge,
+           data = cancer)
+summary(model2)      
+```
+
+```{r}
+# Trying out fuill interaction
+model = lm(TARGET_deathRate ~ PctNoHS18_24 + PctNoHS18_24 + PctSomeCol18_24 +
+                               PctBachDeg18_24 + PctWhite + PctBlack + PctAsian + PctOtherRace +
+                               PctNoHS18_24*PctWhite + PctNoHS18_24*PctBlack + PctNoHS18_24*PctAsian + 
+                              PctNoHS18_24*PctOtherRace + PctHS18_24*PctWhite + PctHS18_24*PctBlack + PctHS18_24*PctAsian + 
+                              PctHS18_24*PctOtherRace + PctSomeCol18_24*PctWhite + PctSomeCol18_24*PctBlack + PctSomeCol18_24*PctAsian + 
+                               PctSomeCol18_24*PctOtherRace + PctBachDeg18_24*PctWhite + PctBachDeg18_24*PctBlack+ 
+                               PctBachDeg18_24*PctAsian + PctBachDeg18_24*PctOtherRace +
+                              incidenceRate + medIncome + popEst2015 + povertyPercent + MedianAge,
+                             data = cancer)
+
+# Doesn't seem very good, will try indicators for high education and low education
+summary(model)             
+```
+
+```{r}
+anova(m1)
+anova(m2)
+```
+
