@@ -5,7 +5,6 @@ date: "11/23/2020"
 output: pdf_document
 ---
 
-
 # 1 Load The Data
 
 ```{r}
@@ -27,6 +26,7 @@ df <- read.csv(data_dir) %>%
 ```
 
 # 2 Modifying the Design Matrix
+- Getting rid of binnedInc and Geography
 
 ```{r}
 vars <- colnames(df)
@@ -96,11 +96,20 @@ for(i in log_vars){
 df_imp3 <- df_imp2 %>% select(- log_vars)
 ```
 
-# 6. Save the dataset
+# 6. Add interaction terms, remove median age male and female
+
+```{r}
+df_imp4 <- df_imp3 %>% select(-c('MedianAgeMale', 'MedianAgeFemale')) %>%
+  mutate(hs_black = PctHS25_Over * PctBlack) %>%
+  mutate(hs_white = PctHS25_Over * PctWhite) %>%
+  mutate(college_black = PctBachDeg25_Over * PctBlack)
+```
+
+# 7. Save the dataset
 
 ```{r}
 data_dir <- paste(dir, '/df_imp.RData', sep = '')
 
-save(df_imp3, file = data_dir)
+save(df_imp4, file = data_dir)
 ```
 
