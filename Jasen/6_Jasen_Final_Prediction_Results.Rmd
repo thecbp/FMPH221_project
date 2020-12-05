@@ -1,0 +1,57 @@
+---
+title: "Final Prediction Results"
+author: "Jasen"
+date: "12/5/2020"
+output: pdf_document
+---
+
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(gplots)
+library(glmnet)
+```
+
+# 1. Table of Coefficients
+
+```{r}
+
+
+```
+
+2. Table of R^2/RMSE
+
+```{r}
+r_squared_lasso_train
+rmse_lasso_train
+r_squared_lasso_test
+rmse_lasso_test
+
+
+```
+
+3. All y_pred vs y_true graphs. 
+
+```{r}
+lay <- rbind(c(1,2,3),
+             c(4,5,6),
+             c(7,8,9))
+
+g_lasso_hyper
+g_lasso_train
+g_lasso_test
+
+g_pca_hyper
+g_pca_train
+g_pca_test
+
+g_step_hyper
+g_step_train
+g_step_test
+
+g_all <- grid.arrange(g_lasso_hyper,g_lasso_train,g_lasso_test,
+             g_pca_hyper,g_pca_train,g_pca_test,
+             g_step_hyper,g_step_train, g_step_test, layout_matrix = lay)
+```
+
