@@ -19,7 +19,7 @@ load(data_dir)
 
 response_vars <- c('TARGET_deathRate')
 
-df <- df_imp3 %>% select(- c('ID', 'incidenceRate'))
+df <- df_imp4 %>% select(- c('ID', 'incidenceRate'))
 
 
 response_vars <- c('TARGET_deathRate')
@@ -49,18 +49,18 @@ train_y <- train %>% select(response_vars)
 train_x <- train %>% select(vars_1)
 ```
 
-# 3 Lasso + Leave one out Cross Validation
-
-## 10 folds since that's default
+# 3. Lasso Cross Validation, 10 folds since that's default
 
 ```{r}
 
-lambda_seq <- 10^seq(-2, -1, by = .05)
-
+lambda_seq <- 10^seq(-4, -1.95, by = .025)
+set.seed(221)
 cv_output <- cv.glmnet(as.matrix(train_x), as.matrix(train_y),
                        alpha = 1, lambda = lambda_seq)
 
 best_lambda <- cv_output$lambda.min
+
+best_lambda
 
 lasso_best <- glmnet(as.matrix(train_x), as.matrix(train_y), alpha = 1, lambda = best_lambda)
 
@@ -96,8 +96,10 @@ g_hyper
 train_results <- data.frame(train_y, pred_train_y)
 colnames(train_results) <- c('y_true', 'y_hat')
 R_squared <- as.numeric(unname(cor(train_y, pred_train_y)))
+r_squared_lasso_train <- R_squared
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
+rmse_lasso_train <- sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
 
 g <- ggplot(train_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
@@ -113,10 +115,7 @@ g <- ggplot(train_results) +
 g
 ```
 
-```{r}
-rmse_lasso_train <- sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
-r_squared_lasso_train <- R_squared
-```
+
 
 # 5 Plotting Y_hat vs Y for test set
 
@@ -124,8 +123,10 @@ r_squared_lasso_train <- R_squared
 test_results <- data.frame(test_y, pred_test_y)
 colnames(test_results) <- c('y_true', 'y_hat')
 R_squared <- as.numeric(unname(cor(test_y, pred_test_y)))
+r_squared_lasso_test <- R_squared
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
+rmse_lasso_test <- sqrt(sum((test_results$y_true - test_results$y_hat)^2)/nrow(test_results))
 
 g <- ggplot(test_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
@@ -142,8 +143,4 @@ g
 ```
 
 
-```{r}
-rmse_lasso_test <- sqrt(sum((test_results$y_true - test_results$y_hat)^2)/nrow(test_results))
-r_squared_lasso_test <- R_squared
-```
 
