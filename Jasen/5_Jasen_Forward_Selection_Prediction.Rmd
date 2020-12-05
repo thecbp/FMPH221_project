@@ -86,7 +86,7 @@ g_step_train <- ggplot(train_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Stepwise Selection Training Prediction')
+  ggtitle('Stepwise Selection Train Prediction')
 
 g_step_train
 ```
