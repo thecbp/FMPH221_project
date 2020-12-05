@@ -17,14 +17,14 @@ data_dir <- paste('df_imp.RData', sep = '')
 load(data_dir)
 
 response_vars <- c('TARGET_deathRate')
-y <- df_imp3 %>% select(response_vars)
+y <- df_imp4 %>% select(response_vars)
 y <- unname(unlist(y))
 
 
 do_not_include <- c('ID', 'TARGET_deathRate', 'incidenceRate', 'popEst2015_log', 'medIncome', 'avgAnnCount_log')
 do_not_include <- c('ID', 'TARGET_deathRate')
 
-df <- df_imp3 %>% select(- do_not_include)
+df <- df_imp4 %>% select(- do_not_include)
 
 
 
@@ -117,13 +117,13 @@ for(i in num_comp){
 results <- results %>% mutate(ID = as.numeric(rownames(results)))
 results_best <- results %>% filter(ID == 10)
 
-g <- ggplot() + geom_point(data = results, aes(x = ID, y = RMSE)) + 
+g_pca_hyper <- ggplot() + geom_point(data = results, aes(x = ID, y = RMSE)) + 
   geom_point(data = results_best, aes(x = ID, y= RMSE), color = 'red') + 
   xlab('# of PCs') + 
   ylab('RMSE') + 
   ggtitle('Selecting Number of Principal Components')
 
-g
+g_pca_hyper
 
 ```
 
@@ -140,18 +140,19 @@ eq <- paste('deathRate', eq, sep = ' ~ ')
 
 pca_df <- pca_df %>% mutate(deathRate = train_y)
 
-pca_train_model <- lm(eq, data = pca_df)
-RMSE_PCA_train <- sqrt(sum(residuals(pca_train_model)^2)/nrow(pca_df))
+pca_train_model_2 <- lm(eq, data = pca_df)
+RMSE_PCA_train <- sqrt(sum(residuals(pca_train_model_2)^2)/nrow(pca_df))
 
-y_pred <- unname(predict(pca_train_model))
+y_pred <- pca_train_model_2$fitted.values
 
 pca_df <- pca_df %>% mutate(y_pred = y_pred)
 
 R_squared <- as.numeric(unname(cor(y_pred, train_y)))
+R_squared_PCA_train <- R_squared
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 
-R_squared_PCA_train <- R_squared
+
 
 g_pca_train <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
@@ -182,20 +183,26 @@ pca_df <- data.frame(test_component_matrix[,1:n])
 eq <- paste(colnames(pca_df), collapse = ' + ')
 eq <- paste('deathRate', eq, sep = ' ~ ')
 
-pca_df <- pca_df %>% mutate(deathRate = test_y)
 
-pca_test_model <- lm(eq, data = pca_df)
-RMSE_PCA_test <- sqrt(sum(residuals(pca_test_model)^2)/nrow(pca_df))
 
-y_pred <- unname(predict(pca_test_model))
+### Do we fit the test set data and get beta_test_hat??
+
+# pca_test_model <- lm(eq, data = pca_df)
+# RMSE_PCA_test <- sqrt(sum(residuals(pca_test_model)^2)/nrow(pca_df))
+# 
+# y_pred <- unname(predict(pca_test_model))
+
+y_pred <- predict(pca_train_model_2, test_component_matrix)
 
 pca_df <- pca_df %>% mutate(y_pred = y_pred)
+pca_df <- pca_df %>% mutate(deathRate = test_y)
 
 R_squared <- as.numeric(unname(cor(y_pred, test_y)))
+R_squared_PCA_test <- R_squared
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 
-R_squared_PCA_test <- R_squared
+
 
 g_pca_test <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
@@ -212,11 +219,27 @@ g_pca_test
 
 ```
 
+# 6. Deliverables
+
 ```{r}
 R_squared_PCA_train
 R_squared_PCA_test
 RMSE_PCA_train
 RMSE_PCA_test
+
+summary(pca_train_model_2)
+loadings <- PCA_train_model$rotation
+
+#PC1: medIncome (-1)
+#PC2: hs_white (-0.92) hs_black (0.37) college_black (0.13)
+#PC3: hs_black (-0.9) hs_white (-0.39) college_black (-0.2)
+#PC4: college_black (-0.96) hs_black(0.24) incidence rate (-0.13)
+#PC5: incidence_rate (-0.99) college_black (0.13)
+#PC6: hs_white (92%)
+#PC7: hs_white (92%)
+#PC8: hs_white (92%)
+#PC9: hs_white (92%)
+#PC10: hs_white (92%)
 ```
 
 

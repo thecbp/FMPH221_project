@@ -80,14 +80,14 @@ hyper <- data.frame(lambdas, cv_error)
 min_cv_error <- min(hyper$cv_error)
 min_df <- hyper %>% filter(cv_error == min_cv_error)
 
-g_hyper <- ggplot() + geom_point(data = hyper, aes(x = lambdas, y = cv_error)) + 
+g_lasso_hyper <- ggplot() + geom_point(data = hyper, aes(x = lambdas, y = cv_error)) + 
   geom_point(data = min_df, aes(x = lambdas, y = cv_error), color = 'red') + 
   scale_x_continuous(trans = 'log10') + 
   ylab('Mean Cross-Validation Error') + 
   xlab('Lambda') + 
   ggtitle('Selection of Lambda Hyperparameter')
 
-g_hyper
+g_lasso_hyper
 ```
 
 # 4 Plotting Y_hat vs Y for training set
@@ -101,7 +101,7 @@ R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 rmse_lasso_train <- sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
 
-g <- ggplot(train_results) + 
+g_lasso_train <- ggplot(train_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
   geom_label(label = R_squared_label, x = 100, y = 275, label.padding = unit(0.55, "lines"),
@@ -112,7 +112,7 @@ g <- ggplot(train_results) +
   xlab('True Cancer Death Rate') + 
   ggtitle('Training Prediction')
 
-g
+g_lasso_train
 ```
 
 
@@ -128,7 +128,7 @@ R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 rmse_lasso_test <- sqrt(sum((test_results$y_true - test_results$y_hat)^2)/nrow(test_results))
 
-g <- ggplot(test_results) + 
+g_lasso_test <- ggplot(test_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
   geom_label(label = R_squared_label, x = 125, y = 250, label.padding = unit(0.55, "lines"),
@@ -139,8 +139,16 @@ g <- ggplot(test_results) +
   xlab('True Cancer Death Rate') + 
   ggtitle('Test Prediction')
 
-g
+g_lasso_test
 ```
+# 6. Beta hats
 
+```{r}
+lasso_beta_hat <- as.numeric(lasso_best$beta)
+lasso_var_names <- rownames(lasso_best$beta)
+
+lasso_final_df <- data.frame(lasso_coeffs = lasso_beta_hat)
+rownames(lasso_final_df) = lasso_var_names
+```
 
 
