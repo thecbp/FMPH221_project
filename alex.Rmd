@@ -10,61 +10,55 @@ View(cancer)
 library(tidyverse)
 ```
 
+
 # table
-
 ```{r}
-# Calculate mean 
-attach(cancer)
-ncol(cancer)
-# m1<-mean(cancer[["avgAnnCount"]]) I don't include this variable as some weird data inside 19xx.xx
-m2<-mean(cancer[["avgDeathsPerYear"]])
-
-m4<-mean(cancer[["incidenceRate"]])
-m5<-mean(cancer[["medIncome"]])
-m6<-mean(cancer[["popEst2015"]])
-m7=mean(cancer$povertyPercent)
-m8=mean(cancer$studyPerCap)
-m9=mean(cancer$binnedInc)
-m10=mean(cancer$MedianAge)
-m11=mean(cancer$MedianAgeMale)
-m12=mean(cancer$MedianAgeFemale)
-m13=mean(cancer$AvgHouseholdSize)
-m14=mean(cancer$PercentMarried)
-m15=mean(cancer$PctNoHS18_24)
-m16=mean(cancer$PctHS18_24)
-m17=mean(cancer$PctSomeCol18_24)
-m18=mean(cancer$PctBachDeg18_24)
-m19=mean(cancer$PctHS25_Over)
-m20=mean(cancer$PctBachDeg25_Over)
-m21=mean(cancer$PctEmployed16_Over)
-m22=mean(cancer$PctUnemployed16_Over)
-m23=mean(cancer$PctPrivateCoverage)
-m24=mean(cancer$PctPrivateCoverageAlone)
-m25=mean(cancer$PctEmpPrivCoverage)
-m26=mean(cancer$PctPublicCoverage)
-m27=mean(cancer$PctPublicCoverageAlone)
-m28=mean(cancer$PctWhite)
-m29=mean(cancer$PctBlack)
-m30=mean(cancer$PctAsian)
-m31=mean(cancer$PctOtherRace)
-m32=mean(cancer$PctMarriedHouseholds)
-m33=mean(cancer$BirthRate)
-m34<-mean(cancer[["TARGET_deathRate"]])
-cancerStats<-matrix(c(m2,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29,m30,m31,m32,m33,m34),ncol=33,byrow=TRUE)
-colnames(cancerStats) <- c("avgDeathsPerYear","incidenceRate","medIncome","popEst2015","povertyPercent","studyPerCap","binnedInc","MedianAge","MedianAgeMale","MedianAgeFemale","AvgHouseholdSize","PercentMarried","PctNoHS18_24","PctHS18_24","PctSomeCol18_24","PctBachDeg18_24","PctHS25_Over","PctBachDeg25_Over","PctEmployed16_Over","PctUnemployed16_Over","PctPrivateCoverage","PctPrivateCoverageAlone","PctEmpPrivCoverage","PctPublicCoverage","PctPublicCoverageAlone","PctWhite","PctBlack","PctAsian","PctOtherRace","PctMarriedHouseholds","BirthRate","TARGET_deathRate")
-rownames(cancerStats)<-c("mean")
-cancerStats=round(cancerStats,2)
-cancerStats<-as.table(cancerStats)
-cancerStats
-```
-
-
-```{r}
-n2=sd(cancer$avgDeathsPerYear)
-n3=sd(cancer$TARGET_deathRate)
 
 ```
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(gplots)
+library(glmnet)
+library(mice)
+df = read.csv("cancer_registry.csv") %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>% filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200) %>%
+  filter(AvgHouseholdSize > 1)
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
+response_vars <- c('TARGET_deathRate')
+predict_vars <- paste(vars_1, collapse = ' + ')
+df <- df %>% select(- c('binnedInc', 'Geography'))
+df <- df %>% mutate('ID' = rownames(df))
+df <- data.frame(sapply(df, as.numeric))
 
+column_names <- c()
+res <- c()
+r_square <- c()
+for (i in colnames(df)){
+  if(class(df[[i]]) == "numeric") {
+     column_names <- c(column_names, i)
+     mean <- round(mean(df[[i]], na.rm = TRUE),2)
+     print(mean)
+     std <- round(sd(df[[i]],na.rm = TRUE),2)
+     res <- c(res, mean)
+     res <- c(res, std)
+  }
+  else {
+    print("not numeric")
+  }
+}
+
+output_table <- matrix(res, ncol=2,byrow=TRUE)
+colnames(output_table) <- c("mean", "std")
+rownames(output_table) <- column_names
+output <- as.table(output_table)
+print(output)
+
+```
 
 
 ```{r}
