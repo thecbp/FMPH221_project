@@ -1,5 +1,5 @@
 ---
-title: "Final Report: Analyzing Socioeconomic Factors on USA Cancer Mortality"
+title: "Final Report: Predicting Cancer Mortality On County-Level Data"
 author: "Jasen Zhang, Alexander Zhu, Christian Pascual"
 output: 
   pdf_document:
@@ -79,7 +79,7 @@ Given our literature and what is present in our dataset, we aim to explore how d
 
 Many of the predictors are highly correlated, so we created a heat map to keep track of these intercorrelations. Figure 1 below shows this heat map.
 
-```{r, echo = F }
+```{r, echo = F, message = F, waring = F }
 df <- read.csv('cancer_registry.csv') %>%
   mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
   filter(incidenceRate < 1000) %>%
@@ -108,69 +108,6 @@ heatmap.2(heatmap2, trace = 'none', margins = c(10,10), col = 'cm.colors', cexRo
 The `povertyPercent` variable correlates highly with other predictors that deal with being under public insurance of being unemployed. Conversely, poverty is highly negatively correlated with having private insurance. The median ages of men and women are highly correlated as well, so we will probably opt for just one of these. Since the educational variable represent highest achievement, many of them are correlated as well. 
 
 In making our future models, we now know that we'll have to deal with this correlation and perform some model selection on our variables. We performed an initial PCA to figure out what variables explained most of the variance in average cancer mortality, and this will help guide our final model selection.
-
-### Race & Average Cancer Mortality
-
-```{r, echo = F, message = F }
-cancer %>% 
-  pivot_longer(
-    cols = c("pct_white", 
-             "pct_black", 
-             "pct_asian",
-             "pct_other_race"),
-    values_to = "pct",
-    names_to = "race"
-  ) %>% 
-  mutate(
-    race = case_when(
-      race == "pct_white" ~ "White",
-      race == "pct_black" ~ "Black",
-      race == "pct_asian" ~ "Asian",
-      race == "pct_other_race" ~ "Other"
-    )
-  ) %>% 
-  ggplot(aes(x = pct, y = target_death_rate, color = race)) + 
-  geom_point(size = 0.5, alpha = 0.3) +
-  geom_smooth(method = "lm") +
-  facet_grid(race ~ .) +
-  theme(legend.position = "bottom") +
-  labs(
-    title = "Death rate by percent of county by percentage of race in a county",
-    x = "Percentage of race in county population",
-    y = "Cancer Mortality (deaths / 100K)")
-```
-
-
-## Education & Average Cancer Mortality
-
-```{r, echo = F, message = F}
-cancer %>% 
-  pivot_longer(
-    cols = c("pct_no_hs18_24", "pct_hs18_24", "pct_bach_deg18_24"),
-    values_to = "pct",
-    names_to = "educ_level"
-  ) %>% 
-  mutate(
-    educ_level = case_when(
-      educ_level == "pct_no_hs18_24" ~ "No HS", 
-      educ_level == "pct_hs18_24" ~ "HS", 
-      educ_level == "pct_bach_deg18_24" ~ "College"
-    )
-  ) %>% 
-  ggplot(aes(x = pct, y = target_death_rate, color = educ_level)) + 
-  facet_grid(educ_level ~ .) +
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",
-    plot.title = element_text(hjust = 0.5)) +
-  geom_point(alpha = 0.2) +
-  geom_smooth(method = "lm") +
-  labs(
-    title = "Cancer mortality by percent of county with particular education level",
-    x = "Percent of population with particular education level",
-    y = "Cancer Mortality (deaths / 100K)")
-```
-
 
 ### Interaction Between Race & Education
 
@@ -215,15 +152,6 @@ cancer %>%
 
 The change is most drastic in Asians, but the trend holds over all races present in the data. For African-Americans, we also see an attenuation of the average cancer mortality desite it not converting to a negative correlation.
 
-- exploratory analyses:
-  - relationship between outcome and:
-    - race
-    - education
-    - cancer incidence
-    - income
-    - insurance status
-  - correlation between the different predictors
-
 Based on the results of our exploratory analyses, we propose two analytic questions:
 
 1. Can we identify county-level factors that contribute to a significant difference in cancer mortality? If so, can we identify any significant interaction between these factors that also contribute to increased cancer mortality?
@@ -235,41 +163,37 @@ Our two questions is motivated by the nature of the data. The data is contains m
 
 ## Explanatory Model
 
-### 
+### Model Selection
 
-To select the best possible candidate model, 
+With 30 covariates, we tried a few different candidate models before deciding on a final model. As seen in our correlation heatmap, we decided on a subset of variables to use instead of creating combined versions. Through a series of ANOVA, we found that an interaction model contained significant interaction between education and race produced the best fit in terms of adjusted $R^2$, so this became a focal point of our analysis. 
 
-- model selection
-  - ANOVA
-  - how did we choose which subset of the columns to use?
-  - found that interactions are significant and should be considered
-- show the selected model (latex)
-- choice of confounders in explanatory model
-- Using a Wald Test 
-- checking regression diagnostics
-- using bootstrap to double check our inferences 
+Our final explanatory model is as follows:
+
+$$
+Y_i = X_{education}\beta + X_{race}\beta + X_{interaction}\beta + X_{confounders}\beta + \epsilon_i
+$$
+
+In terms of education variables, we chose 2 from the entire group: 1) "percent of the county ages 25 and over finishing high school", and 2) the percent over 25 finishing college (bachelor's degree). For our race variables, we included all that were present in the data (% of the county being Asian, Black, White or Other Race). With our literature review and prior knowledge, we knew that age, sex, cancer incidence, income, and population need to be accounted for in the model since they are known confounders between cancer mortality and our covariates of interest. 
+
+### Analysis Plan
+
+As mentioned before, the data concerning education and race come from the 2013 Census. We know the the census data comes from a carefully picked representative population in each county, but this information is not available in the data itself. Despite the data containig most of the counties in the United States, the randomness introduced by the survey requires us to perform some inference. We expect there to be violations to typical regression assumptions since adjacent counties may be correlated. To account for this, we plan to use 1000 bootstrap samples to calculate a robust confidence interval for each of the coefficients. Coefficients that we find to be significant in the explanatory model will be included in a prediction model candidate.
 
 
 ## Prediction Model
 
-- choosing which model to use
-  - PCA, regularization
-- how to split the data
+
+INSERT JASEN'S TEXT HERE
 
 
 # Results & Discussion
 
-## Explanatory Model
+### Initial Explanatory Model
 
-One of our goals was to assess whether there was any significant interaction between race and education that contributed to cancer mortality in a county. The dataset contains different percentages of educational attainment in each county and the percentage of four race categories (Asian, African American, Other and White). We elected for a model that looked at high school achievement and bachelor degrees among adults 25 years and older because we felt that this population would be more reflective of the education levels of the working population in each county. We experimented with a few different interaction models to see what combination of education and race predictors would make for both a sensible and useful model. Our final inference model includes 2 educational variables (high school achievement rate and bachelor degree achievement rate), the aforementioned 4 race percentages, 8 interaction variables based on each race and education pair, and also controls for cancer incidence, median income, county population size, and median age. We use the Wald test to check if any of the interaction coefficients are non-zero. Our dataset is reasonably large, so we feel the test is appropriate for our needed hypothesis with $\alpha = 0.05$. As another way to assess the significance of the interaction coefficients, we used 5000 bootstrap samples and examined the 95% bootstrap percentile interval to see if its results agree with the test. 
+Table 2 shows the intial estimates for our final explanatory model. Looking at the main effects, we see that with the exception of Asians, higher proportions of the other races was associated with higher average cancer mortality in a county. Most of the interaction terms are small and insignificant, but most are associated with average decreases in mortality. This lines up with previous research suggesting that education is beneficial for health outcomes. 
 
-### Interaction Between Education & Race
-
-Our interaction model found that 3 of the interaction coefficients were significant. We found that the interaction between both educational variables and African-Americans was significant, as well as the interaction between high school achievement rate and white Americans. The coefficients associated with these interactions are all negative (albeit small), indicating that they help *reduce* cancer mortality. Figure XXX shows the estimated interaction coefficients, along with their 95% confidence intervals. 
-
-```{r int_effect_table, eval = F, echo = F, message = F, warning = F, out.width = "70%", fig.align = 'center'}
-# Trying out different set of education vars
-model2 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+```{r, echo = F }
+cancer_model = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
              pct_white + pct_black + pct_asian + pct_other_race +
              # Interactions
              pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
@@ -278,45 +202,33 @@ model2 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over +
              incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
            data = cancer)
 
-# Create nice table for coefficients
-broom::tidy(model2) %>% 
+cancer_model %>% 
+  broom::tidy() %>% 
   mutate(
-    left_bound = estimate - qnorm(0.975) * std.error / sqrt(nrow(cancer)),
-    right_bound = estimate + qnorm(0.975) * std.error / sqrt(nrow(cancer)),
-    conf = paste0(round(left_bound, 3), ", ", round(right_bound, 3))
+    left = estimate - qt(0.75, df = nrow(cancer) - length(cancer_model$coefficients)) * std.error,
+    right = estimate + qt(0.75, df = nrow(cancer) - length(cancer_model$coefficients)) * std.error,
+    `95% CI` = paste0("(", left %>% round(3), ", ", right %>% round(3), ")")
   ) %>% 
   filter(
-    term %in% (model2$coefficients %>% names %>% .[13:20])
+    term %in% c("pct_hs25_over", "pct_bach_deg25_over",
+                "pct_white", "pct_black", "pct_asian", "pct_other_race",
+                "pct_hs25_over:pct_white", "pct_hs25_over:pct_black",
+                "pct_hs25_over:pct_asian", "pct_hs25_over:pct_other_race",
+                "pct_bach_deg25_over:pct_white", "pct_bach_deg25_over:pct_black",
+                "pct_bach_deg25_over:pct_asian", "pct_bach_deg25_over:pct_other_race")
   ) %>% 
-  mutate(
-    estimate = round(estimate, 3),
-    term = factor(term,
-                  levels = c(
-                    "pct_hs25_over:pct_asian", "pct_bach_deg25_over:pct_asian",
-                    "pct_hs25_over:pct_black", "pct_bach_deg25_over:pct_black",
-                    "pct_hs25_over:pct_other_race", "pct_bach_deg25_over:pct_other_race",
-                    "pct_hs25_over:pct_white", "pct_bach_deg25_over:pct_white"
-                  ),
-                  labels = c(
-                    "HS x Asian", "College x Asian",
-                    "HS x Black", "College x Black",
-                    "HS x Other", "College x Other",
-                    "HS x White", "College x White"
-                  ))
-  ) %>% 
-  select(
-    Term = term,
-    Estimate = estimate,
-    `95% CI` = conf
-  ) %>% 
-  kable(
-    caption = "Table XXX: Estimated interaction coefficients (95% CI)",
-    align = "c")
+  select(term, estimate, `95% CI`) %>% 
+  kable(digits = 3,
+        caption = "Estimated coefficients and 95% CI")
 ```
 
-These results were encouraging and were subsequently supported by the results of the Wald test, which yielded a p-value less than 0.05. This test only indicates that at least one of the interaction variables is non-zero, but we look to the bootstrap 95% percentile intervals to get an idea of which were. Figure YYY shows the results of 1000 bootstrap interaction models.
+### Interaction Between Education & Race
 
-```{r bootstrap_table, eval = F, echo = F, message = F, warning = F, out.width = "70%", fig.align = 'center' }
+Figure 3 shows the 95% bootstrap percentile intervals of 1000 bootstrap interaction models. The bootstrap 95% confidence intervals indicate that only the high school interactions with African- and white Americans were significant. The coefficients associated with these interactions are all negative, hich matches with our original estimated model. 
+
+```{r bootstrap_table, echo = F, message = F, warning = F }
+bs_n = 1000
+
 create_int_model = function(data) {
 
   lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
@@ -329,11 +241,8 @@ create_int_model = function(data) {
            data = data)
 }
 
-bs_n = 1000
-
-# Terms to keep
-# terms = model$coefficients %>% names %>% .[15:30]
-terms = model2$coefficients %>% names %>% .[13:20]
+m1 = create_int_model(cancer)
+terms = m1$coefficients %>% names %>% .[13:20]
 
 # Create the bootstrap datasets and models
 bs = tibble( idx = 1:bs_n ) %>% 
@@ -382,10 +291,10 @@ bs %>%
   geom_hline(yintercept = 0, color = "red", alpha = 0.5) +
   coord_flip() +
   labs(
-    title = "Bootstrap confidence intervals for 5000 resamples",
+    title = "Bootstrap 95% percentile intervals for 1000 resamples",
     x = "Interaction Term",
     y = "Bootstrap Interaction Coefficient Estimate",
-    caption = "Figure XXX"
+    caption = "Figure 3"
   ) +
   theme_minimal() +
   theme(
@@ -395,21 +304,24 @@ bs %>%
   scale_color_manual(values = c("#DC143C", "#2E8B57"))
 ```
 
-The bootstrap 95% confidence intervals indicate that only the high school interactions with African- and white Americans were significant. The direction of these bootstrap estimates matches that of the overall model, which further supports our findings. We feel confident that our model supports our research hypothesis.
-
-
-- Results based on the wald Test 
-- regression diagnostics results
-  - qqplot, residual plot
-- inferences using the bootstrap
+ With these findings, we include these two interaction terms inside of a candidate predictive model.
 
 ## Prediction Model
 
-- test MSE (final model, and final model including interactions)
+
+
+
+INSERT JASEN'S TEXT HERE
+
+
+
+
 
 # Conclusion
 
 Our analysis found at least one significant interaction between race and education that served to help reduce cancer mortality per capita on a county level. Although this effect was small, their significance was supported simultaneously by the model itself, the Wald test, and the 95% bootstrap percentile intervals. These results support the hypothesis that higher education has a beneficial effect on cancer mortatlity, at least on the county scale. Furthermore, our findings are in line with a wealth of literature that suggest that education is beneficial to improving health outcomes.
+
+INSERT JASEN'S TEXT HERE
 
 These findings are limited by the fact that the observational unit of the data was a county. The model suggests a beneficial benefit, but does not elucidate any reason as to why or how education interacts with race to reduce cancer mortality among African- and white Americans. The educational and race data come from 2013, so the model may be limited in its generalizability to future years, especially in the context of changing demographics and new educational environments created by COVID-19. In light of these weaknesses, we feel that our model offers an interesting perspective on how different demographic factors interact to affect a health-related outcome. Being so prevalent, it's important to understand these factors and interactions so that we can design proper interventions.
 
