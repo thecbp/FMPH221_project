@@ -16,8 +16,13 @@ library(glmnet)
 # 1. Table of Coefficients
 
 ```{r}
+final_coeffs <- merge(df_step_coeffs, lasso_final_df, by = "row.names", all = TRUE)
 
+#the loadings for the PCA
+final_loadings
 
+#the betas for the 10 PC's
+summary(pca_train_model_2)
 ```
 
 2. Table of R^2/RMSE
@@ -28,7 +33,23 @@ rmse_lasso_train
 r_squared_lasso_test
 rmse_lasso_test
 
+R_squared_PCA_train
+R_squared_PCA_test
+RMSE_PCA_train
+RMSE_PCA_test
 
+RMSE_step_train
+R_squared_step_train
+RMSE_step_test
+R_squared_step_test
+
+R_squared_train <- c(r_squared_lasso_train, R_squared_PCA_train, R_squared_step_train)
+R_squared_test <- c(r_squared_lasso_test, R_squared_PCA_test, R_squared_step_test)
+RMSE_train <- c(rmse_lasso_train, RMSE_PCA_train, RMSE_step_train)
+RMSE_test <- c(rmse_lasso_test, RMSE_PCA_test, RMSE_step_test)
+
+final_metrics <- rbind(R_squared_train, R_squared_test, RMSE_train, RMSE_test)
+colnames(final_metrics) <- c('Lasso', 'PCA', 'Stepwise')
 ```
 
 3. All y_pred vs y_true graphs. 
@@ -50,8 +71,12 @@ g_step_hyper
 g_step_train
 g_step_test
 
-g_all <- grid.arrange(g_lasso_hyper,g_lasso_train,g_lasso_test,
+
+pdf('final_graphs.pdf', height = 15, width = 15)
+grid.arrange(g_lasso_hyper,g_lasso_train,g_lasso_test,
              g_pca_hyper,g_pca_train,g_pca_test,
              g_step_hyper,g_step_train, g_step_test, layout_matrix = lay)
+dev.off()
+
 ```
 

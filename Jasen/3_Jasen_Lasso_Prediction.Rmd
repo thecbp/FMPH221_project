@@ -110,7 +110,7 @@ g_lasso_train <- ggplot(train_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Training Prediction')
+  ggtitle('Lasso Train Prediction')
 
 g_lasso_train
 ```
@@ -137,7 +137,7 @@ g_lasso_test <- ggplot(test_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Test Prediction')
+  ggtitle('Lasso Test Prediction')
 
 g_lasso_test
 ```

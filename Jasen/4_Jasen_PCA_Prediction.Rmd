@@ -157,7 +157,7 @@ R_squared_label <- paste('R^2 = ', R_squared)
 g_pca_train <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
   geom_line(aes(x = deathRate, y = deathRate), color = 'red') + 
-  geom_label(label = R_squared_label, x = 140, y = 250, label.padding = unit(0.55, "lines"), 
+  geom_label(label = R_squared_label, x = 100, y = 275, label.padding = unit(0.55, "lines"), 
              label.size = 0.35,
              color = "black",
              fill="#69b3a2") + 
@@ -193,6 +193,7 @@ eq <- paste('deathRate', eq, sep = ' ~ ')
 # y_pred <- unname(predict(pca_test_model))
 
 y_pred <- predict(pca_train_model_2, test_component_matrix)
+RMSE_PCA_test <- sqrt(sum((y_pred - test_y)^2)/nrow(pca_df))
 
 pca_df <- pca_df %>% mutate(y_pred = y_pred)
 pca_df <- pca_df %>% mutate(deathRate = test_y)
@@ -207,7 +208,7 @@ R_squared_label <- paste('R^2 = ', R_squared)
 g_pca_test <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
   geom_line(aes(x = deathRate, y = deathRate), color = 'red') + 
-  geom_label(label = R_squared_label, x = 140, y = 250, label.padding = unit(0.55, "lines"), 
+  geom_label(label = R_squared_label, x = 125, y = 250, label.padding = unit(0.55, "lines"), 
              label.size = 0.35,
              color = "black",
              fill="#69b3a2") + 
@@ -229,17 +230,7 @@ RMSE_PCA_test
 
 summary(pca_train_model_2)
 loadings <- PCA_train_model$rotation
-
-#PC1: medIncome (-1)
-#PC2: hs_white (-0.92) hs_black (0.37) college_black (0.13)
-#PC3: hs_black (-0.9) hs_white (-0.39) college_black (-0.2)
-#PC4: college_black (-0.96) hs_black(0.24) incidence rate (-0.13)
-#PC5: incidence_rate (-0.99) college_black (0.13)
-#PC6: hs_white (92%)
-#PC7: hs_white (92%)
-#PC8: hs_white (92%)
-#PC9: hs_white (92%)
-#PC10: hs_white (92%)
+final_loadings <- loadings[,1:10]
 ```
 
 
