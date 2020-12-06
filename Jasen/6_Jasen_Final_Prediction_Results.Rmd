@@ -17,6 +17,8 @@ library(glmnet)
 
 ```{r}
 final_coeffs <- merge(df_step_coeffs, lasso_final_df, by = "row.names", all = TRUE)
+rownames(final_coeffs) <- final_coeffs$Row.names
+final_coeffs <- final_coeffs %>% select(-c(Row.names))
 
 #the loadings for the PCA
 final_loadings
