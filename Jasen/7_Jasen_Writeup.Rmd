@@ -1,0 +1,11 @@
+---
+title: "Jasen Report"
+author: "Jasen"
+date: "12/6/2020"
+output: pdf_document
+---
+
+
+## Prediciton Model
+
+We proceeded to build three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a lasso regularization, principal component analysis (PCA), and forward backwards stepwise selection model. We randomly split the data into 80% train and 20% test, and then used this same split for all three models. Afterwards, 
