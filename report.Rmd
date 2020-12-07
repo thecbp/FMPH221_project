@@ -12,6 +12,12 @@ geometry: margin=1in
 library(tidyverse)
 library(knitr)
 library(gplots)
+library(gridExtra)
+library(glmnet)
+library(grid)
+library(caret)
+library(olsrr)
+
 set.seed(1)
 
 knitr::opts_chunk$set(
@@ -182,7 +188,7 @@ As mentioned before, the data concerning education and race come from the 2013 C
 
 ## Prediction Model
 
-We proceeded to build three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a lasso regularization, principal component analysis (PCA), and forward backwards stepwise selection model. We randomly split the data into 80% train and 20% test, and then used this same split for all three models. Afterwards, for the lasso and PCA models, the training set was further split into $10$ folds for cross-validation in order to tune the lambda and $\#$ of PC hyperparameters respectively. Choosing $10$ folds and an $80-20$ split are usually default parameters in machine learning models.
+We proceeded to build three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a lasso regularization, principal component analysis (PCA), and forward backwards stepwise selection model. We randomly split the data into 80% train and 20% test, and then used this same split for all three models. Afterwards, for the lasso and PCA models, the training set was further split into $10$ folds for cross-validation in order to tune the lambda and number of PC hyperparameters respectively. Choosing $10$ folds and an $80-20$ split are usually default parameters in machine learning models.
 
 ### Lasso
 
@@ -207,7 +213,7 @@ To assess each of these models, we computed the RMSE and $R^2$ values of the tru
 
 ### Initial Explanatory Model
 
-Table 2 shows the intial estimates for our final explanatory model. Looking at the main effects, we see that with the exception of Asians, higher proportions of the other races was associated with higher average cancer mortality in a county. Most of the interaction terms are small and insignificant, but most are associated with average decreases in mortality. This lines up with previous research suggesting that education is beneficial for health outcomes. 
+Table 2 shows the initial estimates for our final explanatory model. Looking at the main effects, we see that with the exception of Asians, higher proportions of the other races was associated with higher average cancer mortality in a county. Most of the interaction terms are small and insignificant, but most are associated with average decreases in mortality. This lines up with previous research suggesting that education is beneficial for health outcomes. 
 
 ```{r, echo = F }
 cancer_model = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
@@ -327,16 +333,10 @@ bs %>%
 
 
 ```{r include=FALSE}
-library(tidyverse)
-library(gridExtra)
-library(gplots)
-library(glmnet)
-library(grid)
-library(caret)
-library(olsrr)
+
 
 dir = getwd()
-data_dir <- paste('df_imp.RData', sep = '')
+data_dir <- paste(dir, '/Jasen/df_imp.RData', sep = '')
 load(data_dir)
 
 response_vars <- c('TARGET_deathRate')
@@ -458,7 +458,7 @@ rownames(lasso_final_df) = lasso_var_names
 # PCA PART -----------------------------------------------------
 
 dir = getwd()
-data_dir <- paste('df_imp.RData', sep = '')
+data_dir <- paste(dir, '/Jasen/df_imp.RData', sep = '')
 load(data_dir)
 
 response_vars <- c('TARGET_deathRate')
@@ -643,7 +643,7 @@ final_loadings <- loadings[,1:10]
 # STEPWISE ---------------------------------------------------------
 
 dir = getwd()
-data_dir <- paste('df_imp.RData', sep = '')
+data_dir <- paste(dir, '/Jasen/df_imp.RData', sep = '')
 load(data_dir)
 
 
