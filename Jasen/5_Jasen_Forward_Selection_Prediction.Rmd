@@ -77,6 +77,9 @@ R_squared_step_train <- R_squared
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 
+grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
 g_step_train <- ggplot(train_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
@@ -86,7 +89,10 @@ g_step_train <- ggplot(train_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Stepwise Selection Train Prediction')
+  ggtitle('Stepwise Selection Train Prediction') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5)) 
+
 
 g_step_train
 ```
@@ -106,6 +112,9 @@ R_squared_step_test <- R_squared
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 
+grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
 g_step_test <- ggplot(test_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
@@ -115,7 +124,9 @@ g_step_test <- ggplot(test_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Stepwise Selection Test Prediction')
+  ggtitle('Stepwise Selection Test Prediction') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5))   
 
 g_step_test
 ```
@@ -139,6 +150,10 @@ k <- ols_step_both_aic(model)
 
 df_AIC <- data.frame(steps = 1:k$steps, AIC = k$aic, vars = k$predictors)
 
+
+grob <- grobTree(textGrob("(a)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
 g_step_hyper <- ggplot(df_AIC, aes(x= steps, y= AIC, label=vars))+
   geom_point(color = 'red') + 
   geom_line() + 
@@ -147,7 +162,9 @@ g_step_hyper <- ggplot(df_AIC, aes(x= steps, y= AIC, label=vars))+
   ylim(21000, 25500) + 
   xlab('Steps') + 
   ylab('AIC') + 
-  ggtitle('Forward and Backward Stepwise Model')
+  ggtitle('Forward and Backward Stepwise Model') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5))   
 
 g_step_hyper
 

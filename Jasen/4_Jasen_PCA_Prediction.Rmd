@@ -117,11 +117,16 @@ for(i in num_comp){
 results <- results %>% mutate(ID = as.numeric(rownames(results)))
 results_best <- results %>% filter(ID == 10)
 
+grob <- grobTree(textGrob("(a)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
 g_pca_hyper <- ggplot() + geom_point(data = results, aes(x = ID, y = RMSE)) + 
   geom_point(data = results_best, aes(x = ID, y= RMSE), color = 'red') + 
   xlab('# of PCs') + 
   ylab('RMSE') + 
-  ggtitle('Selecting Number of Principal Components')
+  ggtitle('Selecting Number of Principal Components') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5))   
 
 g_pca_hyper
 
@@ -153,6 +158,8 @@ R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 
 
+grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
 
 g_pca_train <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
@@ -163,7 +170,9 @@ g_pca_train <- ggplot(data = pca_df) +
              fill="#69b3a2") + 
   xlab('True Cancer Death Rate') + 
   ylab('Predicted Cancer Death Rate') + 
-  ggtitle('PCA Train Prediction')
+  ggtitle('PCA Train Prediction') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 g_pca_train
 ```
@@ -203,7 +212,8 @@ R_squared_PCA_test <- R_squared
 R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 
-
+grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
 
 g_pca_test <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
@@ -214,7 +224,9 @@ g_pca_test <- ggplot(data = pca_df) +
              fill="#69b3a2") + 
   xlab('True Cancer Death Rate') + 
   ylab('Predicted Cancer Death Rate') + 
-  ggtitle('PCA Test Prediction')
+  ggtitle('PCA Test Prediction') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 g_pca_test
 

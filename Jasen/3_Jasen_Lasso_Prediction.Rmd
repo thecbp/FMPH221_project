@@ -12,6 +12,7 @@ library(tidyverse)
 library(gridExtra)
 library(gplots)
 library(glmnet)
+library(grid)
 
 dir = getwd()
 data_dir <- paste('df_imp.RData', sep = '')
@@ -80,12 +81,18 @@ hyper <- data.frame(lambdas, cv_error)
 min_cv_error <- min(hyper$cv_error)
 min_df <- hyper %>% filter(cv_error == min_cv_error)
 
+grob <- grobTree(textGrob("(a)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
+
 g_lasso_hyper <- ggplot() + geom_point(data = hyper, aes(x = lambdas, y = cv_error)) + 
   geom_point(data = min_df, aes(x = lambdas, y = cv_error), color = 'red') + 
   scale_x_continuous(trans = 'log10') + 
   ylab('Mean Cross-Validation Error') + 
   xlab('Lambda') + 
-  ggtitle('Selection of Lambda Hyperparameter')
+  ggtitle('Selection of Lambda Hyperparameter') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5))
 
 g_lasso_hyper
 ```
@@ -101,6 +108,9 @@ R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 rmse_lasso_train <- sqrt(sum((train_results$y_true - train_results$y_hat)^2)/nrow(train_results))
 
+grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
 g_lasso_train <- ggplot(train_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
@@ -110,7 +120,9 @@ g_lasso_train <- ggplot(train_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Lasso Train Prediction')
+  ggtitle('Lasso Train Prediction') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5))
 
 g_lasso_train
 ```
@@ -128,6 +140,9 @@ R_squared <- sprintf("%.3f", round(R_squared,3))
 R_squared_label <- paste('R^2 = ', R_squared)
 rmse_lasso_test <- sqrt(sum((test_results$y_true - test_results$y_hat)^2)/nrow(test_results))
 
+grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
 g_lasso_test <- ggplot(test_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
@@ -137,7 +152,9 @@ g_lasso_test <- ggplot(test_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Lasso Test Prediction')
+  ggtitle('Lasso Test Prediction') + 
+  annotation_custom(grob) + 
+  theme(plot.title = element_text(hjust = 0.5))  
 
 g_lasso_test
 ```
