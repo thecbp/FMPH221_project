@@ -240,7 +240,7 @@ R_squared_PCA_test
 RMSE_PCA_train
 RMSE_PCA_test
 
-summary(pca_train_model_2)
+s_PCA <- summary(pca_train_model_2)
 loadings <- PCA_train_model$rotation
 final_loadings <- loadings[,1:10]
 ```

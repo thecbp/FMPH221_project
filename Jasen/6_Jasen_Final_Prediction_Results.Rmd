@@ -52,6 +52,12 @@ RMSE_test <- c(rmse_lasso_test, RMSE_PCA_test, RMSE_step_test)
 
 final_metrics <- rbind(R_squared_train, R_squared_test, RMSE_train, RMSE_test)
 colnames(final_metrics) <- c('Lasso', 'PCA', 'Stepwise')
+
+train_metrics <- rbind(R_squared_train, RMSE_train)
+colnames(train_metrics) <- c('Lasso', 'PCA', 'Stepwise')
+
+test_metrics <- rbind(R_squared_test, RMSE_test)
+colnames(test_metrics) <- c('Lasso', 'PCA', 'Stepwise')
 ```
 
 3. All y_pred vs y_true graphs. 
@@ -60,18 +66,8 @@ colnames(final_metrics) <- c('Lasso', 'PCA', 'Stepwise')
 lay <- rbind(c(1,2,3),
              c(4,5,6),
              c(7,8,9))
+
 lay1 <- rbind(c(1,2,3))
-g_lasso_hyper
-g_lasso_train
-g_lasso_test
-
-g_pca_hyper
-g_pca_train
-g_pca_test
-
-g_step_hyper
-g_step_train
-g_step_test
 
 
 pdf('final_graphs.pdf', height = 15, width = 15)
@@ -80,15 +76,15 @@ grid.arrange(g_lasso_hyper,g_lasso_train,g_lasso_test,
              g_step_hyper,g_step_train, g_step_test, layout_matrix = lay)
 dev.off()
 
-png('final_lasso_graphs.png', height = 5, width = 15)
+pdf('final_lasso_graphs.pdf', height = 5, width = 15)
 grid.arrange(g_lasso_hyper,g_lasso_train,g_lasso_test, layout_matrix = lay1)
 dev.off()
 
-pdf('final_PCA_graphs.png', height = 5, width = 15)
+pdf('final_PCA_graphs.pdf', height = 5, width = 15)
 grid.arrange(g_pca_hyper,g_pca_train,g_pca_test, layout_matrix = lay1)
 dev.off()
 
-pdf('final_stepwise_graphs.png', height = 5, width = 15)
+pdf('final_stepwise_graphs.pdf', height = 5, width = 15)
 grid.arrange(g_step_hyper,g_step_train,g_step_test, layout_matrix = lay1)
 dev.off()
 
