@@ -465,6 +465,276 @@ candidate predictive model.
 \hypertarget{prediction-model-1}{%
 \subsection{Prediction Model}\label{prediction-model-1}}
 
+The lasso regularization model selected an optimal hyperparameter of
+\(\lambda = 0.00119\) as shown in Figure X (a). The estimated
+coefficients fitted from the training set are shown in Table Y, with
+only the intercept and incidenceRate having coefficients of \(0\). The
+training set RMSE and \(R^2\) was \(13.796\) and \(0.866\) respectively,
+and the test set metrics showed slight improvements with an RMSE and
+\(R^2\) of \(12.842\) and \(0.872\) respectively. These values are in
+Table Z.
+
+Using the elbow rule as shown in Figure C (a), we selected \(10\) PCs to
+be the optimal amount and obtained the loadings of the first \(10\) PCs
+from the training set. A summary of these loadings are in Table A, where
+roughly half of the variables did not show up significantly in any of
+the \(10\) PCs. The training set RMSE and \(R^2\) was \(20.020\) and
+\(0.689\) respectively, and the test set metrics showed moderate
+improvements with an RMSE and \(R^2\) of \(17.955\) and \(0.728\)
+respectively.
+
+Our stepwise selection model included \(23\) variables, and the order in
+which they were selected is displayed in Figure B. The estimated
+coefficients fitted from the training set are shown in Table Y along
+with the lasso regularization coefficients. The training set RMSE and
+\(R^2\) was \(13.278\) and \(0.877\) respectively, and the test set
+metrics showed slight improvements with an RMSE and \(R^2\) of
+\(12.495\) and \(0.879\) respectively. These values are in Table Z.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{final_metrics}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                      Lasso        PCA   Stepwise
+## R_squared_train  0.8664342  0.6892268  0.8769632
+## R_squared_test   0.8718580  0.7281111  0.8794552
+## RMSE_train      13.7961626 20.0200150 13.2783463
+## RMSE_test       12.8424256 17.9551337 12.4945712
+\end{verbatim}
+
+Table Z
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{final_coeffs}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                                   step_coeffs  lasso_coeffs
+## (Intercept)                      8.982813e+02            NA
+## avgAnnCount_log                 -2.755781e+00 -1.914430e+00
+## avgDeathsPerYear_log             1.039750e+02  1.121735e+02
+## AvgHouseholdSize                 4.653770e+00  6.639897e+00
+## BirthRate                       -4.772253e-01 -6.828285e-01
+## college_black                    1.823608e-02  1.490543e-02
+## hs_black                                   NA -2.201629e-02
+## hs_white                                   NA -1.898820e-02
+## Imputed_PctEmployed16_Over      -4.832461e-01 -6.286077e-01
+## Imputed_PctPrivateCoverageAlone            NA -2.531996e-02
+## incidenceRate                    9.508184e-02            NA
+## MedianAge                       -2.559524e+00 -2.872336e+00
+## medIncome                        3.834720e-04  5.224504e-04
+## PctAsian_log                               NA  3.642454e-01
+## PctBachDeg18_24_log                        NA  1.415853e-02
+## PctBachDeg25_Over               -1.529700e-01 -1.637155e-01
+## PctBlack                        -1.887251e-01  6.371510e-01
+## PctEmployed16_Over              -5.092996e-01 -6.566720e-01
+## PctEmpPrivCoverage               1.053615e-01  1.436310e-01
+## PctHS18_24                       3.614372e-01  4.166293e-01
+## PctHS25_Over                               NA  1.865748e+00
+## PctMarriedHouseholds                       NA -4.685820e-01
+## PctNoHS18_24                    -6.260260e-02 -4.481827e-02
+## PctOtherRace_log                -9.016052e-01 -1.265590e+00
+## PctPrivateCoverage              -2.662975e-01 -5.540287e-02
+## PctPrivateCoverageAlone                    NA -2.523838e-02
+## PctPublicCoverage               -2.148296e+00 -2.366866e+00
+## PctPublicCoverageAlone           1.644217e+00  2.046082e+00
+## PctSomeCol18_24                            NA  4.212474e-02
+## PctUnemployed16_Over             8.859463e-01  9.699252e-01
+## PctWhite                                   NA  6.649455e-01
+## PercentMarried                             NA  4.895686e-01
+## popEst2015_log                  -1.010836e+02 -1.093631e+02
+## povertyPercent                   3.958523e-01  5.106701e-01
+## studyPerCap_log                 -4.043149e-01 -3.224617e-01
+\end{verbatim}
+
+Table Y
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{grid.arrange}\NormalTok{(g_lasso_hyper,g_lasso_train,g_lasso_test, }\DataTypeTok{layout_matrix =}\NormalTok{ lay1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.7\linewidth]{report_files/figure-latex/unnamed-chunk-8-1} \end{center}
+
+Figure X
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{grid.arrange}\NormalTok{(g_pca_hyper,g_pca_train,g_pca_test, }\DataTypeTok{layout_matrix =}\NormalTok{ lay1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.7\linewidth]{report_files/figure-latex/unnamed-chunk-9-1} \end{center}
+
+Figure C
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{grid.arrange}\NormalTok{(g_step_hyper,g_step_train,g_step_test, }\DataTypeTok{layout_matrix =}\NormalTok{ lay1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.7\linewidth]{report_files/figure-latex/unnamed-chunk-10-1} \end{center}
+
+Figure B
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{final_loadings}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                                           PC1           PC2           PC3
+## incidenceRate                   -4.906072e-05 -3.458332e-03 -3.015126e-02
+## medIncome                       -9.997924e-01 -9.091488e-03 -1.808253e-02
+## povertyPercent                   4.154681e-04  2.494200e-03 -6.532604e-04
+## MedianAge                        5.354222e-05 -2.276568e-03 -1.633544e-03
+## AvgHouseholdSize                -3.305854e-06  7.998591e-05  7.136982e-05
+## PercentMarried                  -1.940984e-04 -4.366232e-03  2.376839e-03
+## PctNoHS18_24                     1.943937e-04  3.499056e-04 -1.201002e-03
+## PctHS18_24                       1.413698e-04 -2.459173e-03 -4.519889e-03
+## PctSomeCol18_24                 -1.525707e-04  1.671578e-03  5.033931e-03
+## PctHS25_Over                     2.795490e-04 -4.569666e-03 -9.369580e-03
+## PctBachDeg25_Over               -3.140969e-04  1.558766e-03  3.850017e-03
+## PctEmployed16_Over              -4.460714e-04 -8.560957e-04  2.613779e-03
+## PctUnemployed16_Over             1.257925e-04  1.369913e-03 -9.348405e-04
+## PctPrivateCoverage              -6.329772e-04 -3.100880e-03 -1.845921e-03
+## PctPrivateCoverageAlone         -5.243248e-04 -1.921167e-03 -2.888842e-03
+## PctEmpPrivCoverage              -5.784454e-04 -1.658185e-03 -3.167077e-03
+## PctPublicCoverage                4.895938e-04 -2.904349e-04 -8.102522e-04
+## PctPublicCoverageAlone           3.625061e-04  1.211969e-03 -1.343620e-04
+## PctWhite                        -2.063774e-04 -1.487998e-02  1.068190e-02
+## PctBlack                         3.099063e-04  1.125577e-02 -2.284246e-02
+## PctMarriedHouseholds            -2.352540e-04 -3.643326e-03  1.530868e-03
+## BirthRate                        1.074871e-06 -4.212607e-05  4.317079e-04
+## Imputed_PctEmployed16_Over      -2.847074e-05 -1.674489e-04  2.589367e-05
+## Imputed_PctPrivateCoverageAlone -1.284187e-04  3.555906e-04  1.339068e-03
+## avgAnnCount_log                 -4.106676e-05  2.866863e-04  1.968440e-04
+## avgDeathsPerYear_log            -2.932705e-05  3.535126e-04 -5.207280e-06
+## popEst2015_log                  -4.137450e-05  4.698798e-04  1.573582e-04
+## studyPerCap_log                 -5.279787e-05  5.119546e-04  6.458466e-04
+## PctBachDeg18_24_log             -3.946729e-05 -7.634365e-06 -2.046766e-06
+## PctAsian_log                    -5.319556e-05  4.846992e-04  7.354057e-04
+## PctOtherRace_log                -2.661135e-05  6.287687e-04  1.066399e-03
+## hs_black                         1.324916e-02  3.712419e-01 -8.961406e-01
+## hs_white                         1.538265e-02 -9.184454e-01 -3.920328e-01
+## college_black                    8.043098e-04  1.345255e-01 -2.029164e-01
+##                                           PC4           PC5           PC6
+## incidenceRate                   -0.1255511821 -0.9900370682 -2.777466e-03
+## medIncome                        0.0018017033  0.0004180523  3.653353e-04
+## povertyPercent                   0.0028421778 -0.0022597616  2.017156e-03
+## MedianAge                        0.0039004749  0.0035773653  6.917757e-03
+## AvgHouseholdSize                 0.0002758510  0.0005120483 -6.476944e-05
+## PercentMarried                   0.0076749257  0.0123081795  2.583746e-03
+## PctNoHS18_24                     0.0187182942  0.0238726600  1.143759e-02
+## PctHS18_24                       0.0124774176  0.0022677496  8.203723e-03
+## PctSomeCol18_24                 -0.0215893978 -0.0236167538 -1.974094e-02
+## PctHS25_Over                     0.0069497850 -0.0004548677 -1.854448e-03
+## PctBachDeg25_Over               -0.0112663844  0.0003074223 -4.326691e-04
+## PctEmployed16_Over              -0.0096115494 -0.0020518776 -5.214565e-02
+## PctUnemployed16_Over            -0.0009041992 -0.0062921095  3.561810e-03
+## PctPrivateCoverage              -0.0133579997 -0.0123139952 -1.821871e-02
+## PctPrivateCoverageAlone         -0.0258428205 -0.0002829178 -7.158744e-01
+## PctEmpPrivCoverage              -0.0115737697 -0.0194228541 -2.090703e-02
+## PctPublicCoverage                0.0061966160 -0.0096855947  1.467622e-02
+## PctPublicCoverageAlone           0.0038969118 -0.0085416665  8.455444e-03
+## PctWhite                         0.0045601310 -0.0008443664  3.706167e-03
+## PctBlack                        -0.0181169256  0.0019457048 -3.278570e-04
+## PctMarriedHouseholds             0.0115806759  0.0183592422  3.111408e-03
+## BirthRate                        0.0016154594  0.0034117913 -1.556177e-03
+## Imputed_PctEmployed16_Over       0.0004241153  0.0004273098  3.811283e-02
+## Imputed_PctPrivateCoverageAlone  0.0127661961 -0.0118908930  6.933157e-01
+## avgAnnCount_log                 -0.0043110555 -0.0076358730 -3.195946e-04
+## avgDeathsPerYear_log            -0.0047189107 -0.0055666361  5.632209e-04
+## popEst2015_log                  -0.0046594854 -0.0044140687  1.964825e-04
+## studyPerCap_log                 -0.0061135801 -0.0081772362 -1.601379e-03
+## PctBachDeg18_24_log             -0.0025683251 -0.0027085191 -2.762398e-04
+## PctAsian_log                    -0.0031996503 -0.0037813205  5.982809e-04
+## PctOtherRace_log                 0.0004946635  0.0029924298  1.575223e-04
+## hs_black                         0.2407662093 -0.0049660609 -5.150274e-03
+## hs_white                        -0.0431873798  0.0205089081  4.010692e-03
+## college_black                   -0.9598320345  0.1289877930  2.944341e-02
+##                                           PC7           PC8          PC9
+## incidenceRate                    8.684042e-03 -0.0362244361  0.010503239
+## medIncome                        4.215921e-04 -0.0006410941 -0.001062094
+## povertyPercent                   2.347184e-02 -0.0493721909 -0.175035031
+## MedianAge                        1.086476e-02 -0.0579780527  0.040064365
+## AvgHouseholdSize                 1.281368e-03 -0.0042882614 -0.005825779
+## PercentMarried                  -1.232634e-02 -0.0352419083  0.222312821
+## PctNoHS18_24                     5.348475e-02 -0.2978725600 -0.018240160
+## PctHS18_24                       5.235641e-02 -0.4090464090  0.378464123
+## PctSomeCol18_24                 -8.405795e-02  0.6470790612 -0.385483708
+## PctHS25_Over                     7.995668e-03 -0.0670639649 -0.068593215
+## PctBachDeg25_Over               -1.542547e-02  0.0898985113  0.098110418
+## PctEmployed16_Over              -7.384286e-01 -0.0487841914  0.080810802
+## PctUnemployed16_Over             2.556550e-02 -0.0486391980 -0.136751994
+## PctPrivateCoverage              -7.135685e-02  0.2971863081  0.430311919
+## PctPrivateCoverageAlone          1.337967e-02  0.1210674635  0.171786181
+## PctEmpPrivCoverage              -5.939348e-02  0.2274566552  0.220673500
+## PctPublicCoverage                5.032986e-02 -0.1523415894 -0.296553295
+## PctPublicCoverageAlone           3.935570e-02 -0.1377931042 -0.301524414
+## PctWhite                        -2.445263e-02  0.1853862365  0.233797227
+## PctBlack                         2.596978e-04 -0.0022852438 -0.009117773
+## PctMarriedHouseholds             8.846414e-03 -0.0382077150  0.155803426
+## BirthRate                       -5.992504e-04 -0.0123443431  0.012765385
+## Imputed_PctEmployed16_Over       6.471937e-01  0.1949936729  0.168645045
+## Imputed_PctPrivateCoverageAlone -8.700357e-02  0.1597378723  0.184952549
+## avgAnnCount_log                 -2.049905e-03  0.0137421327 -0.013572889
+## avgDeathsPerYear_log             1.312474e-03  0.0070592335 -0.028896743
+## popEst2015_log                   1.136788e-03  0.0090853176 -0.028487186
+## studyPerCap_log                 -5.118682e-03  0.0312387434 -0.006062260
+## PctBachDeg18_24_log             -7.436677e-03  0.0215244811  0.009266532
+## PctAsian_log                    -6.034725e-05  0.0140037090 -0.014666663
+## PctOtherRace_log                 1.213401e-04 -0.0109537158 -0.011731918
+## hs_black                        -5.850860e-03  0.0154101544  0.002850570
+## hs_white                         5.850028e-05  0.0004046477 -0.008784993
+## college_black                    9.630910e-03 -0.0282457621  0.001764177
+##                                          PC10
+## incidenceRate                   -2.860960e-02
+## medIncome                        2.450144e-05
+## povertyPercent                   7.610751e-02
+## MedianAge                       -2.193138e-01
+## AvgHouseholdSize                 6.782392e-03
+## PercentMarried                  -2.738575e-01
+## PctNoHS18_24                    -5.794527e-01
+## PctHS18_24                       5.212191e-01
+## PctSomeCol18_24                  7.143079e-02
+## PctHS25_Over                     1.300351e-01
+## PctBachDeg25_Over               -4.895124e-02
+## PctEmployed16_Over               6.896812e-03
+## PctUnemployed16_Over             6.033483e-02
+## PctPrivateCoverage              -5.500194e-02
+## PctPrivateCoverageAlone          3.492956e-02
+## PctEmpPrivCoverage               1.929601e-01
+## PctPublicCoverage               -8.237150e-02
+## PctPublicCoverageAlone           6.340484e-02
+## PctWhite                        -3.661139e-01
+## PctBlack                        -8.113672e-03
+## PctMarriedHouseholds            -1.967987e-01
+## BirthRate                       -4.485164e-03
+## Imputed_PctEmployed16_Over       2.365081e-02
+## Imputed_PctPrivateCoverageAlone  5.224743e-02
+## avgAnnCount_log                  1.821538e-02
+## avgDeathsPerYear_log             3.292264e-02
+## popEst2015_log                   3.977256e-02
+## studyPerCap_log                  3.521042e-02
+## PctBachDeg18_24_log              1.576685e-02
+## PctAsian_log                     3.704192e-02
+## PctOtherRace_log                 1.549598e-02
+## hs_black                        -5.747527e-03
+## hs_white                         2.499088e-03
+## college_black                   -1.226432e-02
+\end{verbatim}
+
+Table A
+
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
 
@@ -478,8 +748,15 @@ mortatlity, at least on the county scale. Furthermore, our findings are
 in line with a wealth of literature that suggest that education is
 beneficial to improving health outcomes.
 
-\hypertarget{jasens-part}{%
-\subsection{Jasens part}\label{jasens-part}}
+The stepwise selection model showed the best RMSE and \(R^2\) in the
+training set. Therefore, we select the stepwise selection model to
+predict cancer death rates for the test set. We also see that the
+stepwise selection model had the best metrics for the test set. The
+stepwise selection model also included less beta coefficients (\(24\))
+than the lasso regularization model (\(33\)), so it's much more
+parsimonious than lasso which had marginally worse prediction metrics.
+Most variables in the stepwise selection model had statistically
+significant betas which are indicators of cancer death rates.
 
 These findings are limited by the fact that the observational unit of
 the data was a county. The model suggests a beneficial benefit, but does
@@ -501,8 +778,11 @@ interventions.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
+\tightlist
 \item
+  \url{https://www.cancer.org/content/dam/cancer-org/research/cancer-facts-and-statistics/annual-cancer-facts-and-figures/2020/cancer-facts-and-figures-2020.pdf}
 \item
+  \url{https://www.cancer.org/content/dam/cancer-org/research/cancer-facts-and-statistics/annual-cancer-facts-and-figures/2020/cancer-facts-and-figures-2020.pdf}
 \item
   ADLER, N.E. and OSTROVE, J.M. (1999), Socioeconomic Status and Health:
   What We Know and What We Don't. Annals of the New York Academy of
@@ -555,14 +835,11 @@ interventions.
 \KeywordTok{library}\NormalTok{(grid)}
 \KeywordTok{library}\NormalTok{(caret)}
 \KeywordTok{library}\NormalTok{(olsrr)}
-
 \KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-
 \NormalTok{knitr}\OperatorTok{::}\NormalTok{opts_chunk}\OperatorTok{$}\KeywordTok{set}\NormalTok{(}
   \DataTypeTok{fig.align =} \StringTok{"center"}\NormalTok{,}
   \DataTypeTok{out.width =} \StringTok{"70%"}
 \NormalTok{)}
-
 \CommentTok{# Load the data and do some processing}
 \NormalTok{cancer =}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\StringTok{"cancer_registry.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\CommentTok{# Split the geography variable}
@@ -599,21 +876,17 @@ interventions.
 \StringTok{  }\KeywordTok{filter}\NormalTok{(avgAnnCount }\OperatorTok{<}\StringTok{ }\DecValTok{20000}\NormalTok{) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{filter}\NormalTok{(MedianAge }\OperatorTok{<}\StringTok{ }\DecValTok{200}\NormalTok{) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{filter}\NormalTok{(AvgHouseholdSize }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{)}
-
 \NormalTok{df <-}\StringTok{ }\KeywordTok{na.omit}\NormalTok{(df)}
 \NormalTok{vars <-}\StringTok{ }\KeywordTok{colnames}\NormalTok{(df)}
 \NormalTok{misc_vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'binnedInc'}\NormalTok{, }\StringTok{'Geography'}\NormalTok{, }\StringTok{'TARGET_deathRate'}\NormalTok{)}
 \NormalTok{vars_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(vars, misc_vars)}
 \NormalTok{log_vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'avgAnnCount'}\NormalTok{, }\StringTok{'avgDeathsPerYear'}\NormalTok{, }\StringTok{'popEst2015'}\NormalTok{, }\StringTok{'studyPerCap'}\NormalTok{, }\StringTok{'PctBachDeg18_24'}\NormalTok{, }\StringTok{'PctAsian'}\NormalTok{, }\StringTok{'PctOtherRace'}\NormalTok{)}
 \NormalTok{log_names <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
-
 \NormalTok{all_vars <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(vars_}\DecValTok{1}\NormalTok{, log_vars)}
 \NormalTok{all_vars <-}\StringTok{ }\KeywordTok{append}\NormalTok{(all_vars, log_names)}
 \NormalTok{all_vars <-}\StringTok{ }\KeywordTok{sort}\NormalTok{(all_vars)}
-
 \NormalTok{df_temp <-}\StringTok{ }\NormalTok{df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(all_vars)}
 \NormalTok{df_temp <-}\StringTok{ }\KeywordTok{na.omit}\NormalTok{(df_temp)}
-
 \NormalTok{heatmap2 <-}\StringTok{ }\KeywordTok{cor}\NormalTok{(df_temp)}
 \KeywordTok{heatmap.2}\NormalTok{(heatmap2, }\DataTypeTok{trace =} \StringTok{'none'}\NormalTok{, }\DataTypeTok{margins =} \KeywordTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{10}\NormalTok{), }\DataTypeTok{col =} \StringTok{'cm.colors'}\NormalTok{, }\DataTypeTok{cexRow=}\FloatTok{0.7}\NormalTok{, }\DataTypeTok{cexCol =} \FloatTok{0.7}\NormalTok{)}
 \NormalTok{cancer }\OperatorTok{%>%}\StringTok{ }
@@ -658,7 +931,6 @@ interventions.
 \StringTok{             }\CommentTok{# Confounders}
 \StringTok{             }\NormalTok{incidence_rate }\OperatorTok{+}\StringTok{ }\NormalTok{med_income }\OperatorTok{+}\StringTok{ }\NormalTok{pop_est2015 }\OperatorTok{+}\StringTok{ }\NormalTok{poverty_percent }\OperatorTok{+}\StringTok{ }\NormalTok{median_age,}
            \DataTypeTok{data =}\NormalTok{ cancer)}
-
 \NormalTok{cancer_model }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{mutate}\NormalTok{(}
@@ -678,9 +950,7 @@ interventions.
 \StringTok{  }\KeywordTok{kable}\NormalTok{(}\DataTypeTok{digits =} \DecValTok{3}\NormalTok{,}
         \DataTypeTok{caption =} \StringTok{"Estimated coefficients and 95% CI"}\NormalTok{)}
 \NormalTok{bs_n =}\StringTok{ }\DecValTok{1000}
-
 \NormalTok{create_int_model =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(data) \{}
-
   \KeywordTok{lm}\NormalTok{(target_death_rate }\OperatorTok{~}\StringTok{ }\NormalTok{pct_hs25_over }\OperatorTok{+}\StringTok{ }\NormalTok{pct_bach_deg25_over }\OperatorTok{+}\StringTok{ }
 \StringTok{             }\NormalTok{pct_white }\OperatorTok{+}\StringTok{ }\NormalTok{pct_black }\OperatorTok{+}\StringTok{ }\NormalTok{pct_asian }\OperatorTok{+}\StringTok{ }\NormalTok{pct_other_race }\OperatorTok{+}
 \StringTok{             }\CommentTok{# Interactions}
@@ -690,10 +960,8 @@ interventions.
 \StringTok{             }\NormalTok{incidence_rate }\OperatorTok{+}\StringTok{ }\NormalTok{med_income }\OperatorTok{+}\StringTok{ }\NormalTok{pop_est2015 }\OperatorTok{+}\StringTok{ }\NormalTok{poverty_percent }\OperatorTok{+}\StringTok{ }\NormalTok{median_age,}
            \DataTypeTok{data =}\NormalTok{ data)}
 \NormalTok{\}}
-
 \NormalTok{m1 =}\StringTok{ }\KeywordTok{create_int_model}\NormalTok{(cancer)}
 \NormalTok{terms =}\StringTok{ }\NormalTok{m1}\OperatorTok{$}\NormalTok{coefficients }\OperatorTok{%>%}\StringTok{ }\NormalTok{names }\OperatorTok{%>%}\StringTok{ }\NormalTok{.[}\DecValTok{13}\OperatorTok{:}\DecValTok{20}\NormalTok{]}
-
 \CommentTok{# Create the bootstrap datasets and models}
 \NormalTok{bs =}\StringTok{ }\KeywordTok{tibble}\NormalTok{( }\DataTypeTok{idx =} \DecValTok{1}\OperatorTok{:}\NormalTok{bs_n ) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{mutate}\NormalTok{(}
@@ -731,7 +999,6 @@ interventions.
                     \StringTok{"HS x White"}\NormalTok{, }\StringTok{"College x White"}
 \NormalTok{                  ))}
 \NormalTok{  )}
-
 \CommentTok{# Visualize the bootstrap confidence intervals}
 \NormalTok{bs }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ term, }\DataTypeTok{y =}\NormalTok{ bs_mean)) }\OperatorTok{+}
@@ -752,6 +1019,343 @@ interventions.
     \DataTypeTok{legend.position =} \StringTok{"none"}
 \NormalTok{  ) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{"#DC143C"}\NormalTok{, }\StringTok{"#2E8B57"}\NormalTok{))}
+\NormalTok{dir =}\StringTok{ }\KeywordTok{getwd}\NormalTok{()}
+\NormalTok{data_dir <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(dir, }\StringTok{'/Jasen/df_imp.RData'}\NormalTok{, }\DataTypeTok{sep =} \StringTok{''}\NormalTok{)}
+\KeywordTok{load}\NormalTok{(data_dir)}
+\NormalTok{response_vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'TARGET_deathRate'}\NormalTok{)}
+\NormalTok{df <-}\StringTok{ }\NormalTok{df_imp4 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'ID'}\NormalTok{, }\StringTok{'incidenceRate'}\NormalTok{))}
+\NormalTok{response_vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'TARGET_deathRate'}\NormalTok{)}
+\NormalTok{vars <-}\StringTok{ }\KeywordTok{colnames}\NormalTok{(df)}
+\NormalTok{vars_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(vars, response_vars)}
+\NormalTok{predict_vars <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(vars_}\DecValTok{1}\NormalTok{, }\DataTypeTok{collapse =} \StringTok{' + '}\NormalTok{)}
+\NormalTok{df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{sapply}\NormalTok{(df, as.numeric))}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{221}\NormalTok{)}
+\NormalTok{test_set_index <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df), }\KeywordTok{floor}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(df))}\OperatorTok{/}\DecValTok{10}\NormalTok{)}
+\NormalTok{train_set_index <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df), test_set_index)}
+\NormalTok{test <-}\StringTok{ }\NormalTok{df[test_set_index,]}
+\NormalTok{train <-}\StringTok{ }\NormalTok{df[train_set_index,]}
+\NormalTok{test_y <-}\StringTok{ }\NormalTok{test }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(response_vars)}
+\NormalTok{test_x <-}\StringTok{ }\NormalTok{test }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(vars_}\DecValTok{1}\NormalTok{)}
+\NormalTok{train_y <-}\StringTok{ }\NormalTok{train }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(response_vars)}
+\NormalTok{train_x <-}\StringTok{ }\NormalTok{train }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(vars_}\DecValTok{1}\NormalTok{)}
+\NormalTok{lambda_seq <-}\StringTok{ }\DecValTok{10}\OperatorTok{^}\KeywordTok{seq}\NormalTok{(}\OperatorTok{-}\DecValTok{4}\NormalTok{, }\FloatTok{-1.95}\NormalTok{, }\DataTypeTok{by =} \FloatTok{.025}\NormalTok{)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{221}\NormalTok{)}
+\NormalTok{cv_output <-}\StringTok{ }\KeywordTok{cv.glmnet}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(train_x), }\KeywordTok{as.matrix}\NormalTok{(train_y),}
+                       \DataTypeTok{alpha =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lambda =}\NormalTok{ lambda_seq)}
+\NormalTok{best_lambda <-}\StringTok{ }\NormalTok{cv_output}\OperatorTok{$}\NormalTok{lambda.min}
+\NormalTok{best_lambda}
+\NormalTok{lasso_best <-}\StringTok{ }\KeywordTok{glmnet}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(train_x), }\KeywordTok{as.matrix}\NormalTok{(train_y), }\DataTypeTok{alpha =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lambda =}\NormalTok{ best_lambda)}
+\NormalTok{pred_test_y <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(lasso_best, }\DataTypeTok{s =}\NormalTok{ best_lambda, }\DataTypeTok{newx =} \KeywordTok{as.matrix}\NormalTok{(test_x))}
+\NormalTok{pred_train_y <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(lasso_best, }\DataTypeTok{s =}\NormalTok{ best_lambda, }\DataTypeTok{newx =} \KeywordTok{as.matrix}\NormalTok{(train_x))}
+\NormalTok{cv_error <-}\StringTok{ }\NormalTok{cv_output}\OperatorTok{$}\NormalTok{cvm}
+\NormalTok{lambdas <-}\StringTok{ }\NormalTok{cv_output}\OperatorTok{$}\NormalTok{lambda}
+\NormalTok{hyper <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(lambdas, cv_error)}
+\CommentTok{# taking the minimum}
+\NormalTok{min_cv_error <-}\StringTok{ }\KeywordTok{min}\NormalTok{(hyper}\OperatorTok{$}\NormalTok{cv_error)}
+\NormalTok{min_df <-}\StringTok{ }\NormalTok{hyper }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(cv_error }\OperatorTok{==}\StringTok{ }\NormalTok{min_cv_error)}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(a)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_lasso_hyper <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ hyper, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ lambdas, }\DataTypeTok{y =}\NormalTok{ cv_error)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ min_df, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ lambdas, }\DataTypeTok{y =}\NormalTok{ cv_error), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{trans =} \StringTok{'log10'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Mean Cross-Validation Error'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'Lambda'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Selection of Lambda Hyperparameter'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{))}
+\NormalTok{train_results <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(train_y, pred_train_y)}
+\KeywordTok{colnames}\NormalTok{(train_results) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'y_true'}\NormalTok{, }\StringTok{'y_hat'}\NormalTok{)}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unname}\NormalTok{(}\KeywordTok{cor}\NormalTok{(train_y, pred_train_y)))}
+\NormalTok{r_squared_lasso_train <-}\StringTok{ }\NormalTok{R_squared}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"%.3f"}\NormalTok{, }\KeywordTok{round}\NormalTok{(R_squared,}\DecValTok{3}\NormalTok{))}
+\NormalTok{R_squared_label <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'R^2 = '}\NormalTok{, R_squared)}
+\NormalTok{rmse_lasso_train <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((train_results}\OperatorTok{$}\NormalTok{y_true }\OperatorTok{-}\StringTok{ }\NormalTok{train_results}\OperatorTok{$}\NormalTok{y_hat)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{nrow}\NormalTok{(train_results))}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(b)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_lasso_train <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(train_results) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y=}\NormalTok{ y_hat)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y =}\NormalTok{ y_true), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{)  }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{label =}\NormalTok{ R_squared_label, }\DataTypeTok{x =} \DecValTok{100}\NormalTok{, }\DataTypeTok{y =} \DecValTok{275}\NormalTok{, }\DataTypeTok{label.padding =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.55}\NormalTok{, }\StringTok{"lines"}\NormalTok{),}
+    \DataTypeTok{label.size =} \FloatTok{0.35}\NormalTok{,}
+    \DataTypeTok{color =} \StringTok{"black"}\NormalTok{,}
+    \DataTypeTok{fill=}\StringTok{"#69b3a2"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Predicted Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'True Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Lasso Train Prediction'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{))}
+\NormalTok{test_results <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(test_y, pred_test_y)}
+\KeywordTok{colnames}\NormalTok{(test_results) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'y_true'}\NormalTok{, }\StringTok{'y_hat'}\NormalTok{)}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unname}\NormalTok{(}\KeywordTok{cor}\NormalTok{(test_y, pred_test_y)))}
+\NormalTok{r_squared_lasso_test <-}\StringTok{ }\NormalTok{R_squared}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"%.3f"}\NormalTok{, }\KeywordTok{round}\NormalTok{(R_squared,}\DecValTok{3}\NormalTok{))}
+\NormalTok{R_squared_label <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'R^2 = '}\NormalTok{, R_squared)}
+\NormalTok{rmse_lasso_test <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((test_results}\OperatorTok{$}\NormalTok{y_true }\OperatorTok{-}\StringTok{ }\NormalTok{test_results}\OperatorTok{$}\NormalTok{y_hat)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{nrow}\NormalTok{(test_results))}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(c)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_lasso_test <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(test_results) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y=}\NormalTok{ y_hat)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y =}\NormalTok{ y_true), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{)  }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{label =}\NormalTok{ R_squared_label, }\DataTypeTok{x =} \DecValTok{125}\NormalTok{, }\DataTypeTok{y =} \DecValTok{250}\NormalTok{, }\DataTypeTok{label.padding =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.55}\NormalTok{, }\StringTok{"lines"}\NormalTok{),}
+    \DataTypeTok{label.size =} \FloatTok{0.35}\NormalTok{,}
+    \DataTypeTok{color =} \StringTok{"black"}\NormalTok{,}
+    \DataTypeTok{fill=}\StringTok{"#69b3a2"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Predicted Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'True Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Lasso Test Prediction'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{))  }
+\NormalTok{lasso_beta_hat <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(lasso_best}\OperatorTok{$}\NormalTok{beta)}
+\NormalTok{lasso_var_names <-}\StringTok{ }\KeywordTok{rownames}\NormalTok{(lasso_best}\OperatorTok{$}\NormalTok{beta)}
+\NormalTok{lasso_final_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{lasso_coeffs =}\NormalTok{ lasso_beta_hat)}
+\KeywordTok{rownames}\NormalTok{(lasso_final_df) =}\StringTok{ }\NormalTok{lasso_var_names}
+\CommentTok{# PCA PART -----------------------------------------------------}
+\NormalTok{dir =}\StringTok{ }\KeywordTok{getwd}\NormalTok{()}
+\NormalTok{data_dir <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(dir, }\StringTok{'/Jasen/df_imp.RData'}\NormalTok{, }\DataTypeTok{sep =} \StringTok{''}\NormalTok{)}
+\KeywordTok{load}\NormalTok{(data_dir)}
+\NormalTok{response_vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'TARGET_deathRate'}\NormalTok{)}
+\NormalTok{y <-}\StringTok{ }\NormalTok{df_imp4 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(response_vars)}
+\NormalTok{y <-}\StringTok{ }\KeywordTok{unname}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(y))}
+\NormalTok{do_not_include <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'ID'}\NormalTok{, }\StringTok{'TARGET_deathRate'}\NormalTok{, }\StringTok{'incidenceRate'}\NormalTok{, }\StringTok{'popEst2015_log'}\NormalTok{, }\StringTok{'medIncome'}\NormalTok{, }\StringTok{'avgAnnCount_log'}\NormalTok{)}
+\NormalTok{do_not_include <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'ID'}\NormalTok{, }\StringTok{'TARGET_deathRate'}\NormalTok{)}
+\NormalTok{df <-}\StringTok{ }\NormalTok{df_imp4 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\StringTok{ }\NormalTok{do_not_include)}
+\NormalTok{vars_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{colnames}\NormalTok{(df)}
+\NormalTok{df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{sapply}\NormalTok{(df, as.numeric))}
+\NormalTok{S <-}\StringTok{ }\KeywordTok{cov}\NormalTok{(df)}
+\NormalTok{eig <-}\StringTok{ }\KeywordTok{eigen}\NormalTok{(S)}
+\NormalTok{eig_vals <-}\StringTok{ }\NormalTok{eig}\OperatorTok{$}\NormalTok{values}
+\NormalTok{eig_vecs <-}\StringTok{ }\NormalTok{eig}\OperatorTok{$}\NormalTok{vectors}
+\NormalTok{cum_var_explained <-}\StringTok{ }\KeywordTok{cumsum}\NormalTok{(eig_vals}\OperatorTok{/}\NormalTok{(}\KeywordTok{sum}\NormalTok{(eig_vals)))}
+\NormalTok{PCA_model <-}\StringTok{ }\KeywordTok{prcomp}\NormalTok{(df)}
+\NormalTok{PCA_loadings <-}\StringTok{ }\NormalTok{PCA_model}\OperatorTok{$}\NormalTok{rotation}
+\NormalTok{PCA_summary <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(PCA_model)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{221}\NormalTok{)}
+\NormalTok{test_set_index <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df), }\KeywordTok{floor}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(df))}\OperatorTok{/}\DecValTok{10}\NormalTok{)}
+\NormalTok{train_set_index <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df), test_set_index)}
+\NormalTok{test <-}\StringTok{ }\NormalTok{df[test_set_index,]}
+\NormalTok{train <-}\StringTok{ }\NormalTok{df[train_set_index,]}
+\NormalTok{test_y <-}\StringTok{ }\NormalTok{y[test_set_index]}
+\NormalTok{test_x <-}\StringTok{ }\NormalTok{test }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(vars_}\DecValTok{1}\NormalTok{)}
+\NormalTok{train_y <-}\StringTok{ }\NormalTok{y[train_set_index]}
+\NormalTok{train_x <-}\StringTok{ }\NormalTok{train }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(vars_}\DecValTok{1}\NormalTok{)}
+\NormalTok{num_comp <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(train_x)}
+\NormalTok{mses <-}\StringTok{ }\KeywordTok{integer}\NormalTok{(}\KeywordTok{ncol}\NormalTok{(train_x))}
+\NormalTok{results <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{()}
+\NormalTok{PCA_train_model <-}\StringTok{ }\KeywordTok{prcomp}\NormalTok{(train_x)}
+\NormalTok{component_matrix <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(train_x) }\OperatorTok{%*%}\StringTok{ }\NormalTok{PCA_train_model}\OperatorTok{$}\NormalTok{rotation)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in}\NormalTok{ num_comp)\{}
+  
+\NormalTok{  pca_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(component_matrix[,}\DecValTok{1}\OperatorTok{:}\NormalTok{i])}
+  
+  
+\NormalTok{  eq <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(pca_df), }\DataTypeTok{collapse =} \StringTok{' + '}\NormalTok{)}
+\NormalTok{  eq <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'deathRate'}\NormalTok{, eq, }\DataTypeTok{sep =} \StringTok{' ~ '}\NormalTok{)}
+  
+\NormalTok{  pca_df <-}\StringTok{ }\NormalTok{pca_df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{deathRate =}\NormalTok{ train_y)}
+  
+  \CommentTok{# Train the model}
+  
+\NormalTok{  train.control <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+  
+\NormalTok{  model <-}\StringTok{ }\KeywordTok{train}\NormalTok{(deathRate }\OperatorTok{~}\NormalTok{., }\DataTypeTok{data =}\NormalTok{ pca_df, }\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{,}
+               \DataTypeTok{trControl =}\NormalTok{ train.control)}
+  \ControlFlowTok{if}\NormalTok{(i }\OperatorTok{==}\StringTok{ }\DecValTok{1}\NormalTok{)\{}
+\NormalTok{    results <-}\StringTok{ }\NormalTok{model}\OperatorTok{$}\NormalTok{results}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{\{}
+\NormalTok{    results <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(results, model}\OperatorTok{$}\NormalTok{results)}
+\NormalTok{  \}}
+\NormalTok{\}}
+\NormalTok{results <-}\StringTok{ }\NormalTok{results }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{ID =} \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(results)))}
+\NormalTok{results_best <-}\StringTok{ }\NormalTok{results }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(ID }\OperatorTok{==}\StringTok{ }\DecValTok{10}\NormalTok{)}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(a)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_pca_hyper <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ results, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ ID, }\DataTypeTok{y =}\NormalTok{ RMSE)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ results_best, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ ID, }\DataTypeTok{y=}\NormalTok{ RMSE), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'# of PCs'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'RMSE'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Selecting Number of Principal Components'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{))   }
+\NormalTok{n <-}\StringTok{ }\DecValTok{10}
+\NormalTok{train_component_matrix <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(train_x) }\OperatorTok{%*%}\StringTok{ }\NormalTok{PCA_train_model}\OperatorTok{$}\NormalTok{rotation)}
+\NormalTok{pca_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(train_component_matrix[,}\DecValTok{1}\OperatorTok{:}\NormalTok{n])}
+\NormalTok{eq <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(pca_df), }\DataTypeTok{collapse =} \StringTok{' + '}\NormalTok{)}
+\NormalTok{eq <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'deathRate'}\NormalTok{, eq, }\DataTypeTok{sep =} \StringTok{' ~ '}\NormalTok{)}
+\NormalTok{pca_df <-}\StringTok{ }\NormalTok{pca_df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{deathRate =}\NormalTok{ train_y)}
+\NormalTok{pca_train_model_}\DecValTok{2}\NormalTok{ <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(eq, }\DataTypeTok{data =}\NormalTok{ pca_df)}
+\NormalTok{RMSE_PCA_train <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{(}\KeywordTok{residuals}\NormalTok{(pca_train_model_}\DecValTok{2}\NormalTok{)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{nrow}\NormalTok{(pca_df))}
+\NormalTok{y_pred <-}\StringTok{ }\NormalTok{pca_train_model_}\DecValTok{2}\OperatorTok{$}\NormalTok{fitted.values}
+\NormalTok{pca_df <-}\StringTok{ }\NormalTok{pca_df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{y_pred =}\NormalTok{ y_pred)}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unname}\NormalTok{(}\KeywordTok{cor}\NormalTok{(y_pred, train_y)))}
+\NormalTok{R_squared_PCA_train <-}\StringTok{ }\NormalTok{R_squared}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"%.3f"}\NormalTok{, }\KeywordTok{round}\NormalTok{(R_squared,}\DecValTok{3}\NormalTok{))}
+\NormalTok{R_squared_label <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'R^2 = '}\NormalTok{, R_squared)}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(b)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_pca_train <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ pca_df) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ deathRate, }\DataTypeTok{y =}\NormalTok{ y_pred)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ deathRate, }\DataTypeTok{y =}\NormalTok{ deathRate), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{label =}\NormalTok{ R_squared_label, }\DataTypeTok{x =} \DecValTok{100}\NormalTok{, }\DataTypeTok{y =} \DecValTok{275}\NormalTok{, }\DataTypeTok{label.padding =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.55}\NormalTok{, }\StringTok{"lines"}\NormalTok{), }
+             \DataTypeTok{label.size =} \FloatTok{0.35}\NormalTok{,}
+             \DataTypeTok{color =} \StringTok{"black"}\NormalTok{,}
+             \DataTypeTok{fill=}\StringTok{"#69b3a2"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'True Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Predicted Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'PCA Train Prediction'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{)) }
+\NormalTok{n <-}\StringTok{ }\DecValTok{10}
+\CommentTok{# use the train_PCA_loadings}
+\NormalTok{test_component_matrix <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(test_x) }\OperatorTok{%*%}\StringTok{ }\NormalTok{PCA_train_model}\OperatorTok{$}\NormalTok{rotation)}
+\NormalTok{pca_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(test_component_matrix[,}\DecValTok{1}\OperatorTok{:}\NormalTok{n])}
+\NormalTok{eq <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(pca_df), }\DataTypeTok{collapse =} \StringTok{' + '}\NormalTok{)}
+\NormalTok{eq <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'deathRate'}\NormalTok{, eq, }\DataTypeTok{sep =} \StringTok{' ~ '}\NormalTok{)}
+\CommentTok{### Do we fit the test set data and get beta_test_hat??}
+\CommentTok{# pca_test_model <- lm(eq, data = pca_df)}
+\CommentTok{# RMSE_PCA_test <- sqrt(sum(residuals(pca_test_model)^2)/nrow(pca_df))}
+\CommentTok{# }
+\CommentTok{# y_pred <- unname(predict(pca_test_model))}
+\NormalTok{y_pred <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(pca_train_model_}\DecValTok{2}\NormalTok{, test_component_matrix)}
+\NormalTok{RMSE_PCA_test <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((y_pred }\OperatorTok{-}\StringTok{ }\NormalTok{test_y)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{nrow}\NormalTok{(pca_df))}
+\NormalTok{pca_df <-}\StringTok{ }\NormalTok{pca_df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{y_pred =}\NormalTok{ y_pred)}
+\NormalTok{pca_df <-}\StringTok{ }\NormalTok{pca_df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{deathRate =}\NormalTok{ test_y)}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unname}\NormalTok{(}\KeywordTok{cor}\NormalTok{(y_pred, test_y)))}
+\NormalTok{R_squared_PCA_test <-}\StringTok{ }\NormalTok{R_squared}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"%.3f"}\NormalTok{, }\KeywordTok{round}\NormalTok{(R_squared,}\DecValTok{3}\NormalTok{))}
+\NormalTok{R_squared_label <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'R^2 = '}\NormalTok{, R_squared)}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(c)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_pca_test <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ pca_df) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ deathRate, }\DataTypeTok{y =}\NormalTok{ y_pred)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ deathRate, }\DataTypeTok{y =}\NormalTok{ deathRate), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{label =}\NormalTok{ R_squared_label, }\DataTypeTok{x =} \DecValTok{125}\NormalTok{, }\DataTypeTok{y =} \DecValTok{250}\NormalTok{, }\DataTypeTok{label.padding =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.55}\NormalTok{, }\StringTok{"lines"}\NormalTok{), }
+             \DataTypeTok{label.size =} \FloatTok{0.35}\NormalTok{,}
+             \DataTypeTok{color =} \StringTok{"black"}\NormalTok{,}
+             \DataTypeTok{fill=}\StringTok{"#69b3a2"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'True Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Predicted Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'PCA Test Prediction'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{)) }
+\NormalTok{s_PCA <-}\StringTok{ }\KeywordTok{summary}\NormalTok{(pca_train_model_}\DecValTok{2}\NormalTok{)}
+\NormalTok{loadings <-}\StringTok{ }\NormalTok{PCA_train_model}\OperatorTok{$}\NormalTok{rotation}
+\NormalTok{final_loadings <-}\StringTok{ }\NormalTok{loadings[,}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{]}
+\CommentTok{# STEPWISE ---------------------------------------------------------}
+\NormalTok{dir =}\StringTok{ }\KeywordTok{getwd}\NormalTok{()}
+\NormalTok{data_dir <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(dir, }\StringTok{'/Jasen/df_imp.RData'}\NormalTok{, }\DataTypeTok{sep =} \StringTok{''}\NormalTok{)}
+\KeywordTok{load}\NormalTok{(data_dir)}
+\NormalTok{df <-}\StringTok{ }\NormalTok{df_imp4 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'ID'}\NormalTok{))}
+\NormalTok{response_vars <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'TARGET_deathRate'}\NormalTok{)}
+\NormalTok{vars <-}\StringTok{ }\KeywordTok{colnames}\NormalTok{(df)}
+\NormalTok{vars_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(vars, response_vars)}
+\NormalTok{predict_vars <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(vars_}\DecValTok{1}\NormalTok{, }\DataTypeTok{collapse =} \StringTok{' + '}\NormalTok{)}
+\NormalTok{df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{sapply}\NormalTok{(df, as.numeric))}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{221}\NormalTok{)}
+\NormalTok{test_set_index <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df), }\KeywordTok{floor}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(df))}\OperatorTok{/}\DecValTok{10}\NormalTok{)}
+\NormalTok{train_set_index <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(df), test_set_index)}
+\NormalTok{test <-}\StringTok{ }\NormalTok{df[test_set_index,]}
+\NormalTok{train <-}\StringTok{ }\NormalTok{df[train_set_index,]}
+\NormalTok{test_y <-}\StringTok{ }\NormalTok{test }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(response_vars)}
+\NormalTok{test_y <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{unname}\NormalTok{(test_y))}
+\NormalTok{test_x <-}\StringTok{ }\NormalTok{test }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(vars_}\DecValTok{1}\NormalTok{)}
+\NormalTok{train_y <-}\StringTok{ }\NormalTok{train }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(response_vars)}
+\NormalTok{train_y <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{unname}\NormalTok{(train_y))}
+\NormalTok{train_x <-}\StringTok{ }\NormalTok{train }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(vars_}\DecValTok{1}\NormalTok{)}
+\NormalTok{step_model <-}\StringTok{ }\KeywordTok{step}\NormalTok{(}\KeywordTok{lm}\NormalTok{(TARGET_deathRate }\OperatorTok{~}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ train), }\OperatorTok{~}\StringTok{ }\NormalTok{incidenceRate }\OperatorTok{+}\StringTok{ }\NormalTok{medIncome }\OperatorTok{+}\StringTok{ }\NormalTok{povertyPercent }\OperatorTok{+}\StringTok{ }\NormalTok{MedianAge }\OperatorTok{+}\StringTok{ }\NormalTok{AvgHouseholdSize }\OperatorTok{+}\StringTok{ }\NormalTok{PercentMarried }\OperatorTok{+}\StringTok{ }\NormalTok{PctNoHS18_}\DecValTok{24} \OperatorTok{+}\StringTok{ }\NormalTok{PctHS18_}\DecValTok{24} \OperatorTok{+}\StringTok{ }\NormalTok{PctSomeCol18_}\DecValTok{24} \OperatorTok{+}\StringTok{ }\NormalTok{PctHS25_Over }\OperatorTok{+}\StringTok{ }\NormalTok{PctBachDeg25_Over }\OperatorTok{+}\StringTok{ }\NormalTok{PctEmployed16_Over }\OperatorTok{+}\StringTok{ }\NormalTok{PctUnemployed16_Over }\OperatorTok{+}\StringTok{ }\NormalTok{PctPrivateCoverage }\OperatorTok{+}\StringTok{ }\NormalTok{PctPrivateCoverageAlone }\OperatorTok{+}\StringTok{ }\NormalTok{PctEmpPrivCoverage }\OperatorTok{+}\StringTok{ }\NormalTok{PctPublicCoverage }\OperatorTok{+}\StringTok{ }\NormalTok{PctPublicCoverageAlone }\OperatorTok{+}\StringTok{ }\NormalTok{PctWhite }\OperatorTok{+}\StringTok{ }\NormalTok{PctBlack }\OperatorTok{+}\StringTok{ }\NormalTok{PctMarriedHouseholds }\OperatorTok{+}\StringTok{ }\NormalTok{BirthRate }\OperatorTok{+}\StringTok{ }\NormalTok{Imputed_PctEmployed16_Over }\OperatorTok{+}\StringTok{ }\NormalTok{Imputed_PctPrivateCoverageAlone }\OperatorTok{+}\StringTok{ }\NormalTok{avgAnnCount_log }\OperatorTok{+}\StringTok{ }\NormalTok{avgDeathsPerYear_log }\OperatorTok{+}\StringTok{ }\NormalTok{popEst2015_log }\OperatorTok{+}\StringTok{ }\NormalTok{studyPerCap_log }\OperatorTok{+}\StringTok{ }\NormalTok{PctBachDeg18_}\DecValTok{24}\NormalTok{_log }\OperatorTok{+}\StringTok{ }\NormalTok{PctAsian_log }\OperatorTok{+}\StringTok{ }\NormalTok{PctOtherRace_log }\OperatorTok{+}\StringTok{ }\NormalTok{hs_black }\OperatorTok{+}\StringTok{ }\NormalTok{hs_white }\OperatorTok{+}\StringTok{ }\NormalTok{college_black, }\DataTypeTok{direction=}\StringTok{"both"}\NormalTok{)}
+\NormalTok{features <-}\StringTok{ 'PctBachDeg25_Over + incidenceRate + povertyPercent + PctHS18_24 + avgDeathsPerYear_log + popEst2015_log + MedianAge + medIncome + avgAnnCount_log + PctUnemployed16_Over + PctPublicCoverage + PctPublicCoverageAlone + BirthRate + AvgHouseholdSize + PctOtherRace_log + studyPerCap_log + PctEmployed16_Over + Imputed_PctEmployed16_Over + PctPrivateCoverage + college_black + PctBlack + PctNoHS18_24 + PctEmpPrivCoverage'}
+\NormalTok{features2 <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{strsplit}\NormalTok{(features, }\DataTypeTok{split =} \StringTok{' + '}\NormalTok{, }\DataTypeTok{fixed =}\NormalTok{ T))}
+\NormalTok{train_x <-}\StringTok{ }\NormalTok{train_x }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(features2)}
+\NormalTok{pred_train_y <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(step_model, }\DataTypeTok{data =}\NormalTok{ train_x)}
+\NormalTok{RMSE_step_train <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((pred_train_y }\OperatorTok{-}\StringTok{ }\NormalTok{train_y)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{length}\NormalTok{(train_y))}
+\NormalTok{train_results <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(train_y, pred_train_y)}
+\KeywordTok{colnames}\NormalTok{(train_results) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'y_true'}\NormalTok{, }\StringTok{'y_hat'}\NormalTok{)}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unname}\NormalTok{(}\KeywordTok{cor}\NormalTok{(train_y, pred_train_y)))}
+\NormalTok{R_squared_step_train <-}\StringTok{ }\NormalTok{R_squared}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"%.3f"}\NormalTok{, }\KeywordTok{round}\NormalTok{(R_squared,}\DecValTok{3}\NormalTok{))}
+\NormalTok{R_squared_label <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'R^2 = '}\NormalTok{, R_squared)}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(b)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_step_train <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(train_results) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y=}\NormalTok{ y_hat)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y =}\NormalTok{ y_true), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{)  }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{label =}\NormalTok{ R_squared_label, }\DataTypeTok{x =} \DecValTok{100}\NormalTok{, }\DataTypeTok{y =} \DecValTok{275}\NormalTok{, }\DataTypeTok{label.padding =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.55}\NormalTok{, }\StringTok{"lines"}\NormalTok{),}
+    \DataTypeTok{label.size =} \FloatTok{0.35}\NormalTok{,}
+    \DataTypeTok{color =} \StringTok{"black"}\NormalTok{,}
+    \DataTypeTok{fill=}\StringTok{"#69b3a2"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Predicted Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'True Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Stepwise Selection Train Prediction'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{)) }
+\NormalTok{test_x <-}\StringTok{ }\NormalTok{test_x }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(features2)}
+\NormalTok{pred_test_y <-}\StringTok{ }\KeywordTok{unname}\NormalTok{(}\KeywordTok{predict}\NormalTok{(step_model, test_x))}
+\NormalTok{RMSE_step_test <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((pred_test_y }\OperatorTok{-}\StringTok{ }\NormalTok{test_y)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{length}\NormalTok{(test_y))}
+\NormalTok{test_results <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(test_y, pred_test_y)}
+\KeywordTok{colnames}\NormalTok{(test_results) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'y_true'}\NormalTok{, }\StringTok{'y_hat'}\NormalTok{)}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{unname}\NormalTok{(}\KeywordTok{cor}\NormalTok{(test_y, pred_test_y)))}
+\NormalTok{R_squared_step_test <-}\StringTok{ }\NormalTok{R_squared}
+\NormalTok{R_squared <-}\StringTok{ }\KeywordTok{sprintf}\NormalTok{(}\StringTok{"%.3f"}\NormalTok{, }\KeywordTok{round}\NormalTok{(R_squared,}\DecValTok{3}\NormalTok{))}
+\NormalTok{R_squared_label <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'R^2 = '}\NormalTok{, R_squared)}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(c)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_step_test <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(test_results) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y=}\NormalTok{ y_hat)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ y_true, }\DataTypeTok{y =}\NormalTok{ y_true), }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{)  }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_label}\NormalTok{(}\DataTypeTok{label =}\NormalTok{ R_squared_label, }\DataTypeTok{x =} \DecValTok{125}\NormalTok{, }\DataTypeTok{y =} \DecValTok{250}\NormalTok{, }\DataTypeTok{label.padding =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.55}\NormalTok{, }\StringTok{"lines"}\NormalTok{),}
+    \DataTypeTok{label.size =} \FloatTok{0.35}\NormalTok{,}
+    \DataTypeTok{color =} \StringTok{"black"}\NormalTok{,}
+    \DataTypeTok{fill=}\StringTok{"#69b3a2"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Predicted Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'True Cancer Death Rate'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Stepwise Selection Test Prediction'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{))   }
+\NormalTok{step_coeffs <-}\StringTok{ }\NormalTok{step_model}\OperatorTok{$}\NormalTok{coefficients}
+\NormalTok{df_step_coeffs <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(step_coeffs)}
+\NormalTok{model <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(TARGET_deathRate }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ train)}
+\NormalTok{k <-}\StringTok{ }\KeywordTok{ols_step_both_aic}\NormalTok{(model)}
+\NormalTok{df_AIC <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{steps =} \DecValTok{1}\OperatorTok{:}\NormalTok{k}\OperatorTok{$}\NormalTok{steps, }\DataTypeTok{AIC =}\NormalTok{ k}\OperatorTok{$}\NormalTok{aic, }\DataTypeTok{vars =}\NormalTok{ k}\OperatorTok{$}\NormalTok{predictors)}
+\NormalTok{grob <-}\StringTok{ }\KeywordTok{grobTree}\NormalTok{(}\KeywordTok{textGrob}\NormalTok{(}\StringTok{"(a)"}\NormalTok{, }\DataTypeTok{x=}\FloatTok{0.01}\NormalTok{,  }\DataTypeTok{y=}\FloatTok{0.97}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{,}
+  \DataTypeTok{gp=}\KeywordTok{gpar}\NormalTok{(}\DataTypeTok{fontsize=}\DecValTok{13}\NormalTok{)))}
+\NormalTok{g_step_hyper <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(df_AIC, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{ steps, }\DataTypeTok{y=}\NormalTok{ AIC, }\DataTypeTok{label=}\NormalTok{vars))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{color =} \StringTok{'red'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_text}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label=}\NormalTok{vars),}\DataTypeTok{hjust=}\DecValTok{0}\NormalTok{, }\DataTypeTok{vjust=}\DecValTok{0}\NormalTok{, }\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{size =} \DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlim}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{30}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylim}\NormalTok{(}\DecValTok{21000}\NormalTok{, }\DecValTok{25500}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'Steps'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{'AIC'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Forward and Backward Stepwise Model'}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotation_custom}\NormalTok{(grob) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{))   }
+\CommentTok{# PUTTING IT ALL TOEGHER ---------------------------------------------------}
+\NormalTok{final_coeffs <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(df_step_coeffs, lasso_final_df, }\DataTypeTok{by =} \StringTok{"row.names"}\NormalTok{, }\DataTypeTok{all =} \OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{rownames}\NormalTok{(final_coeffs) <-}\StringTok{ }\NormalTok{final_coeffs}\OperatorTok{$}\NormalTok{Row.names}
+\NormalTok{final_coeffs <-}\StringTok{ }\NormalTok{final_coeffs }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\KeywordTok{c}\NormalTok{(Row.names))}
+\CommentTok{#the loadings for the PCA}
+\CommentTok{#final_loadings}
+\CommentTok{#the betas for the 10 PC's}
+\CommentTok{#summary(pca_train_model_2)}
+\NormalTok{R_squared_train <-}\StringTok{ }\KeywordTok{c}\NormalTok{(r_squared_lasso_train, R_squared_PCA_train, R_squared_step_train)}
+\NormalTok{R_squared_test <-}\StringTok{ }\KeywordTok{c}\NormalTok{(r_squared_lasso_test, R_squared_PCA_test, R_squared_step_test)}
+\NormalTok{RMSE_train <-}\StringTok{ }\KeywordTok{c}\NormalTok{(rmse_lasso_train, RMSE_PCA_train, RMSE_step_train)}
+\NormalTok{RMSE_test <-}\StringTok{ }\KeywordTok{c}\NormalTok{(rmse_lasso_test, RMSE_PCA_test, RMSE_step_test)}
+\NormalTok{final_metrics <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(R_squared_train, R_squared_test, RMSE_train, RMSE_test)}
+\KeywordTok{colnames}\NormalTok{(final_metrics) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'Lasso'}\NormalTok{, }\StringTok{'PCA'}\NormalTok{, }\StringTok{'Stepwise'}\NormalTok{)}
+\NormalTok{train_metrics <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(R_squared_train, RMSE_train)}
+\KeywordTok{colnames}\NormalTok{(train_metrics) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'Lasso'}\NormalTok{, }\StringTok{'PCA'}\NormalTok{, }\StringTok{'Stepwise'}\NormalTok{)}
+\NormalTok{test_metrics <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(R_squared_test, RMSE_test)}
+\KeywordTok{colnames}\NormalTok{(test_metrics) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{'Lasso'}\NormalTok{, }\StringTok{'PCA'}\NormalTok{, }\StringTok{'Stepwise'}\NormalTok{)}
+\NormalTok{lay <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{),}
+             \KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{6}\NormalTok{),}
+             \KeywordTok{c}\NormalTok{(}\DecValTok{7}\NormalTok{,}\DecValTok{8}\NormalTok{,}\DecValTok{9}\NormalTok{))}
+\NormalTok{lay1 <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\NormalTok{final_metrics}
+\NormalTok{final_coeffs}
+\KeywordTok{grid.arrange}\NormalTok{(g_lasso_hyper,g_lasso_train,g_lasso_test, }\DataTypeTok{layout_matrix =}\NormalTok{ lay1)}
+\KeywordTok{grid.arrange}\NormalTok{(g_pca_hyper,g_pca_train,g_pca_test, }\DataTypeTok{layout_matrix =}\NormalTok{ lay1)}
+\KeywordTok{grid.arrange}\NormalTok{(g_step_hyper,g_step_train,g_step_test, }\DataTypeTok{layout_matrix =}\NormalTok{ lay1)}
+\NormalTok{final_loadings}
 \end{Highlighting}
 \end{Shaded}
 
