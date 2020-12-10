@@ -1,0 +1,104 @@
+---
+title: "Table"
+author: "Alexander ZHU"
+output: pdf_document
+---
+
+```{r}
+library(tidyverse)
+cancer=read.csv("cancer_registry.csv")
+
+```
+
+```{r}
+summary(cancer)
+```
+
+
+# Table
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(gplots)
+library(glmnet)
+library(mice)
+df = read.csv("cancer_registry.csv") %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>% filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200) %>%
+  filter(AvgHouseholdSize > 1)
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
+response_vars <- c('TARGET_deathRate')
+predict_vars <- paste(vars_1, collapse = ' + ')
+df <- df %>% select(- c('binnedInc', 'Geography'))
+
+df <- data.frame(sapply(df, as.numeric))
+df2<-df[, c(colnames(df)[7],colnames(df)[9:32])]
+
+library("reshape2")
+data_long <- melt(df2)
+library("ggplot2")# Reshaping data frame
+ggplot(data_long, aes(x = variable, y = value)) + theme(axis.text.x=element_text(angle=90,hjust=1)) + ggtitle("Boxplots of Variables in Cancer_Registry Dataset ") + geom_boxplot()
+
+
+df3<-df[,c(colnames(df)[3:4])]
+data_long <- melt(df3)
+ggplot(data_long, aes(x = variable, y = value))+ ggtitle("Boxplot of Target_deathrate + IncidenceRate") + geom_boxplot()
+
+df4<-df[,c(colnames(df)[1:2])]
+data_long <- melt(df4)
+ggplot(data_long, aes(x = variable, y = value)) +ggtitle("Boxplot of AvgAnnCount + AvgDeathsPerYear")+ geom_boxplot()
+
+
+#medIncome, popEst2015, studyPerCap
+column_names <- c()
+res <- c()
+outlier <- c()
+for (i in colnames(df)){
+  if(class(df[[i]]) == "numeric") {
+     column_names <- c(column_names, i)
+     mean <- round(mean(df[[i]], na.rm = TRUE),2)
+     std <- round(sd(df[[i]],na.rm = TRUE),2)
+     cor <- round(cor(df[[i]], df[['TARGET_deathRate']], use="complete.obs"),3)
+     res <- c(res, mean)
+     res <- c(res, std)
+     res <- c(res, cor) 
+     if (i== "medIncome" || i == "popEst2015"|| i == "studyPerCap"){
+       boxplot(df[[i]], xlab=i)
+     }
+     out <- boxplot.stats(df[[i]])$out
+     percent <- 100*length(out)/length(df[[i]])
+     print(percent)
+     outlier <- c(outlier, percent)
+  }
+  else {
+    print("not numeric")
+  }
+}
+
+output_table <- matrix(res, ncol=3,byrow=TRUE)
+colnames(output_table) <- c("Mean", "Std", "R_Squared")
+rownames(output_table) <- column_names
+output <- as.table(output_table)
+Result <- output[order(output[,3]), ]
+
+
+
+outlier_table <- matrix(outlier, ncol=1, byrow=TRUE)
+colnames(outlier_table) <- c("outlier in percentage")
+rownames(outlier_table) <- column_names
+outlier_table_output <- as.table(outlier_table)
+
+```
+
+```{r}
+print(Result)
+```
+
+```{r}
+print(outlier_table_output)
+```
+
