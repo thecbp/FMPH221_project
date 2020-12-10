@@ -510,3 +510,13 @@ cancer %>%
 ```
 
 QQ-plot suggests that the errors are not normally distributed, which means that the LSE estimates may not be normally distributed. This justifies the use of bootstrap to attempt to check the significance of the model estimates.
+
+
+# Model without interactions
+
+```{r}
+pred_test_y <- unname(predict(echeck, test_x))
+
+RMSE_step_test <- sqrt(sum((pred_test_y - test_y)^2)/length(test_y))
+```
+
