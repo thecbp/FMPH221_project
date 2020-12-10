@@ -107,6 +107,9 @@ output <- as.table(output_table)
 output %>%  kable()
 ```
 
+\begin{center}
+Table 1: Data summary
+\end{center}
 
 Our data contained information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented typically as percentages. These data were taken from the 2013 Census. In terms of race-related variables, twe had percentages of each county that identified as a particular race (Asian, Black, White and Other). The data also contained information on educational acheivement as well, measured as the proportion of the county population who have achieved a certain degree of education (high school and college). The education variables were also divided up by age, with separate columns for people ages 18 to 24 and another set 25 years and over. The proportion of people who have public and private health insurance was another notable variable in the data. A few variables in the dataset span many magnitudes, like median income, so we considered performing a log transform as we chose features to inclide in the final model.
 
@@ -743,7 +746,7 @@ The stepwise selection model showed the best RMSE and $R^2$ in the training set.
 - **Jasen**: handled predicitve modeling, writing for predictive model parts of the report, editing/revising
 - **Christian**: handled explanatory modeling, writing for explanatory model parts of the report, performed the literature review, editing/revising
 
-Our project repo can be found at on [Github](https://github.com/thecbp/FMPH221_project), commits can be reviewed through time. 
+Our project repo can be found at on [Github (click me)](https://github.com/thecbp/FMPH221_project), commits can be reviewed through time. 
 
 \pagebreak
 
