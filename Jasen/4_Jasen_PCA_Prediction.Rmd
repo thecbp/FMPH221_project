@@ -123,7 +123,8 @@ grob <- grobTree(textGrob("(a)", x=0.01,  y=0.97, hjust=0,
 g_pca_hyper <- ggplot() + geom_point(data = results, aes(x = ID, y = RMSE)) + 
   geom_point(data = results_best, aes(x = ID, y= RMSE), color = 'red') + 
   xlab('# of PCs') + 
-  ylab('RMSE')  
+  ylab('RMSE') + 
+  annotation_custom(grob)
 
 g_pca_hyper
 
@@ -162,7 +163,8 @@ g_pca_train <- ggplot(data = pca_df) +
   geom_point(aes(x = deathRate, y = y_pred)) + 
   geom_line(aes(x = deathRate, y = deathRate), color = 'red') + 
   xlab('True Cancer Death Rate') + 
-  ylab('Predicted Cancer Death Rate')
+  ylab('Predicted Cancer Death Rate') + 
+  annotation_custom(grob)
 
 g_pca_train
 ```
@@ -209,7 +211,8 @@ g_pca_test <- ggplot(data = pca_df) +
   geom_point(aes(x = deathRate, y = y_pred)) + 
   geom_line(aes(x = deathRate, y = deathRate), color = 'red') +
   xlab('True Cancer Death Rate') + 
-  ylab('Predicted Cancer Death Rate')
+  ylab('Predicted Cancer Death Rate') + 
+  annotation_custom(grob)
 
 g_pca_test
 

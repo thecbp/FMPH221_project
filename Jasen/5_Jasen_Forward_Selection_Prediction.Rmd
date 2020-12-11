@@ -84,7 +84,8 @@ g_step_train <- ggplot(train_results) +
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red') +
   ylab('Predicted Cancer Death Rate') + 
-  xlab('True Cancer Death Rate')
+  xlab('True Cancer Death Rate') + 
+  annotation_custom(grob)
 
 
 g_step_train
@@ -112,7 +113,8 @@ g_step_test <- ggplot(test_results) +
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
   ylab('Predicted Cancer Death Rate') + 
-  xlab('True Cancer Death Rate')  
+  xlab('True Cancer Death Rate') + 
+  annotation_custom(grob)
 
 g_step_test
 ```
@@ -147,7 +149,8 @@ g_step_hyper <- ggplot(df_AIC, aes(x= steps, y= AIC, label=vars))+
   xlim(0,30) + 
   ylim(21000, 25500) + 
   xlab('Steps') + 
-  ylab('AIC')
+  ylab('AIC') + 
+  annotation_custom(grob)
 
 g_step_hyper
 
