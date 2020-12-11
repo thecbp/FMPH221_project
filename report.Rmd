@@ -4,11 +4,12 @@ author: "Jasen Zhang, Alexander Zhu, Christian Pascual"
 output: 
   pdf_document:
     latex_engine: xelatex
+    number_sections: true
 fontsize: 11pt
 geometry: margin=1in
 ---
 
-```{r, message = F, warning = F, echo = F }
+```{r intro, message = F, warning = F, echo = F }
 library(tidyverse)
 library(knitr)
 library(gplots)
@@ -20,7 +21,7 @@ library(olsrr)
 set.seed(1)
 knitr::opts_chunk$set(
   fig.align = "center",
-  out.width = "70%"
+  out.width = "80%"
 )
 # Load the data and do some processing
 cancer = read_csv("cancer_registry.csv") %>% 
@@ -56,33 +57,77 @@ cancer = read_csv("cancer_registry.csv") %>%
 
 # Introduction
 
-Cancer ranks among the leading causes of death worldwide. According to a report published by the American Cancer Society, 1.8 million new cancer cases are estimated to be diagnosed in 2020 in the United States, and more than 600,000 are expected to die directly as a result of cancer [1]. Cancer also carries a significant economic burden, costing the United States an estimated $80.2 billion according to a 2015 report [2]. From both a humane and economic perspective, investigation into effective, affordable cancer cures and treatments represents a important front of research. 
+Cancer ranks among the leading causes of death worldwide. According to a report published by the American Cancer Society, 1.8 million new cancer cases are estimated to be diagnosed in 2020 in the United States, and more than 600,000 are expected to die directly as a result of cancer [1]. Cancer also carries a significant economic burden, costing the United States an estimated $80.2 billion according to a 2015 report [2]. From both a humane and economic perspective, investigation into effective cancer interventions represents a important front of research. 
 
-Cancer is inherently a disease of the genes, but a wide berth of research has demonstrated that a diverse set of environmental and socioeconomic factors contribute to increased risk of cancer incidence and mortality. For example, Adler et. al showed that higher socioeconomic status was associated with decreased cancer mortality [3]. Rawl et. al demonstrates a similar result in a statewide survey in Indiana that income and education were inversely related to cancer mortality. Rawl also discusses how race affected cancer mortality in their sample, finding that African-American participants worried less about cancer and were less likely to seek treatment [4]. Rohfling et. al found that uninsured patients or those under Medicaid were more likely to have more advanced tumors and poorer survival compared to peers with private insurance [5]. Higher socioeconomic status gives people better access to healthcare resources that are potentially life-saving or will help increase survival, and the opposite effect has been seen the lower scale.
+A wide berth of research has demonstrated that environmental and socioeconomic factors contribute to increased risk of cancer and mortality. For example, Adler et. al showed that higher socioeconomic status was associated with decreased cancer mortality [3]. Rawl et. al demonstrates a similar result in a statewide survey in Indiana that income and education were inversely related to cancer mortality. Rawl also discusses how race affected cancer mortality in their sample, finding that African-American participants worried less about cancer and were less likely to seek treatment [4]. Rohfling et. al found that uninsured patients or those under Medicaid were more likely to have more advanced tumors and poorer survival compared to peers with private insurance [5]. Higher socioeconomic status gives people better access to healthcare resources that are potentially life-saving or will help increase survival, and the opposite effect has been seen the lower scale.
 
-Similar research has documented race-based health disparities in cancer mortality. In an observational study in Philadelphia, Zeigler-Johnson found that black men were at the highest risk of prostate cancer relative to similar white counterparts [6]. Looking at data spanning from 1950 to 2014, a study by Singh showed that individuals from lower educational backgrounds experienced higher mortality of various types of cancer. Furthermore, African-Americans saw higher cancer mortality compared to their Asian and White counterparts in this group [7]. These are just a few examples of studies that have documented how race influences cancer mortality, highlighting that it is critical to consider race-based health disparities in any cancer-related intervention. 
+Similar research has documented race-based health disparities in cancer mortality. In an observational study in Philadelphia, Zeigler-Johnson found that black men were at the highest risk of prostate cancer relative to similar white counterparts [6]. Looking at data spanning from 1950 to 2014, a study by Singh showed that individuals from lower educational backgrounds experienced higher mortality of various types of cancer. Furthermore, African-Americans saw higher cancer mortality compared to their Asian and White counterparts in this group [7]. These are just a few examples that have documented how race influences cancer mortality, illustrating that it is a critical factor to consider race-based health disparities in any cancer-related intervention. Bahk et. al discussed the increasing trend in breast cancer mortality among Korean women between 1983 and 2012 was due to the increased mortality of the lower education groups, not the highest education group. Thus, it would be interesting to look at the cancer mortality in different education group and race.
 
-One difficulty in researching cancer is that it is an incredibly diverse collection of diseases, as opposed to a monolithic set of symptoms. Further complicating this is that different cancers can occur at different rates across different regions of the United States. Mokdad et. al found that there were distinct clusters of counties in different regions with especially high cancer mortality. For example, breast cancers are highly prevalent in the southern belt, whereas liver cancer is the prevailing diagnosis along the Texas-Mexico border [8]. The heterogeneity of different cancers in the United States offers an interesting research avenue. Just as the aforementioned studies examined how socioeconomic factors and race affect cancer mortality on an individual, it could be useful to understand how these factors relate to cancer mortality on a higher, geographic level. Understanding how these factors contribute to cancer mortality on a geographic level offers an opportunity for researchers to understand the factors that contribute to higher mortality in different states and possibly a better way to allocate health resources to areas that are harder hit.
+One difficulty in researching cancer is that it is an incredibly diverse collection of diseases, as opposed to a single monolithic illness. Further complicating this is that different cancers can occur at different rates across different regions of the United States. Mokdad et. al found that there were distinct clusters of counties in different regions with especially high cancer mortality. For example, breast cancers are highly prevalent in the southern belt, whereas liver cancer is the prevailing diagnosis along the Texas-Mexico border [8]. Just as the aforementioned studies examined how socioeconomic factors and race can influence cancer mortality on an individual level, it could be useful to understand how these factors relate to cancer mortality on a wider geographic level. Understanding how the relationship between these factors and cancer mortality on a geographic level offers an opportunity for researchers to create predicive models that can help us see what areas might have higher cancer burdern and thus be a way for us to know how we might to allocate limited resources to areas that are harder hit.
 
 ## Data
 
-For our analysis, we will use a dataset aggregated from multiple sources, which we note later. The data spans from 2010 to 2016 and includes information on `r nrow(cancer)` counties in the United States. There are a total of 3,143 counties and county-equivalents in the United States, so `r (((3143 - nrow(cancer)) / 3143) * 100) %>% round(1)`% of them are represented in the data. Our group did not aggregate the data ourselves, it is publically available and can be found [here](https://data.world/nrippner/ols-regression-challenge).
+For our analysis, we used a dataset aggregated from multiple sources, noted later. The data spanned from 2010 to 2016 and included information on `r nrow(cancer)` counties in the United States, the county being the observational unit in the data. There were a total of 3,143 counties and county-equivalents in the United States, so `r (((3143 - nrow(cancer)) / 3143) * 100) %>% round(1)`% of them were represented. Our group did not aggregate the data ourselves, it is publically available and can be found at this [link](https://data.world/nrippner/ols-regression-challenge). Table 1 contains a full overview of the data:
 
-Our data contains information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented typically as percentages. These data are gathered from the 2013 Census. Each row contains the percentage of each race (Asian, Black, White and Other) that live in the county. The data also contains information on educational acheivement as well, measured as the proportion of the county population who have achieved high school and college degrees. The proportion of people who have public and private health insurance is another notable variable in the data. 
+```{r data_table, echo = F, message = F, warning = F }
+df = read_csv("cancer_registry.csv") %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>% filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200) %>%
+  filter(AvgHouseholdSize > 1)
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
+response_vars <- c('TARGET_deathRate')
+predict_vars <- paste(vars_1, collapse = ' + ')
+df <- df %>% select(- c('binnedInc', 'Geography'))
 
-The cancer data has been aggregated from the American Community Survey, cancer.gov and clinicaltrials.gov, spanning from 2010 to 2016. In terms of important cancer-related factors, we have the incidence rate of *all* cancer diagnoses in the county, measured in terms of *mean per capita (100,000 people)* and the average number of cancer cases reported annually from 2010 to 2016. 
+df <- data.frame(sapply(df, as.numeric))
+df2<-df[, c(colnames(df)[7],colnames(df)[9:32])]
 
-Our target response is cancer mortality, also measured as mean per capita. In this dataset, cancer mortality ranges from `r cancer$target_death_rate %>% min` to `r cancer$target_death_rate %>% max`, with a median value of `r cancer$target_death_rate %>% median`. The outcome is also reasonably bell-shaped, so we don't think any transformation will be necessary for the analyses. 
+column_names <- c()
+res <- c()
+outlier <- c()
+for (i in colnames(df)){
+  if (class(df[[i]]) == "numeric") {
+     column_names <- c(column_names, i)
+     mean <- round(mean(df[[i]], na.rm = TRUE),2)
+     std <- round(sd(df[[i]],na.rm = TRUE),2)
+     cor <- round(cor(df[[i]], df[['TARGET_deathRate']], use="complete.obs"),3)
+     res <- c(res, mean)
+     res <- c(res, std)
+     res <- c(res, cor) 
+  }
+}
+
+output_table <- matrix(res, ncol=3,byrow=TRUE)
+colnames(output_table) <- c("Mean", "Std", "R_Squared")
+rownames(output_table) <- column_names
+output <- as.table(output_table)
+output %>%  kable()
+```
+
+\begin{center}
+Table 1: Data summary
+\end{center}
+
+Our data contained information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented typically as percentages. These data were taken from the 2013 Census. The $R^2$ reprsents the correlation between that single predictor and the outcome. In terms of race-related variables, twe had percentages of each county that identified as a particular race (Asian, Black, White and Other). The data also contained information on educational acheivement as well, measured as the proportion of the county population who have achieved a certain degree of education (high school and college). The education variables were also divided up by age, with separate columns for people ages 18 to 24 and another set 25 years and over. The proportion of people who have public and private health insurance was another notable variable in the data. A few variables in the dataset span many magnitudes, like median income, so we considered performing a log transform as we chose features to inclide in the final model.
+
+The cancer-related variables data were aggregated from the American Community Survey, cancer.gov and clinicaltrials.gov, spanning from 2010 to 2016. In terms of important cancer-related factors, we had the incidence rate of *all* cancer diagnoses in the county, measured in terms of *mean per capita (100,000 people)* and the average number of cancer cases reported annually from 2010 to 2016. Our target response was cancer mortality, also measured as mean per capita. In this dataset, cancer mortality ranged from `r cancer$target_death_rate %>% min` to `r cancer$target_death_rate %>% max`, with a median value of `r cancer$target_death_rate %>% median`. 
 
 ## Initial Analyses & Objectives
 
-Given our literature and what is present in our dataset, we aim to explore how different socioeconomic and demographic factors are associated with cancer mortality on a county level. 
+Given our literature and what is present in our dataset, we aimed to examine how different socioeconomic and demographic factors are associated with cancer mortality on a county level. 
+
+### Data Cleaning
+
+A few of the variables in the dataset showed skewed distributions such as `avgAnnCount` and `PctAsian` (Appendix Fig X). Therefore, we log-transformed these variables so that their distributions are closer to normality. Furthermore, we decided to exclude a few counties based on values that were magnitudes beyond any other county or had values that did not make sense (i.e. `MedianAge > 100`). There were also two variables, `PctEmployed16_Over` and `PctPrivateCoverageAlone`, both of which had < 20% missing data. We used the `mice` package in R to do impute for these missing values. 
 
 ### Correlation Between Predictors
 
-Many of the predictors are highly correlated, so we created a heat map to keep track of these intercorrelations. Figure 1 below shows this heat map.
+Many of the predictors were highly correlated, so we created a heat map to keep track of these intercorrelations. Figure 1 below shows this heat map.
 
-```{r, echo = F, message = F, waring = F }
+```{r fig_1, echo = F, message = F, waring = F }
 df <- read.csv('cancer_registry.csv') %>%
   mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
   filter(incidenceRate < 1000) %>%
@@ -104,15 +149,17 @@ heatmap2 <- cor(df_temp)
 heatmap.2(heatmap2, trace = 'none', margins = c(10,10), col = 'cm.colors', cexRow=0.7, cexCol = 0.7)
 ```
 
-The `povertyPercent` variable correlates highly with other predictors that deal with being under public insurance of being unemployed. Conversely, poverty is highly negatively correlated with having private insurance. The median ages of men and women are highly correlated as well, so we will probably opt for just one of these. Since the educational variable represent highest achievement, many of them are correlated as well. 
+\begin{center}
+Figure 1: Correlation heatmap between variables in our cancer mortality dataset.
+\end{center}
 
-In making our future models, we now know that we'll have to deal with this correlation and perform some model selection on our variables. We performed an initial PCA to figure out what variables explained most of the variance in average cancer mortality, and this will help guide our final model selection.
+The percentage of poverty in a county correlated highly with other predictors that deal with being under public insurance or being unemployed. The median ages of men and women were highly correlated as well. The education variables are also highly correlated. With these correlations in mind, we know that we need to account for this and include only one of them. 
 
 ### Interaction Between Race & Education
 
 One interesting trend that we found in the data was that there seemed to be an interaction between race and education in relation to cancer mortality. According to an article by the US Department of Education, the median percentage of adults 25 and over completing a bachelor's degree was 34%. We divided the counties by if they fell below or were equal to higher to the median value and investigated how cancer mortality changed with percentage of race (Figure 2).
 
-```{r, echo = F, message = F }
+```{r fig-2, echo = F, message = F }
 cancer %>% 
   mutate(
     high_college = pct_bach_deg25_over > 34, # median(pct_bach_deg18_24),
@@ -143,20 +190,23 @@ cancer %>%
   ) + 
   labs(
     title = "Death rate by percent of by race in a county and high education",
-    subtitle = "Figure 2: Effects plot of percentage of race in county, stratified by education achievement",
     x = "Percentage of race in county population",
     y = "Cancer Mortality (deaths / 100K)") +
   scale_color_discrete(labels = c("Above Median", "Below Median")) 
 ```
 
-The change is most drastic in Asians, but the trend holds over all races present in the data. For African-Americans, we also see an attenuation of the average cancer mortality desite it not converting to a negative correlation.
+\begin{center}
+Figure 2: Effects plot of percentage of race in county, stratified by education achievement
+\end{center}
+
+The change is most drastic in Asians, but the trend holds over all races present in the data. For African-Americans, we also see an attenuation of the average cancer mortality desite it not converting to a negative correlation. Our literature review showed that both education and race are both significantly associated with cancer mortality, so it raise an interesting question on if this can be utilized on a county level.
 
 Based on the results of our exploratory analyses, we propose two analytic questions:
 
 1. Can we identify county-level factors that contribute to a significant difference in cancer mortality? If so, can we identify any significant interaction between these factors that also contribute to increased cancer mortality?
-2. Can we create an effective predictive model from the data? If we can find any significant interactions from our explanatory model, might they be helpful in increasing predictive ability?
+2. Can we create an effective predictive model from the data? If we can find any significant interactions from our explanatory model, will they be helpful in increasing predictive ability?
 
-Our two questions is motivated by the nature of the data. The data is contains most of the counties in the United States, so any estimates we find apply directly to these counties during this time period. Since the data is a "snapshot" of the population from 2011 - 2016, we must acknowledge that the estimates we get in any explanatory model will reflect population characteristics. We also acknowledge that some variation is introduced because the data is come different points in time, we assume that these measurements do not change drastically on the scale of a few years. With the nature of the data in mind, we want to try to use the explanatory model to see if any features or combination of features might be useful in a prediction model, based on the estimated coefficients.
+The focus of our project will be to create a useful predictive model for cancer mortality.
 
 # Methodology
 
@@ -164,7 +214,7 @@ Our two questions is motivated by the nature of the data. The data is contains m
 
 ### Model Selection
 
-With 30 covariates, we tried a few different candidate models before deciding on a final model. As seen in our correlation heatmap, we decided on a subset of variables to use instead of creating combined versions. Through a series of ANOVA, we found that an interaction model contained significant interaction between education and race produced the best fit in terms of adjusted $R^2$, so this became a focal point of our analysis. 
+With 30 covariates, we tried a few different candidate models before deciding on a final model. As seen in our correlation heatmap, we decided on a subset of variables to use instead of creating combined versions. Through a series of ANOVA, we found that an interaction model contained significant interaction between education and race produced the best fit in terms of adjusted $R^2$, so this became a focal point of our analysis. The education variables focused on ages 25 and above created better model fit than the 
 
 Our final explanatory model is as follows:
 
@@ -176,37 +226,33 @@ In terms of education variables, we chose 2 from the entire group: 1) "percent o
 
 ### Analysis Plan
 
-As mentioned before, the data concerning education and race come from the 2013 Census. We know the the census data comes from a carefully picked representative population in each county, but this information is not available in the data itself. Despite the data containig most of the counties in the United States, the randomness introduced by the survey requires us to perform some inference. We expect there to be violations to typical regression assumptions since adjacent counties may be correlated. To account for this, we plan to use 1000 bootstrap samples to calculate a robust confidence interval for each of the coefficients. Coefficients that we find to be significant in the explanatory model will be included in a prediction model candidate.
+As mentioned before, the data concerning education and race come from the 2013 Census. We know the the census data comes from a carefully picked representative population in each county, but this information is not available in the data itself. Despite the data containing most of the counties in the United States, the randomness introduced by the survey requires us to perform some inference. We expect there to be violations to typical regression assumptions since adjacent counties may be correlated. To account for this, we plan to use 1000 bootstrap samples to calculate a robust confidence interval for each of the coefficients. Coefficients that we find to be significant in the explanatory model will be included in a prediction model candidate.
 
+## Prediction Models
 
-## Prediction Model
+We built three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a LASSO regularization model, principal component analysis (PCA) model, and stepwise selection model. We randomly split the data into 80% train and 20% test and used this same split for all three models. The LASSO and PCA models had hyperparmeters to optimize, so these were optimized using 10 fold cross-validation on the training set. Choosing 10 folds and an 80-20 split are conventional in machine learning models, so we follow this best practice.
 
-We proceeded to build three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a lasso regularization, principal component analysis (PCA), and forward backwards stepwise selection model. We randomly split the data into 80% train and 20% test, and then used this same split for all three models. Afterwards, for the lasso and PCA models, the training set was further split into $10$ folds for cross-validation in order to tune the lambda and number of PC hyperparameters respectively. Choosing $10$ folds and an $80-20$ split are usually default parameters in machine learning models.
+### LASSO
 
-### Lasso
-
-In lasso regularization, the aim is to minimize not just the residual sum of squares (RSS), but the sum of RSS and a scalar multiple of the absolute sum of the beta coefficients. This allows for the moderation of beta coefficients and serves to filter out features that do minimal explanation. We performed $10$ fold cross-validation to select for the optimal value of $\lambda$, the scalar multiple, and then fitted the lasso regularization model on the entire training set. The beta estimates were then used to predict cancer death rates in the test set. 
+In the LASSO model, the aim is to minimize not just the residual sum of squares (RSS), but the sum of both RSS and a scalar multiple ($\lambda$) of the absolute sum of the beta coefficients. This extra penalty term allows for the moderation of beta coefficients and serves as another layer of feature selection. We performed 10 fold cross-validation to select for the optimal value of $\lambda$, and then fit the LASSO model on the entire training set. The resulting model beta was then used to predict cancer mortality in the test set. 
 
 ### PCA
 
-In PCA, we used $10$ fold cross validation to select for an optimal number of principal components (PCs). Since the error formula we used was root mean square error (RMSE), adding additional PCs generally decrease RMSE. As a result, we used a heuristic, the elbow rule, to select for the optimal amount of PCs. The elbow rule selects an optimal value for the number of PCs when adding additional PCs no longer significantly reduces RMSE. Once we selected the optimal number of PCs, $k$, we computed the first $k$ PC loadings and used those loadings to predict the cancer death rates in the train and test sets. 
+In the PCA model, we used $10$ fold cross validation to select for an optimal number of principal components (PC). Since the error metric we used was root mean square error (RMSE), we chose to follow a elbow heuristic to choose the optimal number of PCs. The elbow rule selects a number of PCs that explains an appreciable amount of the variance while minimizing the diminishing returns from choosing more PCs when adding additional PCs  Once we selected the optimal number of PCs, 10, we computed the first 10 PC loadings and used those loadings to predict the cancer death rates in the train and test sets. 
 
+### Stepwise Selection
 
-### Forward and Backward Stepwise Selection
-
-Forward and backwards stepwise selection did not use cross-validation to select for a hyperparmeter. Instead, we used the stepwise selection algorithm with AIC as a metric on the entire training set to select for a set of variables. These variables were then fitted on the training set and used to predict the cancer death rates in the test set. 
-
+We used the stepwise selection algorithm with AIC as a guiding metric on the entire training set to select for a well-fitting set of variables. These variables were then fitted on the training set and used to predict the cancer death rates in the test set. 
 
 ### Model Metrics
 
-To assess each of these models, we computed the RMSE and $R^2$ values of the true cancer death rates versus predicted cancer death rates of the training set. The model with the highest RMSE and/or $R^2$ values would then be the ideal model candidate to perform the test set predictions. The estimated beta coefficients in the lasso and stepwise models and the loadings in the PCA model can be used to interpret prediction results.
-
+To assess each of these models, we computed the RMSE and $R^2$ values of the true cancer death rates versus predicted cancer death rates of the training set. The model with the highest RMSE and/or $R^2$ values would then be the ideal model candidate to perform the test set predictions.
 
 # Results & Discussion
 
 ### Initial Explanatory Model
 
-Table 2 shows the initial estimates for our final explanatory model. Looking at the main effects, we see that with the exception of Asians, higher proportions of the other races was associated with higher average cancer mortality in a county. Most of the interaction terms are small and insignificant, but most are associated with average decreases in mortality. This lines up with previous research suggesting that education is beneficial for health outcomes. 
+Table 2 shows the initial estimates for our final explanatory model. Looking at the main effects, we see that with the exception of Asians, higher proportions of the other races was associated with higher average cancer mortality in a county. Most of the interaction terms are small and insignificant, but most are associated with average decreases in mortality.
 
 ```{r, echo = F }
 cancer_model = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
@@ -237,9 +283,15 @@ cancer_model %>%
         caption = "Estimated coefficients and 95% CI")
 ```
 
+\begin{center}
+Figure 3: Effects plot of percentage of race in county, stratified by education achievement
+\end{center}
+
+Looking at our regression diagnostics, we confirmed that the errors did not seem to come from a normal distribution based on deviations in the QQ plot. 
+
 ### Interaction Between Education & Race
 
-Figure 3 shows the 95% bootstrap percentile intervals of 1000 bootstrap interaction models. The bootstrap 95% confidence intervals indicate that only the high school interactions with African- and white Americans were significant. The coefficients associated with these interactions are all negative, hich matches with our original estimated model. 
+Figure 3 shows the 95% bootstrap percentile intervals of 1000 bootstrap interaction models. The bootstrap 95% confidence intervals indicate that only the high school interactions with African- and white Americans were significant. The coefficients associated with these interactions are all negative, which matched with our original estimated model. 
 
 ```{r bootstrap_table, echo = F, message = F, warning = F }
 bs_n = 1000
@@ -303,8 +355,7 @@ bs %>%
   labs(
     title = "Bootstrap 95% percentile intervals for 1000 resamples",
     x = "Interaction Term",
-    y = "Bootstrap Interaction Coefficient Estimate",
-    caption = "Figure 3"
+    y = "Bootstrap Interaction Coefficient Estimate"
   ) +
   theme_minimal() +
   theme(
@@ -314,12 +365,15 @@ bs %>%
   scale_color_manual(values = c("#DC143C", "#2E8B57"))
 ```
 
- With these findings, we include these two interaction terms inside of a candidate predictive model.
+\begin{center}
+Figure 4: 95% bootstrap percentile intervals
+\end{center}
+
+With these results and literature review in mind, we added HS x White, HS x Black and BS Black to the prediction models
 
 ## Prediction Model
 
-
-```{r include=FALSE}
+```{r pred_models, include = FALSE}
 dir = getwd()
 data_dir <- paste(dir, '/Jasen/df_imp.RData', sep = '')
 load(data_dir)
@@ -361,8 +415,6 @@ g_lasso_hyper <- ggplot() + geom_point(data = hyper, aes(x = lambdas, y = cv_err
   scale_x_continuous(trans = 'log10') + 
   ylab('Mean Cross-Validation Error') + 
   xlab('Lambda') + 
-  ggtitle('Selection of Lambda Hyperparameter') + 
-  annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5))
 train_results <- data.frame(train_y, pred_train_y)
 colnames(train_results) <- c('y_true', 'y_hat')
@@ -382,8 +434,6 @@ g_lasso_train <- ggplot(train_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Lasso Train Prediction') + 
-  annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5))
 test_results <- data.frame(test_y, pred_test_y)
 colnames(test_results) <- c('y_true', 'y_hat')
@@ -403,13 +453,13 @@ g_lasso_test <- ggplot(test_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Lasso Test Prediction') + 
-  annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5))  
 lasso_beta_hat <- as.numeric(lasso_best$beta)
 lasso_var_names <- rownames(lasso_best$beta)
 lasso_final_df <- data.frame(lasso_coeffs = lasso_beta_hat)
 rownames(lasso_final_df) = lasso_var_names
+
+
 # PCA PART -----------------------------------------------------
 dir = getwd()
 data_dir <- paste(dir, '/Jasen/df_imp.RData', sep = '')
@@ -474,7 +524,6 @@ g_pca_hyper <- ggplot() + geom_point(data = results, aes(x = ID, y = RMSE)) +
   geom_point(data = results_best, aes(x = ID, y= RMSE), color = 'red') + 
   xlab('# of PCs') + 
   ylab('RMSE') + 
-  ggtitle('Selecting Number of Principal Components') + 
   annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5))   
 n <- 10
@@ -502,8 +551,6 @@ g_pca_train <- ggplot(data = pca_df) +
              fill="#69b3a2") + 
   xlab('True Cancer Death Rate') + 
   ylab('Predicted Cancer Death Rate') + 
-  ggtitle('PCA Train Prediction') + 
-  annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5)) 
 n <- 10
 # use the train_PCA_loadings
@@ -535,8 +582,6 @@ g_pca_test <- ggplot(data = pca_df) +
              fill="#69b3a2") + 
   xlab('True Cancer Death Rate') + 
   ylab('Predicted Cancer Death Rate') + 
-  ggtitle('PCA Test Prediction') + 
-  annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5)) 
 s_PCA <- summary(pca_train_model_2)
 loadings <- PCA_train_model$rotation
@@ -585,8 +630,6 @@ g_step_train <- ggplot(train_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Stepwise Selection Train Prediction') + 
-  annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5)) 
 test_x <- test_x %>% select(features2)
 pred_test_y <- unname(predict(step_model, test_x))
@@ -608,8 +651,6 @@ g_step_test <- ggplot(test_results) +
     fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
   xlab('True Cancer Death Rate') + 
-  ggtitle('Stepwise Selection Test Prediction') + 
-  annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5))   
 step_coeffs <- step_model$coefficients
 df_step_coeffs <- data.frame(step_coeffs)
@@ -626,7 +667,6 @@ g_step_hyper <- ggplot(df_AIC, aes(x= steps, y= AIC, label=vars))+
   ylim(21000, 25500) + 
   xlab('Steps') + 
   ylab('AIC') + 
-  ggtitle('Forward and Backward Stepwise Model') + 
   annotation_custom(grob) + 
   theme(plot.title = element_text(hjust = 0.5))   
 # PUTTING IT ALL TOEGHER ---------------------------------------------------
@@ -653,56 +693,59 @@ lay <- rbind(c(1,2,3),
 lay1 <- rbind(c(1,2,3))
 ```
 
+The LASSO model selected an optimal hyperparameter of $\lambda = 0.00119$ as shown in Figure 5a. The estimated coefficients fitted from the training set are shown in Table Y, with only the intercept and incidence rate having coefficients of $0$. The training set RMSE and $R^2$ was $13.8$ and $0.866$ respectively, and the test set metrics showed slight improvements with an RMSE and $R^2$ of $12.8$ and $0.872$ respectively. 
 
-The lasso regularization model selected an optimal hyperparameter of $\lambda = 0.00119$ as shown in Figure X (a). The estimated coefficients fitted from the training set are shown in Table Y, with only the intercept and incidenceRate having coefficients of $0$. The training set RMSE and $R^2$ was $13.796$ and $0.866$ respectively, and the test set metrics showed slight improvements with an RMSE and $R^2$ of $12.842$ and $0.872$ respectively. These values are in Table Z.
+Using the elbow rule as shown in Figure 6a, we selected $10$ PCs to be the optimal amount and obtained the loadings of the first $10$ PCs from the training set. Roughly half of the variables did not show up significantly in any of the $10$ PCs. The training set RMSE and $R^2$ was $20.0$ and $0.689$ respectively, and the test set metrics showed moderate improvements with an RMSE and $R^2$ of $17.9$ and $0.728$ respectively.
 
-Using the elbow rule as shown in Figure C (a), we selected $10$ PCs to be the optimal amount and obtained the loadings of the first $10$ PCs from the training set. A summary of these loadings are in Table A, where roughly half of the variables did not show up significantly in any of the $10$ PCs. The training set RMSE and $R^2$ was $20.020$ and $0.689$ respectively, and the test set metrics showed moderate improvements with an RMSE and $R^2$ of $17.955$ and $0.728$ respectively.
+Our stepwise selection model included $23$ variables, and the order in which they were selected is displayed in Figure B. The estimated coefficients fitted from the training set are shown in Table Y along with the lasso regularization coefficients. The training set RMSE and $R^2$ was $13.2$ and $0.877$ respectively, and the test set metrics showed slight improvements with an RMSE and $R^2$ of $12.4$ and $0.879$ respectively. These values are in Supplemental Table Z. This model also excluded 2 of the interaction terms that were significant in the explanatory model.
 
-Our stepwise selection model included $23$ variables, and the order in which they were selected is displayed in Figure B. The estimated coefficients fitted from the training set are shown in Table Y along with the lasso regularization coefficients. The training set RMSE and $R^2$ was $13.278$ and $0.877$ respectively, and the test set metrics showed slight improvements with an RMSE and $R^2$ of $12.495$ and $0.879$ respectively. These values are in Table Z.
-
-```{r}
-final_metrics
+```{r, echo = F }
+final_metrics %>% kable(digits = 3)
 ```
 
-Table Z
+\begin{center}
+Table 2: Training and test metrics for the 3 predictive models.
+\end{center}
 
-```{r}
-final_coeffs
+```{r, echo = F }
+grid.arrange(g_lasso_hyper, g_lasso_train, g_lasso_test, layout_matrix = lay1)
 ```
 
-Table Y 
+\begin{center}
+Figure 5: Hyperparameter Choice and train/test plots for LASSO model. a) hyperparameter optimization, b) fit on the training dataset, c) fit on the test dataset
+\end{center}
 
-```{r}
-grid.arrange(g_lasso_hyper,g_lasso_train,g_lasso_test, layout_matrix = lay1)
-```
-
-Figure X
-
-```{r}
+```{r, echo = F }
 grid.arrange(g_pca_hyper,g_pca_train,g_pca_test, layout_matrix = lay1)
 ```
 
-Figure C
+\begin{center}
+Figure 6: Hyperparameter Choice and train/test plots for PCA model. a) hyperparameter optimization, b) fit on the training dataset, c) fit on the test dataset
+\end{center}
 
-```{r}
+```{r, echo = F }
 grid.arrange(g_step_hyper,g_step_train,g_step_test, layout_matrix = lay1)
 ```
 
-Figure B
-
-```{r}
-final_loadings
-```
-
-Table A
+\begin{center}
+Figure 7: Hyperparameter Choice and train/test plots for stepwise model. a) AIC as features added to model, b) fit on the training dataset, c) fit on the test dataset
+\end{center}
 
 # Conclusion
 
-Our analysis found at least one significant interaction between race and education that served to help reduce cancer mortality per capita on a county level. Although this effect was small, their significance was supported simultaneously by the model itself, the Wald test, and the 95% bootstrap percentile intervals. These results support the hypothesis that higher education has a beneficial effect on cancer mortatlity, at least on the county scale. Furthermore, our findings are in line with a wealth of literature that suggest that education is beneficial to improving health outcomes.
+Our analysis found at least one significant interaction between race and education that served to help reduce cancer mortality per capita on a county level. However, this effect was small, and these interaction variables did not appear helpful in our stepwise model. Despite finding some significant terms, our predictive model showed that adding them was not particularly helpful. We considered using this explanatory model as a means of feature selection before we formally learned it in lecture, but we still thought it might be of value as a preliminary step for the prediction model.
 
-The stepwise selection model showed the best RMSE and $R^2$ in the training set. Therefore, we select the stepwise selection model to predict cancer death rates for the test set. We also see that the stepwise selection model had the best metrics for the test set. The stepwise selection model also included less beta coefficients ($24$) than the lasso regularization model ($33$), so it's much more parsimonious than lasso which had marginally worse prediction metrics. Most variables in the stepwise selection model had statistically significant betas which are indicators of cancer death rates. 
+The stepwise selection model showed the best RMSE and $R^2$ in the training set. We also see that the stepwise selection model had the best metrics for the test set. The stepwise selection model also included less features ($24$) than the LASSO model ($33$), so it's more parsimonious. Most variables in the stepwise selection model had statistically significant betas which are indicators of cancer mortality. The LASSO and stepwise models do not differ appreciably in terms of prediction error, so we ultimately opt for the stepwise model as the best candidate prediction model to use.
 
-These findings are limited by the fact that the observational unit of the data was a county. The model suggests a beneficial benefit, but does not elucidate any reason as to why or how education interacts with race to reduce cancer mortality among African- and white Americans. The educational and race data come from 2013, so the model may be limited in its generalizability to future years, especially in the context of changing demographics and new educational environments created by COVID-19. In light of these weaknesses, we feel that our model offers an interesting perspective on how different demographic factors interact to affect a health-related outcome. Being so prevalent, it's important to understand these factors and interactions so that we can design proper interventions.
+In terms of future directions we may take the work, we believe that controlling for the number of cases in each county would aid in the analysis. Cancer mortality per capita doesn't adjust for this, so this should be accounted for later. Another improvement would be to first group up the variables and pick from them before feeding it to the predictive model.
+
+## Contributions
+
+- **Alexander**: created the table characterizing the data, boxplots for presentation, editing/revising for introduction, some literature review
+- **Jasen**: handled predicitve modeling, writing for predictive model parts of the report, editing/revising
+- **Christian**: handled explanatory modeling, writing for explanatory model parts of the report, performed the literature review, editing/revising
+
+Our project repo can be found at on [Github (click me)](https://github.com/thecbp/FMPH221_project), commits can be reviewed through time. 
 
 \pagebreak
 
@@ -720,7 +763,60 @@ These findings are limited by the fact that the observational unit of the data w
 
 \pagebreak
 
-# Appendix
+# Supplemental Figures
+
+Table Z: Comparison of Stepwise and LASSO model coefficients
+
+```{r}
+final_coeffs
+```
+
+```{r}
+cancer
+```
+
+## Boxplots
+
+```{r data_t, echo = F, message = F, warning = F }
+library(glmnet)
+library(mice)
+df = read_csv("cancer_registry.csv") %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>% filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200) %>%
+  filter(AvgHouseholdSize > 1)
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
+response_vars <- c('TARGET_deathRate')
+predict_vars <- paste(vars_1, collapse = ' + ')
+df <- df %>% select(- c('binnedInc', 'Geography'))
+df <- data.frame(sapply(df, as.numeric))
+df2<-df[, c(colnames(df)[7],colnames(df)[9:32])]
+column_names <- c()
+res <- c()
+outlier <- c()
+for (i in colnames(df)){
+  if (class(df[[i]]) == "numeric") {
+     column_names <- c(column_names, i)
+     mean <- round(mean(df[[i]], na.rm = TRUE),2)
+     std <- round(sd(df[[i]],na.rm = TRUE),2)
+     cor <- round(cor(df[[i]], df[['TARGET_deathRate']], use="complete.obs"),3)
+     res <- c(res, mean)
+     res <- c(res, std)
+     res <- c(res, cor) 
+  }
+}
+output_table <- matrix(res, ncol=3,byrow=TRUE)
+colnames(output_table) <- c("Mean", "Std", "R_Squared")
+rownames(output_table) <- column_names
+output <- as.table(output_table)
+output %>%  kable()
+```
+
+\pagebreak
+
+# Appendix Code
 
 ```{r ref.label=knitr::all_labels(), echo = T, eval = F}
 ```
