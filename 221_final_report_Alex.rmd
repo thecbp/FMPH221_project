@@ -1,0 +1,175 @@
+---
+title: "Alex-report"
+author: "Alexander ZHU"
+date: "12/9/2020"
+output: pdf_document
+---
+
+```{r, message = F, warning = F, echo = F }
+library(tidyverse)
+library(knitr)
+library(gplots)
+set.seed(1)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  out.width = "70%"
+)
+
+# Load the data and do some processing
+cancer = read_csv("cancer_registry.csv") %>% 
+  # Split the geography variable
+  separate(Geography, into = c("county", "state"), sep = ", ") %>% 
+  # Split up binnedInc into a lower and upper decile
+  mutate(
+    binnedInc = str_remove_all(binnedInc, "[(\\]]"),
+    # also try to group states by region
+    region = case_when(
+      state %in% c("California", "Oregon", "Washington", "Nevada", "Idaho", 
+                   "Montana", "Wyoming", "Colorado", "Utah", "Alaska", "Hawaii") ~ "West",
+      state %in% c("Arizona", "New Mexico", "Texas", "Oklahoma") ~ "Southwest",
+      state %in% c("North Dakota", "South Dakota", "Nebraska", "Kansas", 
+                   "Minnesota", "Iowa", "Missouri", "Wisconsin", "Illinois", 
+                   "Indiana", "Ohio", "Michigan") ~ "Midwest",
+      state %in% c("Arkansas", "Louisiana", "Mississippi", "Alabama", "Georgia",
+                   "Florida", "South Carolina", "North Carolina", "Tennessee",
+                   "Kentucky", "Virginia", "West Virginia", "District of Columbia",
+                   "Delaware") ~ "Southeast",
+      state %in% c("Maryland", "Pennsylvania", "New Jersey", "New York", "Rhode Island",
+                   "Connecticut", "Massachusetts", "New Hampshire", "Vermont", "Maine") ~ "Northeast",
+      TRUE ~ "Southwest" # Weird formatting means a single NM is NA in state
+    )
+  ) %>% 
+  separate(binnedInc, into = c("inc_dec_low", "inc_dec_high"), sep = ",") %>% 
+  janitor::clean_names() %>%  # Convert all column names to lowercase'
+  mutate(
+    high_college = pct_bach_deg25_over > median(pct_bach_deg25_over), # median(pct_bach_deg18_24),
+    high_hs = pct_hs18_24 > median(pct_hs18_24)
+  )
+```
+
+# Introduction
+
+Cancer is the second leading cause of death in the United States and globally [1]. In 2014, the disease accounted for 7.4 million deaths, causing around 13% of all deaths worldwide. In America, that meant one in four people died from some form of cancer [2]. In 2020, 1.8 million new cancer cases are estimated to be diagnosed in the United States, and more than 600,000 are expected to die directly as a result of cancer [3]. Cancer also carries a significant economic burden, costing over 173 billion dollarrs in estimation this year [4]. From both humane and economic perspectives, investigation into cancer represents an important front of research.
+
+In biology, cancer is a genetic disease -- that is,it is caused by changes to genes that control the way our cells function, especially how they grow and divide. Genetic changes that cause cancer can be inherited from parents. They can also arise during a person’s lifetime as a result of errors that occur as cells divide or because of damage to DNA caused by certain environmental exposures [5].A wide berth of research demonstrated that a diverse set of socioeconomic factors and race contributed to the increased risk of cancer incidence and mortality.  For example, Adler et. al showed that higher socioeconomic status was associated with decreased cancer mortality [6]. Rawl et. al demonstrated a similar result in a statewide survey in Indiana that income and education were inversely related to cancer mortality. Rawl discussed how race affected cancer mortality in their sample, finding that African-American participants worried less about cancer and were less likely to seek treatment [7]. Rohfling et. al found that uninsured patients or those under Medicaid were more likely to have more advanced tumors and poorer survival compared to peers with private insurance [8]. In an observational study in Philadelphia, Zeigler-Johnson found that black men were at the highest risk of prostate cancer relative to similar white counterparts [9]. Looking at data spanning from 1950 to 2014, a study by Singh showed that individuals from lower educational backgrounds experienced higher mortality of various types of cancer.In their study, African-Americans saw higher cancer mortality compared to their Asian and White counterparts in this group [10].These examples of study demonstrated it is critical to consider race-based health disparities in any ancer-related intervention. Furthermore, in a population-based modeling study of deidentified death records in 1980-2014 among US counties, Mokdad et. al found high mortality rate were clustered along the Mississipi River, near the Kentucky-West Virginia border and in general the South [11]. They proposed potential explanations for the high rates of cancer mortality could be due to the lack of screening, awareness in the population and health clinicians, and poor access to health care. Among the socioeconomic factors contributing to risk of cancer mortality, educational level raised our attention. Bahk et. al discussed the increasing trend in breast cancer mortality among Korean women between 1983 and 2012 was due to the increased mortality of the lower education groups, not the highest education group [12].Thus, it would be interesting to look at the cancer mortality in different education group and race.
+
+Most previous reports on cancer mortality in the U.S. either focused on variation by state, with less information available at the county level [13] or focused on comprehensive factors. There is a value for data at the county level as local information can be useful for health care clinicians to understand community needs for care and aid in identifying cancer hot spots that need more investigation to understand the root causes. The specific focus on educational factors and race in determination of cancer mortality rates would be helpful to raise attention in the role of educational equality and ethnic diversity in healthcare field. 
+
+
+## Data
+
+The data set aggregated from American Community Survey, cancer.gov and Clinicaltrials.gov, spanning from 2010 to 2016 and includes information on `r nrow(cancer)` counties in the United States was used for our analysis. Our group did not aggregate the data ourselves, it is publicly available and can be found [here](https://urldefense.com/v3/__https://data.world/nrippner/ols-regression-challenge).The__;!!Mih3wA!RPZqvY_PiU51U3JklRcPWUAGKXpSor11hNihWZZdZynHDWjhnk6ocgImcp40WBvnIg$  data set contained information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented mostly as percentages, with several parameters represented by higher value of range like household median income. Among the variables, the educational levels were noted as proportion of the county population achieved high school and college degrees with different age group while the race percentage variables were categorized and presented. 
+
+Table 1 summarized the data with mean and standatd deviation. The R_Squared value described the extent of correlation between each parameter with our target response, cancer mortality, noted as target_death_rate in the table. It was observed that many of the variables were not correlated well with the cancer mortality. The quantile distribution of variables were further illustrated via boxplots. Many of the variables were highly skewed with a bell-shape across the nation. 
+
+
+
+
+```{r data_table, echo = F, message = F, warning = F }
+library(glmnet)
+library(mice)
+df = read_csv("cancer_registry.csv") %>%
+  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>% filter(incidenceRate < 1000) %>%
+  filter(avgAnnCount < 20000) %>%
+  filter(MedianAge < 200) %>%
+  filter(AvgHouseholdSize > 1)
+vars <- colnames(df)
+misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
+vars_1 <- setdiff(vars, misc_vars)
+response_vars <- c('TARGET_deathRate')
+predict_vars <- paste(vars_1, collapse = ' + ')
+df <- df %>% select(- c('binnedInc', 'Geography'))
+df <- data.frame(sapply(df, as.numeric))
+df2<-df[, c(colnames(df)[7],colnames(df)[9:32])]
+column_names <- c()
+res <- c()
+outlier <- c()
+for (i in colnames(df)){
+  if (class(df[[i]]) == "numeric") {
+     column_names <- c(column_names, i)
+     mean <- round(mean(df[[i]], na.rm = TRUE),2)
+     std <- round(sd(df[[i]],na.rm = TRUE),2)
+     cor <- round(cor(df[[i]], df[['TARGET_deathRate']], use="complete.obs"),3)
+     res <- c(res, mean)
+     res <- c(res, std)
+     res <- c(res, cor) 
+  }
+}
+output_table <- matrix(res, ncol=3,byrow=TRUE)
+colnames(output_table) <- c("Mean", "Std", "R_Squared")
+rownames(output_table) <- column_names
+output <- as.table(output_table)
+output %>%  kable()
+```
+
+\begin{center}
+Table 1: Data Summary
+\end{center}
+
+
+
+# Discussion 
+
+
+
+\pagebreak
+# References 
+
+1. GBD 2015 Mortality and Causes of Death Collaborators.  Global, regional, and national life expectancy, all-cause mortality, and cause-specific mortality for 249 causes of death, 1980-2015: a systematic analysis for the Global Burden of Disease Study 2015.  Lancet. 2016;388(10053):1459-1544.
+2. Stewart BW, Wild CP, editors. World cancer report 2014
+3. American Cancer Society. Cancer Facts & Figures 2020
+4. Mariotto AB, Yabroff KR, Shao Y, Feuer EJ, Brown ML. Projections of the cost of cancer care in the United States: 2010-2020. J Natl Cancer Inst. 2011 Jan 19;103(2):117-28. doi: 10.1093/jnci/djq495. Epub 2011 Jan 12. Erratum in: J Natl Cancer Inst. 2011 Apr 20;103(8):699. PMID: 21228314; PMCID: PMC3107566.
+5. What is cancer? National Cancer Institute.https://urldefense.com/v3/__https://www.cancer.gov/about-cancer/understanding/what-is-cancer__;!!Mih3wA!RPZqvY_PiU51U3JklRcPWUAGKXpSor11hNihWZZdZynHDWjhnk6ocgImcp6Db5-G3Q$ 
+6. ADLER, N.E. and OSTROVE, J.M. (1999), Socioeconomic Status and Health: What We Know and What We Don't. Annals of the New York Academy of Sciences, 896: 3-15. https://urldefense.com/v3/__https://doi.org/10.1111/j.1749-6632.1999.tb08101.x__;!!Mih3wA!RPZqvY_PiU51U3JklRcPWUAGKXpSor11hNihWZZdZynHDWjhnk6ocgImcp5ys1Jqiw$ 
+7. Rawl SM, Dickinson S, Lee JL, Roberts JL, Teal E, Baker LB, Kianersi S, Haggstrom DA. Racial and Socioeconomic Disparities in Cancer-Related Knowledge, Beliefs, and Behaviors in Indiana. Cancer Epidemiol Biomarkers Prev. 2019 Mar;28(3):462-470. doi:10.1158/1055-9965.EPI-18-0795. Epub 2018 Nov 28. PMID: 30487135.
+8. Rohlfing ML, Mays AC, Isom S, Waltonen JD. Insurance status as a predictor of mortality in patients undergoing head and neck cancer surgery. Laryngoscope. 2017 Dec;127(12):2784-2789. doi: 10.1002/lary.26713. Epub 2017 Jun 22. PMID: 28639701; PMCID: PMC5688011.
+9. Zeigler-Johnson C, Keith S, McIntire R, Robinson T, Leader A, Glanz K. Racial and Ethnic Trends in Prostate Cancer Incidence and Mortality in Philadelphia, PA: an Observational Study. J Racial Ethn Health Disparities. 2019 Apr;6(2):371-379. doi: 10.1007/s40615-018-00534-z. Epub 2018 Dec 5. PMID: 30520002.
+10. Singh, Gopal & Jemal, Ahmedin. (2017). Socioeconomic and Racial/Ethnic Disparities in Cancer Mortality, Incidence, and Survival in the United States, 1950–2014: Over Six Decades of Changing Patterns and Widening Inequalities. Journal of Environmental and Public Health. 2017. 1-19. 10.1155/2017/2819372. 
+11. Mokdad AH, Dwyer-Lindgren L, Fitzmaurice C, et al. Trends and Patterns of Disparities in Cancer Mortality Among US Counties, 1980-2014. JAMA. 2017;317(4):388–406. doi:10.1001/jama.2016.20324
+12. Bahk J, Jang SM, Jung-Choi K. Increased breast cancer mortality only in the lower education group: age-period-cohort effect in breast cancer mortality by educational level in South Korea, 1983-2012. Int J Equity Health. 2017;16(1):56. Published 2017 Mar 31. doi:10.1186/s12939-017-0554-6
+13. US Cancer Statistics Working Group. United States Cancer Statistics: 1999-2013 Incidence and Mortality Web-Based Report. Atlanta, GA: Department of Health and Human Services, Centers for Disease Control and Prevention, and National Cancer Institute; 2015. https://urldefense.com/v3/__https://nccd.cdc.gov/uscs/__;!!Mih3wA!RPZqvY_PiU51U3JklRcPWUAGKXpSor11hNihWZZdZynHDWjhnk6ocgImcp4vJX_qBg$ . Accessed May 13, 2016.
+
+
+\pagebreak
+
+# Appendix
+
+
+```{r data_table, echo = F, message = F, warning = F }
+library("reshape2")
+data_long <- melt(df2)
+library("ggplot2")# Reshaping data frame
+ggplot(data_long, aes(x = variable, y = value)) + theme(axis.text.x=element_text(angle=90,hjust=1)) + ggtitle("Boxplots of Variables in Cancer_Registry Dataset ") + geom_boxplot()
+
+# Generation of boxplots
+df3<-df[,c(colnames(df)[3:4])]
+data_long <- melt(df3)
+ggplot(data_long, aes(x = variable, y = value))+ ggtitle("Boxplot of Target_deathrate + IncidenceRate") + geom_boxplot()
+
+df4<-df[,c(colnames(df)[1:2])]
+data_long <- melt(df4)
+ggplot(data_long, aes(x = variable, y = value)) +ggtitle("Boxplot of AvgAnnCount + AvgDeathsPerYear")+ geom_boxplot()
+
+output <- as.table(output_table)
+Result <- output[order(output[,3]), ]
+
+outlier_table <- matrix(outlier, ncol=1, byrow=TRUE)
+colnames(outlier_table) <- c("outlier in percentage")
+rownames(outlier_table) <- column_names
+outlier_table_output <- as.table(outlier_table)
+
+# Print data summary table 
+print(Result)
+
+#Print percentage of outliers 
+print(outlier_table_output)
+```
+
+\begin{center}
+Figure 1: Boxplots of the Data 
+\end{center}
+
+```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+```
+
