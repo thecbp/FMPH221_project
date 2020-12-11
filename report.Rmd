@@ -67,7 +67,7 @@ One difficulty in researching cancer is that it is an incredibly diverse collect
 
 ## Data
 
-For our analysis, we used a dataset aggregated from multiple sources, noted later. The data spanned from 2010 to 2016 and included information on `r nrow(cancer)` counties in the United States, the county being the observational unit in the data. There were a total of 3,143 counties and county-equivalents in the United States, so `r (((3143 - nrow(cancer)) / 3143) * 100) %>% round(1)`% of them were represented. Our group did not aggregate the data ourselves, it is publically available and can be found at this [link](https://data.world/nrippner/ols-regression-challenge). Table 1 contains a full overview of the data in terms of mean, standard deviation and correlation:
+For our analysis, we used a dataset aggregated from multiple sources, noted later. The data spanned from 2010 to 2016 and included information on `r nrow(cancer)` counties in the United States, the county being the observational unit in the data. There were a total of 3,143 counties and county-equivalents in the United States, so `r (1 -((3143 - nrow(cancer)) / 3143) * 100) %>% round(1)`% of them were represented. Our group did not aggregate the data ourselves, it is publically available and can be found at this [link](https://data.world/nrippner/ols-regression-challenge). Table 1 contains a full overview of the data in terms of mean, standard deviation and correlation:
 
 ```{r data_table, echo = F, message = F, warning = F }
 df = read_csv("cancer_registry.csv") %>%
@@ -111,17 +111,17 @@ output %>%  kable()
 Table 1: Data summary
 \end{center}
 
-Our data contained information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented typically as percentages. These data were taken from the 2013 Census. The $R^2$ reprsents the correlation between that single predictor and the outcome. In terms of race-related variables, twe had percentages of each county that identified as a particular race (Asian, Black, White and Other). The data also contained information on educational acheivement as well, measured as the proportion of the county population who have achieved a certain degree of education (high school and college). The education variables were also divided up by age, with separate columns for people ages 18 to 24 and another set 25 years and over. The proportion of people who have public and private health insurance was another notable variable in the data. A few variables in the dataset span many magnitudes, like median income, so we considered performing a log transform as we chose features to inclide in the final model.
+Our data contained information on various demographic, socioeconomic, household, and cancer-related factors for each county, represented typically as percentages. These data were taken from the 2013 Census. The $R^2$ reprsents the correlation between that single predictor and the outcome. In terms of race-related variables, twe had percentages of each county that identified as a particular race (Asian, Black, White and Other). The data also contained information on educational acheivement as well, measured as the proportion of the county population who have achieved a certain degree of education (high school and college). The education variables were also divided up by age, with separate columns for people ages 18 to 24 and another set 25 years and over. The proportion of people who have public and private health insurance was another notable variable in the data. A few variables in the dataset span many magnitudes, like median income, so we considered performing a log transform as we chose features to inclide in the final model. These boxplots can be found in the supplement.
 
 The cancer-related variables data were aggregated from the American Community Survey, cancer.gov and clinicaltrials.gov, spanning from 2010 to 2016. In terms of important cancer-related factors, we had the incidence rate of *all* cancer diagnoses in the county, measured in terms of *mean per capita (100,000 people)* and the average number of cancer cases reported annually from 2010 to 2016. Our target response was cancer mortality, also measured as mean per capita. In this dataset, cancer mortality ranged from `r cancer$target_death_rate %>% min` to `r cancer$target_death_rate %>% max`, with a median value of `r cancer$target_death_rate %>% median`. 
 
 ## Initial Analyses & Objectives
 
-Given our literature and what is present in our dataset, we aimed to examine how different socioeconomic and demographic factors are associated with cancer mortality on a county level. 
+Given our literature and what was present in our dataset, we aimed to examine how different socioeconomic and demographic factors were associated with cancer mortality on a county level, with a focus on race and education.
 
 ### Data Cleaning
 
-A few of the variables in the dataset showed skewed distributions such as `avgAnnCount` and `PctAsian` (Appendix Fig X). Therefore, we log-transformed these variables so that their distributions are closer to normality. Furthermore, we decided to exclude a few counties based on values that were magnitudes beyond any other county or had values that did not make sense (i.e. `MedianAge > 100`). There were also two variables, `PctEmployed16_Over` and `PctPrivateCoverageAlone`, both of which had < 20% missing data. We used the `mice` package in R to do impute for these missing values. 
+A few of the variables in the dataset showed skewed distributions such as `avgAnnCount` and `PctAsian` (Appendix Fig X). Therefore, we log-transformed these variables so that their distributions were closer to normality. Furthermore, we decided to exclude a few counties based on values that were magnitudes beyond any other county or had values that did not make sense (i.e. `MedianAge > 100`). There were also two variables, `PctEmployed16_Over` and `PctPrivateCoverageAlone`, both of which had < 20% missing data. We used the `mice` package in R to impute these missing values. 
 
 ### Correlation Between Predictors
 
@@ -130,10 +130,10 @@ Many of the predictors were highly correlated, so we created a heat map to keep 
 ![](heatmap2.png)
 
 \begin{center}
-Figure 1: Correlation heatmap between variables in our cancer mortality dataset.
+Figure 1: Correlation heatmap between variables in our dataset
 \end{center}
 
-The percentage of poverty in a county correlated highly with other predictors that deal with being under public insurance or being unemployed. The median ages of men and women were highly correlated as well. The education variables are also highly correlated. With these correlations in mind, we know that we need to account for this and include only one of them. 
+The percentage of poverty in a county correlated highly with other predictors that deal with being under public insurance or being unemployed. The median ages of men and women were highly correlated as well. The education variables were also highly correlated. With these correlations in mind, we know that we need to account for this and include only one of them. 
 
 ### Interaction Between Race & Education
 
@@ -179,14 +179,14 @@ cancer %>%
 Figure 2: Effects plot of percentage of race in county, stratified by education achievement
 \end{center}
 
-The change is most drastic in Asians, but the trend holds over all races present in the data. For African-Americans, we also see an attenuation of the average cancer mortality desite it not converting to a negative correlation. Our literature review showed that both education and race are both significantly associated with cancer mortality, so it raise an interesting question on if this can be utilized on a county level.
+The change was most drastic in Asians, but the trend held over all races present in the data. For African-Americans, we also see an attenuation of the average cancer mortality despite it not converting to a negative correlation. Our literature review showed that both education and race are both significantly associated with cancer mortality, so it raised an interesting question on if this can be utilized on a county level.
 
 Based on the results of our exploratory analyses, we propose two analytic questions:
 
 1. Can we identify county-level factors that contribute to a significant difference in cancer mortality? If so, can we identify any significant interaction between these factors that also contribute to increased cancer mortality?
 2. Can we create an effective predictive model from the data? If we can find any significant interactions from our explanatory model, will they be helpful in increasing predictive ability?
 
-The focus of our project will be to create a useful predictive model for cancer mortality.
+The focus of our project is to create a useful predictive model for cancer mortality.
 
 # Methodology
 
@@ -202,15 +202,15 @@ $$
 Y_i = X_{education}\beta + X_{race}\beta + X_{interaction}\beta + X_{confounders}\beta + \epsilon_i
 $$
 
-In terms of education variables, we chose 2 from the entire group: 1) "percent of the county ages 25 and over finishing high school", and 2) the percent over 25 finishing college (bachelor's degree). For our race variables, we included all that were present in the data (% of the county being Asian, Black, White or Other Race). With our literature review and prior knowledge, we knew that age, sex, cancer incidence, income, and population need to be accounted for in the model since they are known confounders between cancer mortality and our covariates of interest. 
+In terms of education variables, we chose 2 from the entire group: 1) "percent of the county ages 25 and over finishing high school", and 2) the percent over 25 finishing college (bachelor's degree). For our race variables, we included all that were present in the data (% of the county being Asian, Black, White or Other Race). With our literature review and prior knowledge, we knew that age, sex, cancer incidence, income, and population need to be accounted for in the model since they were known confounders between cancer mortality and our covariates of interest. 
 
 ### Analysis Plan
 
-As mentioned before, the data concerning education and race come from the 2013 Census. We know the the census data comes from a carefully picked representative population in each county, but this information is not available in the data itself. Despite the data containing most of the counties in the United States, the randomness introduced by the survey requires us to perform some inference. We expect there to be violations to typical regression assumptions since adjacent counties may be correlated. To account for this, we plan to use 1000 bootstrap samples to calculate a robust confidence interval for each of the coefficients. Coefficients that we find to be significant in the explanatory model will be included in a prediction model candidate.
+As mentioned before, the data concerning education and race come from the 2013 Census. We knew the the census data came from a carefully picked representative population in each county, but this information is not available in the data itself. We expect there to be violations to typical regression assumptions since adjacent counties may be correlated. To account for this, we plan to use 1000 bootstrap samples to calculate a more robust confidence interval for each of the coefficients. Coefficients that we find to be "significant" in the explanatory model will be included in a prediction model candidate.
 
 ## Prediction Models
 
-We built three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a LASSO regularization model, principal component analysis (PCA) model, and stepwise selection model. We randomly split the data into 80% train and 20% test and used this same split for all three models. The LASSO and PCA models had hyperparmeters to optimize, so these were optimized using 10 fold cross-validation on the training set. Choosing 10 folds and an 80-20 split are conventional in machine learning models, so we follow this best practice.
+We built three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a LASSO regularization model, principal component analysis (PCA) model, and stepwise selection model. We randomly split the data into 80% train and 20% test and used this same split for all three models. The LASSO and PCA models had hyperparmeters to optimize, so these were optimized using 10 fold cross-validation on the training set. Choosing 10 folds and an 80-20 split are conventional in machine learning models, so we followed this best practice.
 
 ### LASSO
 
@@ -716,17 +716,17 @@ In terms of future directions we may take the work, we believe that controlling 
 ## Contributions
 
 - **Alexander**: created the table characterizing the data, boxplots for presentation, editing/revising for introduction, some literature review
-- **Jasen**: handled predicitve modeling, writing for predictive model parts of the report, editing/revising
-- **Christian**: handled explanatory modeling, writing for explanatory model parts of the report, performed the literature review, editing/revising
+- **Jasen**: exploratory analysis for predictive model, handled predicitve modeling, writing for predictive model parts of the report, editing/revising
+- **Christian**: exploratory analysis for explanatory model, handled explanatory modeling, writing for explanatory model parts of the report, performed the literature review, editing/revising
 
-Our project repo can be found at on [Github (click me)](https://github.com/thecbp/FMPH221_project), commits can be reviewed through time. 
+Our project repo can be found at on [Github (click me)](https://github.com/thecbp/FMPH221_project), commits can be reviewed through time. Alex had trouble working with Github and had to send files through email.
 
 \pagebreak
 
 # References 
 
-1. https://www.cancer.org/content/dam/cancer-org/research/cancer-facts-and-statistics/annual-cancer-facts-and-figures/2020/cancer-facts-and-figures-2020.pdf
-2. https://www.cancer.org/content/dam/cancer-org/research/cancer-facts-and-statistics/annual-cancer-facts-and-figures/2020/cancer-facts-and-figures-2020.pdf
+1. GBD 2015 Mortality and Causes of Death Collaborators.  Global, regional, and national life expectancy, all-cause mortality, and cause-specific mortality for 249 causes of death, 1980-2015: a systematic analysis for the Global Burden of Disease Study 2015.  Lancet. 2016;388(10053):1459-1544.
+2. Stewart BW, Wild CP, editors. World cancer report 2014
 3. ADLER, N.E. and OSTROVE, J.M. (1999), Socioeconomic Status and Health: What We Know and What We Don't. Annals of the New York Academy of Sciences, 896: 3-15. https://doi.org/10.1111/j.1749-6632.1999.tb08101.x
 4. Rawl SM, Dickinson S, Lee JL, Roberts JL, Teal E, Baker LB, Kianersi S, Haggstrom DA. Racial and Socioeconomic Disparities in Cancer-Related Knowledge, Beliefs, and Behaviors in Indiana. Cancer Epidemiol Biomarkers Prev. 2019 Mar;28(3):462-470. doi: 10.1158/1055-9965.EPI-18-0795. Epub 2018 Nov 28. PMID: 30487135.
 5. Rohlfing ML, Mays AC, Isom S, Waltonen JD. Insurance status as a predictor of mortality in patients undergoing head and neck cancer surgery. Laryngoscope. 2017 Dec;127(12):2784-2789. doi: 10.1002/lary.26713. Epub 2017 Jun 22. PMID: 28639701; PMCID: PMC5688011.
