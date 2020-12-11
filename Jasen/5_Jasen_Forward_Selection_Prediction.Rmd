@@ -82,16 +82,9 @@ grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
 
 g_step_train <- ggplot(train_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
-  geom_line(aes(x = y_true, y = y_true), color = 'red')  +
-  geom_label(label = R_squared_label, x = 100, y = 275, label.padding = unit(0.55, "lines"),
-    label.size = 0.35,
-    color = "black",
-    fill="#69b3a2") + 
+  geom_line(aes(x = y_true, y = y_true), color = 'red') +
   ylab('Predicted Cancer Death Rate') + 
-  xlab('True Cancer Death Rate') + 
-  ggtitle('Stepwise Selection Train Prediction') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5)) 
+  xlab('True Cancer Death Rate')
 
 
 g_step_train
@@ -118,15 +111,8 @@ grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
 g_step_test <- ggplot(test_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
-  geom_label(label = R_squared_label, x = 125, y = 250, label.padding = unit(0.55, "lines"),
-    label.size = 0.35,
-    color = "black",
-    fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
-  xlab('True Cancer Death Rate') + 
-  ggtitle('Stepwise Selection Test Prediction') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5))   
+  xlab('True Cancer Death Rate')  
 
 g_step_test
 ```
@@ -161,10 +147,7 @@ g_step_hyper <- ggplot(df_AIC, aes(x= steps, y= AIC, label=vars))+
   xlim(0,30) + 
   ylim(21000, 25500) + 
   xlab('Steps') + 
-  ylab('AIC') + 
-  ggtitle('Forward and Backward Stepwise Model') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5))   
+  ylab('AIC')
 
 g_step_hyper
 

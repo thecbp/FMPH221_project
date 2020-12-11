@@ -30,21 +30,6 @@ summary(pca_train_model_2)
 2. Table of R^2/RMSE
 
 ```{r}
-r_squared_lasso_train
-rmse_lasso_train
-r_squared_lasso_test
-rmse_lasso_test
-
-R_squared_PCA_train
-R_squared_PCA_test
-RMSE_PCA_train
-RMSE_PCA_test
-
-RMSE_step_train
-R_squared_step_train
-RMSE_step_test
-R_squared_step_test
-
 R_squared_train <- c(r_squared_lasso_train, R_squared_PCA_train, R_squared_step_train)
 R_squared_test <- c(r_squared_lasso_test, R_squared_PCA_test, R_squared_step_test)
 RMSE_train <- c(rmse_lasso_train, RMSE_PCA_train, RMSE_step_train)

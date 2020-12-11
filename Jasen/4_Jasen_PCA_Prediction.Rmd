@@ -123,10 +123,7 @@ grob <- grobTree(textGrob("(a)", x=0.01,  y=0.97, hjust=0,
 g_pca_hyper <- ggplot() + geom_point(data = results, aes(x = ID, y = RMSE)) + 
   geom_point(data = results_best, aes(x = ID, y= RMSE), color = 'red') + 
   xlab('# of PCs') + 
-  ylab('RMSE') + 
-  ggtitle('Selecting Number of Principal Components') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5))   
+  ylab('RMSE')  
 
 g_pca_hyper
 
@@ -164,15 +161,8 @@ grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
 g_pca_train <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
   geom_line(aes(x = deathRate, y = deathRate), color = 'red') + 
-  geom_label(label = R_squared_label, x = 100, y = 275, label.padding = unit(0.55, "lines"), 
-             label.size = 0.35,
-             color = "black",
-             fill="#69b3a2") + 
   xlab('True Cancer Death Rate') + 
-  ylab('Predicted Cancer Death Rate') + 
-  ggtitle('PCA Train Prediction') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5)) 
+  ylab('Predicted Cancer Death Rate')
 
 g_pca_train
 ```
@@ -217,16 +207,9 @@ grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
 
 g_pca_test <- ggplot(data = pca_df) + 
   geom_point(aes(x = deathRate, y = y_pred)) + 
-  geom_line(aes(x = deathRate, y = deathRate), color = 'red') + 
-  geom_label(label = R_squared_label, x = 125, y = 250, label.padding = unit(0.55, "lines"), 
-             label.size = 0.35,
-             color = "black",
-             fill="#69b3a2") + 
+  geom_line(aes(x = deathRate, y = deathRate), color = 'red') +
   xlab('True Cancer Death Rate') + 
-  ylab('Predicted Cancer Death Rate') + 
-  ggtitle('PCA Test Prediction') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5)) 
+  ylab('Predicted Cancer Death Rate')
 
 g_pca_test
 

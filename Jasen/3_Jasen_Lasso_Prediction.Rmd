@@ -89,10 +89,7 @@ g_lasso_hyper <- ggplot() + geom_point(data = hyper, aes(x = lambdas, y = cv_err
   geom_point(data = min_df, aes(x = lambdas, y = cv_error), color = 'red') + 
   scale_x_continuous(trans = 'log10') + 
   ylab('Mean Cross-Validation Error') + 
-  xlab('Lambda') + 
-  ggtitle('Selection of Lambda Hyperparameter') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5))
+  xlab('Lambda')
 
 g_lasso_hyper
 ```
@@ -113,16 +110,9 @@ grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
 
 g_lasso_train <- ggplot(train_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
-  geom_line(aes(x = y_true, y = y_true), color = 'red')  +
-  geom_label(label = R_squared_label, x = 100, y = 275, label.padding = unit(0.55, "lines"),
-    label.size = 0.35,
-    color = "black",
-    fill="#69b3a2") + 
+  geom_line(aes(x = y_true, y = y_true), color = 'red') + 
   ylab('Predicted Cancer Death Rate') + 
-  xlab('True Cancer Death Rate') + 
-  ggtitle('Lasso Train Prediction') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5))
+  xlab('True Cancer Death Rate')
 
 g_lasso_train
 ```
@@ -146,15 +136,8 @@ grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
 g_lasso_test <- ggplot(test_results) + 
   geom_point(aes(x = y_true, y= y_hat)) + 
   geom_line(aes(x = y_true, y = y_true), color = 'red')  +
-  geom_label(label = R_squared_label, x = 125, y = 250, label.padding = unit(0.55, "lines"),
-    label.size = 0.35,
-    color = "black",
-    fill="#69b3a2") + 
   ylab('Predicted Cancer Death Rate') + 
-  xlab('True Cancer Death Rate') + 
-  ggtitle('Lasso Test Prediction') + 
-  annotation_custom(grob) + 
-  theme(plot.title = element_text(hjust = 0.5))  
+  xlab('True Cancer Death Rate')
 
 g_lasso_test
 ```
