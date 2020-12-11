@@ -61,13 +61,13 @@ Cancer ranks among the leading causes of death worldwide. According to a report 
 
 A wide berth of research has demonstrated that environmental and socioeconomic factors contribute to increased risk of cancer and mortality. For example, Adler et. al showed that higher socioeconomic status was associated with decreased cancer mortality [3]. Rawl et. al demonstrates a similar result in a statewide survey in Indiana that income and education were inversely related to cancer mortality. Rawl also discusses how race affected cancer mortality in their sample, finding that African-American participants worried less about cancer and were less likely to seek treatment [4]. Rohfling et. al found that uninsured patients or those under Medicaid were more likely to have more advanced tumors and poorer survival compared to peers with private insurance [5]. Higher socioeconomic status gives people better access to healthcare resources that are potentially life-saving or will help increase survival, and the opposite effect has been seen the lower scale.
 
-Similar research has documented race-based health disparities in cancer mortality. In an observational study in Philadelphia, Zeigler-Johnson found that black men were at the highest risk of prostate cancer relative to similar white counterparts [6]. Looking at data spanning from 1950 to 2014, a study by Singh showed that individuals from lower educational backgrounds experienced higher mortality of various types of cancer. Furthermore, African-Americans saw higher cancer mortality compared to their Asian and White counterparts in this group [7]. These are just a few examples that have documented how race influences cancer mortality, illustrating that it is a critical factor to consider race-based health disparities in any cancer-related intervention. Bahk et. al discussed the increasing trend in breast cancer mortality among Korean women between 1983 and 2012 was due to the increased mortality of the lower education groups, not the highest education group. Thus, it would be interesting to look at the cancer mortality in different education group and race.
+Similar research has documented race-based health disparities in cancer mortality. In an observational study in Philadelphia, Zeigler-Johnson found that black men were at the highest risk of prostate cancer relative to similar white counterparts [6]. Looking at data spanning from 1950 to 2014, a study by Singh showed that individuals from lower educational backgrounds experienced higher mortality of various types of cancer. Furthermore, African-Americans saw higher cancer mortality compared to their Asian and White counterparts in this group [7]. These are just a few examples that have documented how race influences cancer mortality, illustrating that it is a critical factor to consider race-based health disparities in any cancer-related intervention. Bahk et. al discussed the increasing trend in breast cancer mortality among Korean women between 1983 and 2012 was due to the increased mortality of the lower education groups, not the highest education group. Thus, it would be interesting to look at the cancer mortality in different education group and race [8].
 
-One difficulty in researching cancer is that it is an incredibly diverse collection of diseases, as opposed to a single monolithic illness. Further complicating this is that different cancers can occur at different rates across different regions of the United States. Mokdad et. al found that there were distinct clusters of counties in different regions with especially high cancer mortality. For example, breast cancers are highly prevalent in the southern belt, whereas liver cancer is the prevailing diagnosis along the Texas-Mexico border [8]. Just as the aforementioned studies examined how socioeconomic factors and race can influence cancer mortality on an individual level, it could be useful to understand how these factors relate to cancer mortality on a wider geographic level. Understanding how the relationship between these factors and cancer mortality on a geographic level offers an opportunity for researchers to create predicive models that can help us see what areas might have higher cancer burdern and thus be a way for us to know how we might to allocate limited resources to areas that are harder hit.
+One difficulty in researching cancer is that it is an incredibly diverse collection of diseases, as opposed to a single monolithic illness. Further complicating this is that different cancers can occur at different rates across different regions of the United States. Mokdad et. al found that there were distinct clusters of counties in different regions with especially high cancer mortality. For example, breast cancers are highly prevalent in the southern belt, whereas liver cancer is the prevailing diagnosis along the Texas-Mexico border [9]. Just as the aforementioned studies examined how socioeconomic factors and race can influence cancer mortality on an individual level, it could be useful to understand how these factors relate to cancer mortality on a wider geographic level. Understanding how the relationship between these factors and cancer mortality on a geographic level offers an opportunity for researchers to create predicive models that can help us see what areas might have higher cancer burdern and thus be a way for us to know how we might to allocate limited resources to areas that are harder hit.
 
 ## Data
 
-For our analysis, we used a dataset aggregated from multiple sources, noted later. The data spanned from 2010 to 2016 and included information on `r nrow(cancer)` counties in the United States, the county being the observational unit in the data. There were a total of 3,143 counties and county-equivalents in the United States, so `r (((3143 - nrow(cancer)) / 3143) * 100) %>% round(1)`% of them were represented. Our group did not aggregate the data ourselves, it is publically available and can be found at this [link](https://data.world/nrippner/ols-regression-challenge). Table 1 contains a full overview of the data:
+For our analysis, we used a dataset aggregated from multiple sources, noted later. The data spanned from 2010 to 2016 and included information on `r nrow(cancer)` counties in the United States, the county being the observational unit in the data. There were a total of 3,143 counties and county-equivalents in the United States, so `r (((3143 - nrow(cancer)) / 3143) * 100) %>% round(1)`% of them were represented. Our group did not aggregate the data ourselves, it is publically available and can be found at this [link](https://data.world/nrippner/ols-regression-challenge). Table 1 contains a full overview of the data in terms of mean, standard deviation and correlation:
 
 ```{r data_table, echo = F, message = F, warning = F }
 df = read_csv("cancer_registry.csv") %>%
@@ -127,27 +127,7 @@ A few of the variables in the dataset showed skewed distributions such as `avgAn
 
 Many of the predictors were highly correlated, so we created a heat map to keep track of these intercorrelations. Figure 1 below shows this heat map.
 
-```{r fig_1, echo = F, message = F, waring = F }
-df <- read.csv('cancer_registry.csv') %>%
-  mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>%
-  filter(incidenceRate < 1000) %>%
-  filter(avgAnnCount < 20000) %>%
-  filter(MedianAge < 200) %>%
-  filter(AvgHouseholdSize > 1)
-df <- na.omit(df)
-vars <- colnames(df)
-misc_vars <- c('binnedInc', 'Geography', 'TARGET_deathRate')
-vars_1 <- setdiff(vars, misc_vars)
-log_vars <- c('avgAnnCount', 'avgDeathsPerYear', 'popEst2015', 'studyPerCap', 'PctBachDeg18_24', 'PctAsian', 'PctOtherRace')
-log_names <- c()
-all_vars <- setdiff(vars_1, log_vars)
-all_vars <- append(all_vars, log_names)
-all_vars <- sort(all_vars)
-df_temp <- df %>% select(all_vars)
-df_temp <- na.omit(df_temp)
-heatmap2 <- cor(df_temp)
-heatmap.2(heatmap2, trace = 'none', margins = c(10,10), col = 'cm.colors', cexRow=0.7, cexCol = 0.7)
-```
+![](heatmap2.png)
 
 \begin{center}
 Figure 1: Correlation heatmap between variables in our cancer mortality dataset.
@@ -707,25 +687,19 @@ final_metrics %>% kable(digits = 3)
 Table 2: Training and test metrics for the 3 predictive models.
 \end{center}
 
-```{r, echo = F }
-grid.arrange(g_lasso_hyper, g_lasso_train, g_lasso_test, layout_matrix = lay1)
-```
+![](final_lasso_graphs.png)
 
 \begin{center}
 Figure 5: Hyperparameter Choice and train/test plots for LASSO model. a) hyperparameter optimization, b) fit on the training dataset, c) fit on the test dataset
 \end{center}
 
-```{r, echo = F }
-grid.arrange(g_pca_hyper,g_pca_train,g_pca_test, layout_matrix = lay1)
-```
+![](final_PCA_graphs.png)
 
 \begin{center}
 Figure 6: Hyperparameter Choice and train/test plots for PCA model. a) hyperparameter optimization, b) fit on the training dataset, c) fit on the test dataset
 \end{center}
 
-```{r, echo = F }
-grid.arrange(g_step_hyper,g_step_train,g_step_test, layout_matrix = lay1)
-```
+![](final_stepwise_graphs.png)
 
 \begin{center}
 Figure 7: Hyperparameter Choice and train/test plots for stepwise model. a) AIC as features added to model, b) fit on the training dataset, c) fit on the test dataset
@@ -759,7 +733,8 @@ Our project repo can be found at on [Github (click me)](https://github.com/thecb
 6. Zeigler-Johnson C, Keith S, McIntire R, Robinson T, Leader A, Glanz K. Racial and Ethnic Trends in Prostate Cancer Incidence and Mortality in Philadelphia, PA: an Observational Study. J Racial Ethn Health Disparities. 2019 Apr;6(2):371-379. doi: 10.1007/s40615-018-00534-z. Epub 2018 Dec 5. PMID: 30520002.
 7. Singh, Gopal & Jemal, Ahmedin. (2017). Socioeconomic and Racial/Ethnic Disparities in Cancer Mortality, Incidence, and Survival in the United States, 1950–2014: Over Six Decades of Changing Patterns and Widening Inequalities. Journal of Environmental and Public Health. 2017. 1-19. 10.1155/2017/2819372. 
 8. Mokdad AH, Dwyer-Lindgren L, Fitzmaurice C, et al. Trends and Patterns of Disparities in Cancer Mortality Among US Counties, 1980-2014. JAMA. 2017;317(4):388–406. doi:10.1001/jama.2016.20324
-9. https://nces.ed.gov/pubs93/93442.pdf
+9. Bahk J, Jang SM, Jung-Choi K. Increased breast cancer mortality only in the lower education group: age-period-cohort effect in breast cancer mortality by educational level in South Korea, 1983-2012. Int J Equity Health. 2017;16(1):56. Published 2017 Mar 31. doi:10.1186/s12939-017-0554-6
+10. https://nces.ed.gov/pubs93/93442.pdf
 
 \pagebreak
 
@@ -771,16 +746,15 @@ Table Z: Comparison of Stepwise and LASSO model coefficients
 final_coeffs
 ```
 
-```{r}
-cancer
-```
-
 ## Boxplots
 
 ```{r data_t, echo = F, message = F, warning = F }
+library(tidyverse)
+library(gridExtra)
+library(gplots)
 library(glmnet)
 library(mice)
-df = read_csv("cancer_registry.csv") %>%
+df = read.csv("cancer_registry.csv") %>%
   mutate(PctSomeCol18_24 = 100 - PctNoHS18_24 - PctHS18_24 - PctBachDeg18_24) %>% filter(incidenceRate < 1000) %>%
   filter(avgAnnCount < 20000) %>%
   filter(MedianAge < 200) %>%
@@ -791,13 +765,31 @@ vars_1 <- setdiff(vars, misc_vars)
 response_vars <- c('TARGET_deathRate')
 predict_vars <- paste(vars_1, collapse = ' + ')
 df <- df %>% select(- c('binnedInc', 'Geography'))
+
 df <- data.frame(sapply(df, as.numeric))
 df2<-df[, c(colnames(df)[7],colnames(df)[9:32])]
+
+library("reshape2")
+data_long <- melt(df2)
+library("ggplot2")# Reshaping data frame
+ggplot(data_long, aes(x = variable, y = value)) + theme(axis.text.x=element_text(angle=90,hjust=1)) + ggtitle("Boxplots of Variables in Cancer_Registry Dataset ") + geom_boxplot()
+
+
+df3<-df[,c(colnames(df)[3:4])]
+data_long <- melt(df3)
+ggplot(data_long, aes(x = variable, y = value))+ ggtitle("Boxplot of Target_deathrate + IncidenceRate") + geom_boxplot()
+
+df4<-df[,c(colnames(df)[1:2])]
+data_long <- melt(df4)
+ggplot(data_long, aes(x = variable, y = value)) +ggtitle("Boxplot of AvgAnnCount + AvgDeathsPerYear")+ geom_boxplot()
+
+
+#medIncome, popEst2015, studyPerCap
 column_names <- c()
 res <- c()
 outlier <- c()
 for (i in colnames(df)){
-  if (class(df[[i]]) == "numeric") {
+  if(class(df[[i]]) == "numeric") {
      column_names <- c(column_names, i)
      mean <- round(mean(df[[i]], na.rm = TRUE),2)
      std <- round(sd(df[[i]],na.rm = TRUE),2)
@@ -805,13 +797,12 @@ for (i in colnames(df)){
      res <- c(res, mean)
      res <- c(res, std)
      res <- c(res, cor) 
+     if (i== "medIncome" || i == "popEst2015"|| i == "studyPerCap"){
+       boxplot(df[[i]], xlab=i)
+     }
+     out <- boxplot.stats(df[[i]])$out 
   }
 }
-output_table <- matrix(res, ncol=3,byrow=TRUE)
-colnames(output_table) <- c("Mean", "Std", "R_Squared")
-rownames(output_table) <- column_names
-output <- as.table(output_table)
-output %>%  kable()
 ```
 
 \pagebreak
