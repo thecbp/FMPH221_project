@@ -1,0 +1,199 @@
+---
+title: "Presentation"
+author: "Christian Pascual"
+date: "12/6/2020"
+output: html_document
+---
+
+```{r, message = F, warning = F, echo = F }
+library(tidyverse)
+library(knitr)
+library(gplots)
+library(kableExtra)
+set.seed(1)
+
+knitr::opts_chunk$set(
+  fig.align = "center",
+  out.width = "70%"
+)
+
+# Load the data and do some processing
+cancer = read_csv("cancer_registry.csv") %>% 
+  # Split the geography variable
+  separate(Geography, into = c("county", "state"), sep = ", ") %>% 
+  # Split up binnedInc into a lower and upper decile
+  mutate(
+    binnedInc = str_remove_all(binnedInc, "[(\\]]"),
+    # also try to group states by region
+    region = case_when(
+      state %in% c("California", "Oregon", "Washington", "Nevada", "Idaho", 
+                   "Montana", "Wyoming", "Colorado", "Utah", "Alaska", "Hawaii") ~ "West",
+      state %in% c("Arizona", "New Mexico", "Texas", "Oklahoma") ~ "Southwest",
+      state %in% c("North Dakota", "South Dakota", "Nebraska", "Kansas", 
+                   "Minnesota", "Iowa", "Missouri", "Wisconsin", "Illinois", 
+                   "Indiana", "Ohio", "Michigan") ~ "Midwest",
+      state %in% c("Arkansas", "Louisiana", "Mississippi", "Alabama", "Georgia",
+                   "Florida", "South Carolina", "North Carolina", "Tennessee",
+                   "Kentucky", "Virginia", "West Virginia", "District of Columbia",
+                   "Delaware") ~ "Southeast",
+      state %in% c("Maryland", "Pennsylvania", "New Jersey", "New York", "Rhode Island",
+                   "Connecticut", "Massachusetts", "New Hampshire", "Vermont", "Maine") ~ "Northeast",
+      TRUE ~ "Southwest" # Weird formatting means a single NM is NA in state
+    )
+  ) %>% 
+  separate(binnedInc, into = c("inc_dec_low", "inc_dec_high"), sep = ",") %>% 
+  janitor::clean_names() %>%  # Convert all column names to lowercase'
+  mutate(
+    high_college = pct_bach_deg25_over > median(pct_bach_deg25_over), # median(pct_bach_deg18_24),
+    high_hs = pct_hs18_24 > median(pct_hs18_24)
+  )
+```
+
+```{r, echo = F }
+cancer_model = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+
+cancer_model %>% 
+  broom::tidy() %>% 
+  mutate(
+    left = estimate - qt(0.75, df = nrow(cancer) - length(cancer_model$coefficients)) * std.error,
+    right = estimate + qt(0.75, df = nrow(cancer) - length(cancer_model$coefficients)) * std.error,
+    `95% CI` = paste0("(", left %>% round(3), ", ", right %>% round(3), ")")
+  ) %>% 
+  filter(
+    term %in% c("pct_hs25_over", "pct_bach_deg25_over",
+                "pct_white", "pct_black", "pct_asian", "pct_other_race",
+                "pct_hs25_over:pct_white", "pct_hs25_over:pct_black",
+                "pct_hs25_over:pct_asian", "pct_hs25_over:pct_other_race",
+                "pct_bach_deg25_over:pct_white", "pct_bach_deg25_over:pct_black",
+                "pct_bach_deg25_over:pct_asian", "pct_bach_deg25_over:pct_other_race")
+  ) %>% 
+  select(term, estimate, `95% CI`) %>% 
+  mutate(
+    term = c(
+      "% of county age 25 and over with at high school degree",
+      "% of county age 25 and over with at bachelors degree",
+      "% of county identifying as white",
+      "% of county identifying as black",
+      "% of county identifying as Asian",
+      "% of county identifying as Other Race",
+      "HS x White",
+      "HS x Black",
+      "HS x Asian",
+      "HS x Other",
+      "BS x White",
+      "BS x Black",
+      "BS x Asian",
+      "BS x Other"
+    )
+  ) %>% 
+  kable(digits = 3,
+        caption = "Estimated coefficients and 95% CI in explanatory model") %>% 
+  kable_paper("striped") %>%
+  pack_rows("Main Effects", 1, 6) %>% 
+  pack_rows("Interactions", 7, 14)
+```
+
+
+```{r}
+m1 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+m2= lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+
+anova(m1, m2)
+```
+
+```{r}
+m3 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race,
+           data = cancer)
+
+m4 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over,
+           data = cancer)
+
+anova(m3, m4)
+```
+```{r}
+m1 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+m2= lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+
+anova(m1, m2)
+```
+
+```{r}
+m5 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+m6 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+
+anova(m5, m6)
+```
+
+```{r}
+m7 = lm(target_death_rate ~ incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+m8 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             pct_white + pct_black + pct_asian + pct_other_race +
+             # Interactions
+             pct_white*pct_hs25_over + pct_black*pct_hs25_over + pct_asian*pct_hs25_over + pct_other_race*pct_hs25_over +
+             pct_white*pct_bach_deg25_over + pct_black*pct_bach_deg25_over + pct_asian*pct_bach_deg25_over + pct_other_race*pct_bach_deg25_over +
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+
+anova(m7, m8)
+```
+
+
+```{r}
+m9 = lm(target_death_rate ~ pct_hs18_24 + pct_bach_deg18_24 + 
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+m10 = lm(target_death_rate ~ pct_hs25_over + pct_bach_deg25_over + 
+             # Confounders
+             incidence_rate + med_income + pop_est2015 + poverty_percent + median_age,
+           data = cancer)
+
+AIC(m9)
+AIC(m10)
+```

@@ -1,0 +1,42 @@
+---
+title: "Jasen Report"
+author: "Jasen"
+date: "12/6/2020"
+output: pdf_document
+---
+
+
+## Prediciton Model
+
+We proceeded to build three models to predict county cancer death rates using both the raw explanatory variables and interaction variables we found to be significant. We built a lasso regularization, principal component analysis (PCA), and forward backwards stepwise selection model. We randomly split the data into 80% train and 20% test, and then used this same split for all three models. Afterwards, for the lasso and PCA models, the training set was further split into $10$ folds for cross-validation in order to tune the lambda and $\#$ of PC hyperparameters respectively. Choosing $10$ folds and an $80-20$ split are usually default parameters in machine learning models.
+
+### Lasso
+
+In lasso regularization, the aim is to minimize not just the residual sum of squares (RSS), but the sum of RSS and a scalar multiple of the absolute sum of the beta coefficients. This allows for the moderation of beta coefficients and serves to filter out features that do minimal explanation. We performed $10$ fold cross-validation to select for the optimal value of $\lambda$, the scalar multiple, and then fitted the lasso regularization model on the entire training set. The beta estimates were then used to predict cancer death rates in the test set. 
+
+### PCA
+
+In PCA, we used $10$ fold cross validation to select for an optimal number of principal components (PCs). Since the error formula we used was root mean square error (RMSE), adding additional PCs generally decrease RMSE. As a result, we used a heuristic, the elbow rule, to select for the optimal amount of PCs. The elbow rule selects an optimal value for the number of PCs when adding additional PCs no longer significantly reduces RMSE. Once we selected the optimal number of PCs, $k$, we computed the first $k$ PC loadings and used those loadings to predict the cancer death rates in the train and test sets. 
+
+
+### Forward and Backward Stepwise Selection
+
+Forward and backwards stepwise selection did not use cross-validation to select for a hyperparmeter. Instead, we used the stepwise selection algorithm with AIC as a metric on the entire training set to select for a set of variables. These variables were then fitted on the training set and used to predict the cancer death rates in the test set. 
+
+
+### Model Metrics
+
+To assess each of these models, we computed the RMSE and $R^2$ values of the true cancer death rates versus predicted cancer death rates of the training set. The model with the highest RMSE and/or $R^2$ values would then be the ideal model candidate to perform the test set predictions. The estimated beta coefficients in the lasso and stepwise models and the loadings in the PCA model can be used to interpret prediction results.
+
+
+## Results
+
+The lasso regularization model selected an optimal hyperparameter of $\lambda = 0.00119$ as shown in Figure X. The estimated coefficients fitted from the training set are shown in Table Y, with only the intercept and incidenceRate having coefficients of $0$. The training set RMSE and $R^2$ was $13.796$ and $0.866$ respectively, and the test set metrics showed slight improvements with an RMSE and $R^2$ of $12.842$ and $0.872$ respectively. These values are in Table Z.
+
+Using the elbow rule, we selected $10$ PCs to be the optimal amount and obtained the loadings of the first $10$ PCs from the training set. A summary of these loadings are in Table A, where roughly half of the variables did not show up significantly in any of the $10$ PCs. The training set RMSE and $R^2$ was $20.020$ and $0.689$ respectively, and the test set metrics showed moderate improvements with an RMSE and $R^2$ of $17.955$ and $0.728$ respectively.
+
+Our stepwise selection model included $23$ variables, and the order in which they were selected is displayed in Figure B. The estimated coefficients fitted from the training set are shown in Table Y along with the lasso regularization coefficients. The training set RMSE and $R^2$ was $13.278$ and $0.877$ respectively, and the test set metrics showed slight improvements with an RMSE and $R^2$ of $12.495$ and $0.879$ respectively. These values are in Table Z.
+
+## Conclusion
+
+The stepwise selection model showed the best RMSE and $R^2$ in the training set. Therefore, we select the stepwise selection model to predict cancer death rates for the test set. We also see that the stepwise selection model had the best metrics for the test set. The stepwise selection model also included less beta coefficients ($24$) than the lasso regularization model ($33$), so it's much more parsimonious than lasso which had marginally worse prediction metrics. Most variables in the stepwise selection model had statistically significant betas which are indicators of cancer death rates. 

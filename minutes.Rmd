@@ -8,6 +8,61 @@ output: html_document
 - Project Proposal Google Doc: https://docs.google.com/document/d/1o2uwT-Cma9o6UsyaRo6lUYbd91xiHiS3SwMz09GbAb0/edit
 - Project Proposal Presentation: https://docs.google.com/presentation/d/1EBkkb6x0Uzv8apnwczo8TgY3-1_3djSD_QP-uJGMy9A/edit?usp=sharing
 
+
+# Friday Dec-4, 3:00pm Meeting Minutes By Alex
+1. Questions from proposal
+  1.1 EDA
+       P4. Incidence correlates with mortality and should be accounted. 
+                Comment: Can be done in 1: as a term in the model, but it may explain most of the variability
+                                        2: as a factor to normalize the mortality rate,the result would be the case fatality rate
+                                          factor can be ratio between mortality and incidence (per capital), data transformation
+                                          a pair plot suggested
+  1.2 Q of Interest
+      1.2.1 Is there a significant interaction between any demographic and economic factors that contributes to
+increased cancer mortality in a county?
+                Comment: Check main effects and then do interactions
+      1.2.2 Predictino model
+            How to verify the model? Where to predict? New dataset? 
+  
+  1.3 Future directions
+        error matrics such as absolute error or squared error
+               Comment: Differnet matircs are not discussed in class.What motivations are for this? What different error matrics can be look like? 
+
+2.  PCA
+     2.1 R_squared_PCA_train 0.694, how good is the model? 
+     2.2 In propsoal, explore PCA on all 31 covariates. 
+                Comment: The problem with this is loss of interpretability. You may want to divide the variables into meaningful groups and then do reduction within each group.
+                combine predictors inside group?
+      2.3Anything remains to be done?
+      
+3. Prediction
+      - Exploring different error metrics (AIC, MSE)
+      -- Cross Validation
+ 
+ 4. Anova
+ 
+ 5. Table
+    
+     
+                                      
+                                          
+
+# Tuesday Dec-1, 1:00pm Meeting Minutes
+
+Brainstorming additional tasks
+
+1. Literature review on socioeconomic status on cancer, not sure how much we've done
+2. Additional EDA and diagnostics
+  a. Homoskedastic?
+  b. Errors seem normally sitributed?
+3. Tranforming the data?
+  a. Summary score of variables that are related
+  b. Scale? Center?
+  c. Splines? Polynomials?
+4. Adjusting for OLS violations
+  a. Weighted least squares?
+  b. Sandwich method for standard errors of beta_hat's 
+
 # Monday, Nov-9, 1:30pm Meeting Miniutes
 Delegating tasks:
  - Agreeing to a common list of data points to throw out

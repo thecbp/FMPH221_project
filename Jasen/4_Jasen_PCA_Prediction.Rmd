@@ -1,0 +1,234 @@
+---
+title: "PCA Prediction"
+output: pdf_document
+---
+
+# 1. Load dataset with imputed missing values
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(gplots)
+library(glmnet)
+library(caret)
+
+dir = getwd()
+data_dir <- paste('df_imp.RData', sep = '')
+load(data_dir)
+
+response_vars <- c('TARGET_deathRate')
+y <- df_imp4 %>% select(response_vars)
+y <- unname(unlist(y))
+
+
+do_not_include <- c('ID', 'TARGET_deathRate', 'incidenceRate', 'popEst2015_log', 'medIncome', 'avgAnnCount_log')
+do_not_include <- c('ID', 'TARGET_deathRate')
+
+df <- df_imp4 %>% select(- do_not_include)
+
+
+
+vars_1 <- colnames(df)
+df <- data.frame(sapply(df, as.numeric))
+```
+
+# 2. Looking at PCA
+
+```{r}
+S <- cov(df)
+eig <- eigen(S)
+eig_vals <- eig$values
+eig_vecs <- eig$vectors
+
+
+cum_var_explained <- cumsum(eig_vals/(sum(eig_vals)))
+
+cum_var_explained
+```
+
+```{r}
+prcomp(df)
+```
+
+```{r}
+PCA_model <- prcomp(df)
+PCA_loadings <- PCA_model$rotation
+```
+
+```{r}
+PCA_summary <- summary(PCA_model)
+
+PCA_summary
+```
+
+
+# 3 Splitting Test and Training Set
+
+## Arbitrarily chose 10% to be test set
+
+```{r message=FALSE}
+set.seed(221)
+test_set_index <- sample(1:nrow(df), floor(nrow(df))/10)
+train_set_index <- setdiff(1:nrow(df), test_set_index)
+
+test <- df[test_set_index,]
+train <- df[train_set_index,]
+
+test_y <- y[test_set_index]
+test_x <- test %>% select(vars_1)
+train_y <- y[train_set_index]
+train_x <- train %>% select(vars_1)
+```
+
+# 4. 10 fold cross validation
+
+```{r}
+num_comp <- 1:ncol(train_x)
+mses <- integer(ncol(train_x))
+results <- data.frame()
+
+PCA_train_model <- prcomp(train_x)
+component_matrix <- data.frame(as.matrix(train_x) %*% PCA_train_model$rotation)
+
+for(i in num_comp){
+  
+  pca_df <- data.frame(component_matrix[,1:i])
+  
+  
+  eq <- paste(colnames(pca_df), collapse = ' + ')
+  eq <- paste('deathRate', eq, sep = ' ~ ')
+  
+  pca_df <- pca_df %>% mutate(deathRate = train_y)
+  
+  # Train the model
+  
+  train.control <- trainControl(method = "cv", number = 10)
+  
+  model <- train(deathRate ~., data = pca_df, method = "lm",
+               trControl = train.control)
+  if(i == 1){
+    results <- model$results
+  } else{
+    results <- rbind(results, model$results)
+  }
+
+}
+
+results <- results %>% mutate(ID = as.numeric(rownames(results)))
+results_best <- results %>% filter(ID == 10)
+
+grob <- grobTree(textGrob("(a)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
+g_pca_hyper <- ggplot() + geom_point(data = results, aes(x = ID, y = RMSE)) + 
+  geom_point(data = results_best, aes(x = ID, y= RMSE), color = 'red') + 
+  xlab('# of PCs') + 
+  ylab('RMSE') + 
+  annotation_custom(grob)
+
+g_pca_hyper
+
+```
+
+# 4.5 R^2 Plot of the Training Set
+
+```{r}
+n <- 10
+
+train_component_matrix <- data.frame(as.matrix(train_x) %*% PCA_train_model$rotation)
+pca_df <- data.frame(train_component_matrix[,1:n])
+
+eq <- paste(colnames(pca_df), collapse = ' + ')
+eq <- paste('deathRate', eq, sep = ' ~ ')
+
+pca_df <- pca_df %>% mutate(deathRate = train_y)
+
+pca_train_model_2 <- lm(eq, data = pca_df)
+RMSE_PCA_train <- sqrt(sum(residuals(pca_train_model_2)^2)/nrow(pca_df))
+
+y_pred <- pca_train_model_2$fitted.values
+
+pca_df <- pca_df %>% mutate(y_pred = y_pred)
+
+R_squared <- as.numeric(unname(cor(y_pred, train_y)))
+R_squared_PCA_train <- R_squared
+R_squared <- sprintf("%.3f", round(R_squared,3))
+R_squared_label <- paste('R^2 = ', R_squared)
+
+
+grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
+g_pca_train <- ggplot(data = pca_df) + 
+  geom_point(aes(x = deathRate, y = y_pred)) + 
+  geom_line(aes(x = deathRate, y = deathRate), color = 'red') + 
+  xlab('True Cancer Death Rate') + 
+  ylab('Predicted Cancer Death Rate') + 
+  annotation_custom(grob)
+
+g_pca_train
+```
+
+# 5 Predicting Test Set 
+
+## Seems like 10 PC's is best
+
+```{r}
+n <- 10
+
+# use the train_PCA_loadings
+
+test_component_matrix <- data.frame(as.matrix(test_x) %*% PCA_train_model$rotation)
+pca_df <- data.frame(test_component_matrix[,1:n])
+
+eq <- paste(colnames(pca_df), collapse = ' + ')
+eq <- paste('deathRate', eq, sep = ' ~ ')
+
+
+
+### Do we fit the test set data and get beta_test_hat??
+
+# pca_test_model <- lm(eq, data = pca_df)
+# RMSE_PCA_test <- sqrt(sum(residuals(pca_test_model)^2)/nrow(pca_df))
+# 
+# y_pred <- unname(predict(pca_test_model))
+
+y_pred <- predict(pca_train_model_2, test_component_matrix)
+RMSE_PCA_test <- sqrt(sum((y_pred - test_y)^2)/nrow(pca_df))
+
+pca_df <- pca_df %>% mutate(y_pred = y_pred)
+pca_df <- pca_df %>% mutate(deathRate = test_y)
+
+R_squared <- as.numeric(unname(cor(y_pred, test_y)))
+R_squared_PCA_test <- R_squared
+R_squared <- sprintf("%.3f", round(R_squared,3))
+R_squared_label <- paste('R^2 = ', R_squared)
+
+grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
+g_pca_test <- ggplot(data = pca_df) + 
+  geom_point(aes(x = deathRate, y = y_pred)) + 
+  geom_line(aes(x = deathRate, y = deathRate), color = 'red') +
+  xlab('True Cancer Death Rate') + 
+  ylab('Predicted Cancer Death Rate') + 
+  annotation_custom(grob)
+
+g_pca_test
+
+```
+
+# 6. Deliverables
+
+```{r}
+R_squared_PCA_train
+R_squared_PCA_test
+RMSE_PCA_train
+RMSE_PCA_test
+
+s_PCA <- summary(pca_train_model_2)
+loadings <- PCA_train_model$rotation
+final_loadings <- loadings[,1:10]
+```
+
+

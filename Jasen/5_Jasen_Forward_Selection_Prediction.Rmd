@@ -1,0 +1,157 @@
+---
+title: "Forward Selection"
+author: "Jasen"
+date: "12/3/2020"
+output: pdf_document
+---
+
+# 1. Load Data
+
+```{r echo=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(gplots)
+library(glmnet)
+library(olsrr)
+
+dir = getwd()
+data_dir <- paste('df_imp.RData', sep = '')
+load(data_dir)
+
+
+df <- df_imp4 %>% select(- c('ID'))
+response_vars <- c('TARGET_deathRate')
+vars <- colnames(df)
+vars_1 <- setdiff(vars, response_vars)
+predict_vars <- paste(vars_1, collapse = ' + ')
+
+df <- data.frame(sapply(df, as.numeric))
+```
+
+# 2. Splitting Test and Training Set
+
+## Arbitrarily choose 10% to be test set
+
+```{r message=FALSE}
+set.seed(221)
+test_set_index <- sample(1:nrow(df), floor(nrow(df))/10)
+train_set_index <- setdiff(1:nrow(df), test_set_index)
+
+test <- df[test_set_index,]
+train <- df[train_set_index,]
+
+test_y <- test %>% select(response_vars)
+test_y <- unlist(unname(test_y))
+test_x <- test %>% select(vars_1)
+train_y <- train %>% select(response_vars)
+train_y <- unlist(unname(train_y))
+train_x <- train %>% select(vars_1)
+```
+
+# 3 Forward and Backwards Selection
+
+```{r include=FALSE}
+step_model <- step(lm(TARGET_deathRate ~ 1, data = train), ~ incidenceRate + medIncome + povertyPercent + MedianAge + AvgHouseholdSize + PercentMarried + PctNoHS18_24 + PctHS18_24 + PctSomeCol18_24 + PctHS25_Over + PctBachDeg25_Over + PctEmployed16_Over + PctUnemployed16_Over + PctPrivateCoverage + PctPrivateCoverageAlone + PctEmpPrivCoverage + PctPublicCoverage + PctPublicCoverageAlone + PctWhite + PctBlack + PctMarriedHouseholds + BirthRate + Imputed_PctEmployed16_Over + Imputed_PctPrivateCoverageAlone + avgAnnCount_log + avgDeathsPerYear_log + popEst2015_log + studyPerCap_log + PctBachDeg18_24_log + PctAsian_log + PctOtherRace_log + hs_black + hs_white + college_black, direction="both")
+```
+
+# 3.5 Important features, copy and pasted from the stepwise result
+
+```{r}
+features <- 'PctBachDeg25_Over + incidenceRate + povertyPercent + PctHS18_24 + avgDeathsPerYear_log + popEst2015_log + MedianAge + medIncome + avgAnnCount_log + PctUnemployed16_Over + PctPublicCoverage + PctPublicCoverageAlone + BirthRate + AvgHouseholdSize + PctOtherRace_log + studyPerCap_log + PctEmployed16_Over + Imputed_PctEmployed16_Over + PctPrivateCoverage + college_black + PctBlack + PctNoHS18_24 + PctEmpPrivCoverage'
+features2 <- unlist(strsplit(features, split = ' + ', fixed = T))
+```
+
+# 4 Train Statistics
+
+```{r}
+train_x <- train_x %>% select(features2)
+
+pred_train_y <- predict(step_model, data = train_x)
+
+RMSE_step_train <- sqrt(sum((pred_train_y - train_y)^2)/length(train_y))
+
+train_results <- data.frame(train_y, pred_train_y)
+colnames(train_results) <- c('y_true', 'y_hat')
+R_squared <- as.numeric(unname(cor(train_y, pred_train_y)))
+R_squared_step_train <- R_squared
+R_squared <- sprintf("%.3f", round(R_squared,3))
+R_squared_label <- paste('R^2 = ', R_squared)
+
+grob <- grobTree(textGrob("(b)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
+g_step_train <- ggplot(train_results) + 
+  geom_point(aes(x = y_true, y= y_hat)) + 
+  geom_line(aes(x = y_true, y = y_true), color = 'red') +
+  ylab('Predicted Cancer Death Rate') + 
+  xlab('True Cancer Death Rate') + 
+  annotation_custom(grob)
+
+
+g_step_train
+```
+
+# 4. Test Statistics
+
+```{r}
+test_x <- test_x %>% select(features2)
+pred_test_y <- unname(predict(step_model, test_x))
+
+RMSE_step_test <- sqrt(sum((pred_test_y - test_y)^2)/length(test_y))
+
+test_results <- data.frame(test_y, pred_test_y)
+colnames(test_results) <- c('y_true', 'y_hat')
+R_squared <- as.numeric(unname(cor(test_y, pred_test_y)))
+R_squared_step_test <- R_squared
+R_squared <- sprintf("%.3f", round(R_squared,3))
+R_squared_label <- paste('R^2 = ', R_squared)
+
+grob <- grobTree(textGrob("(c)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
+g_step_test <- ggplot(test_results) + 
+  geom_point(aes(x = y_true, y= y_hat)) + 
+  geom_line(aes(x = y_true, y = y_true), color = 'red')  +
+  ylab('Predicted Cancer Death Rate') + 
+  xlab('True Cancer Death Rate') + 
+  annotation_custom(grob)
+
+g_step_test
+```
+# 5. Deliverables
+
+```{r}
+RMSE_step_train
+R_squared_step_train
+RMSE_step_test
+R_squared_step_test
+
+step_coeffs <- step_model$coefficients
+df_step_coeffs <- data.frame(step_coeffs)
+```
+
+# 6. AIC Graph
+
+```{r}
+model <- lm(TARGET_deathRate ~ ., data = train)
+k <- ols_step_both_aic(model)
+
+df_AIC <- data.frame(steps = 1:k$steps, AIC = k$aic, vars = k$predictors)
+
+
+grob <- grobTree(textGrob("(a)", x=0.01,  y=0.97, hjust=0,
+  gp=gpar(fontsize=13)))
+
+g_step_hyper <- ggplot(df_AIC, aes(x= steps, y= AIC, label=vars))+
+  geom_point(color = 'red') + 
+  geom_line() + 
+  geom_text(aes(label=vars),hjust=0, vjust=0, angle = 45, size = 3) + 
+  xlim(0,30) + 
+  ylim(21000, 25500) + 
+  xlab('Steps') + 
+  ylab('AIC') + 
+  annotation_custom(grob)
+
+g_step_hyper
+
+```
